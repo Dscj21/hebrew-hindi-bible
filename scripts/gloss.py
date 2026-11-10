@@ -14,6 +14,8 @@ SUBJ = {'1cs': 'मैं', '1cp': 'हम', '2ms': 'तू', '2fs': 'तू', '
 OBLIQUE_WORDS = {'बेटा', 'लड़का', 'घोड़ा', 'गदहा', 'कपड़ा', 'उजियाला', 'अन्धियारा', 'बछड़ा', 'मेढ़ा', 'रास्ता',
                  'बकरा', 'पहिया', 'बूढ़ा', 'गुम्मट', 'कटोरा', 'हण्डा', 'छोटा', 'बड़ा', 'भला', 'बुरा', 'दूसरा', 'पहला',
                  'तीसरा', 'चौथा', 'सातवाँ', 'आठवाँ', 'दसवाँ', 'अगला', 'पिछला', 'नया', 'सीधा', 'ऊँचा', 'कड़वा', 'भारी'}
+# -ā words that do NOT inflect (feminine Sanskrit nouns, kinship/agent nouns)
+NO_OBL = set('राजा पिता दादा चाचा मामा नाना देवता योद्धा दाता आत्मा परमात्मा नेता कर्ता माता सेना दया कृपा शिक्षा आज्ञा सभा प्रजा पूजा यात्रा भाषा सीमा महिमा आशा इच्छा घटना रचना प्रार्थना वर्षा सेवा रक्षा परीक्षा दशा दिशा कथा व्यवस्था अवस्था आराधना प्रतिज्ञा निन्दा मात्रा क्षमा प्रशंसा चिन्ता शोभा कन्या माला शाला कला लता हवा दवा सज़ा याह यहोवा मन्ना जूफा प्रतिमा मूर्खता पवित्रता शुद्धता दुष्टता सच्चाई गदा ज्वाला ललकार घृणा तृष्णा लज्जा सहायता नम्रता विधवा वेश्या दासता बाधा'.split())
 VOWEL_SIGNS = 'ािीुूेैोौ'
 IND = {'ा': 'आ', 'ि': 'इ', 'ी': 'ई', 'ु': 'उ', 'ू': 'ऊ', 'े': 'ए', 'ै': 'ऐ', 'ो': 'ओ', 'ौ': 'औ'}
 PAST_IRR = {'कर': ('किया', 'की', 'किए'), 'दे': ('दिया', 'दी', 'दिए'), 'ले': ('लिया', 'ली', 'लिए'),
@@ -129,9 +131,12 @@ def compose(parts, lexhi, ispropn):
         core = pron_with_post(sp, base) if sp else base
     elif pos in 'NA':
         noun = base
-        if (post or sp) and noun in OBLIQUE_WORDS: noun = noun[:-1] + 'े'
+        g, n = mc[2:3], mc[3:4]
+        ws = noun.split(); lw = ws[-1] if ws else ''
+        if (post or n == 'p') and lw and not ispropn(lem) and (lw in OBLIQUE_WORDS or (
+                lw.endswith('ा') and not lw.endswith('ना') and g == 'm' and lw not in NO_OBL and not lw.endswith('ता') and len(lw) > 2)):
+            ws[-1] = lw[:-1] + 'े'; noun = ' '.join(ws)
         if sp and not ispropn(lem):
-            g, n = mc[2:3] if pos == 'N' else mc[2:3], mc[3:4] if pos == 'N' else mc[3:4]
             end = 'ी' if g == 'f' and n != 'p' else 'े' if (post or n == 'p') else 'ा'
             noun = POSS.get(sp, 'उसक') + end + ' ' + noun
         core = noun
