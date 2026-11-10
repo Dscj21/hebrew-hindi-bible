@@ -2,7 +2,7 @@
 # Rebuild data and publish to GitHub Pages (repo main branch, root). Needs: gh auth login (once).
 set -euo pipefail
 cd "$(dirname "$0")"
-[ "${1:-}" = "--build" ] && python3 scripts/build.py
+[ "${1:-}" = "--build" ] && python3 scripts/build.py all
 git add -A
 git commit -m "${MSG:-update $(date +%F_%H%M)}" || echo "nothing to commit"
 git push origin main
