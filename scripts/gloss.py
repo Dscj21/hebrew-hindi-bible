@@ -1,6 +1,7 @@
 """Compose a short in-context Hindi gloss for one OSHB word from prefix + lemma + morphology + suffix.
 Hand overrides (word_glosses_hi.json) win over this; this is the safe automatic fallback."""
 import re
+from hi_gender import gender as hi_gender
 
 PRE_WORD = {'c': 'और', 'i': 'क्या', 's': 'जो'}
 PRE_POST = {'b': 'में', 'l': 'को', 'k': 'के समान', 'm': 'से'}
@@ -133,11 +134,12 @@ def compose(parts, lexhi, ispropn):
         noun = base
         g, n = mc[2:3], mc[3:4]
         ws = noun.split(); lw = ws[-1] if ws else ''
+        if pos == 'N' and lw: g = hi_gender(lw, lem)  # agreement follows the Hindi noun (मेरी शिक्षा), not Hebrew
         if (post or n == 'p') and lw and not ispropn(lem) and (lw in OBLIQUE_WORDS or (
                 lw.endswith('ा') and not lw.endswith('ना') and g == 'm' and lw not in NO_OBL and not lw.endswith('ता') and len(lw) > 2)):
             ws[-1] = lw[:-1] + 'े'; noun = ' '.join(ws)
         if sp and not ispropn(lem):
-            end = 'ी' if g == 'f' and n != 'p' else 'े' if (post or n == 'p') else 'ा'
+            end = 'ी' if g == 'f' else 'े' if (post or n == 'p') else 'ा'
             noun = POSS.get(sp, 'उसक') + end + ' ' + noun
         core = noun
     elif pos == 'P':

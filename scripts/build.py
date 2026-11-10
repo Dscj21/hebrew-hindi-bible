@@ -13,6 +13,7 @@ import json, re, sys, os, glob, unicodedata
 import xml.etree.ElementTree as ET
 from translit import translit, CANT
 from gloss import compose, short
+import hi_gender
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW, S, OUT = os.path.join(ROOT, 'data', 'raw'), os.path.join(ROOT, 'scripts'), os.path.join(ROOT, 'data')
@@ -33,7 +34,10 @@ def lexicon():
         for line in open(f, encoding='utf8'):
             if '|' in line and not line.startswith('#'):
                 k, v = line.rstrip('\n').split('|', 1)
-                if k.strip() and v.strip(): lx[k.strip()] = v.strip()
+                v = v.strip()
+                m = re.search(r'\s*~([mf])$', v)  # optional Hindi gender field: 'शिक्षा~f'
+                if m: hi_gender.LEX_G[k.strip()] = m.group(1); v = v[:m.start()]
+                if k.strip() and v: lx[k.strip()] = v
     lx.update({k: v for k, v in load('lexicon_hi.json').items() if not k.startswith('_')})
     return lx
 
