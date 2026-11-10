@@ -1,0 +1,199 @@
+{
+"books": [
+{
+"id": "Gen",
+"name": "उत्पत्ति",
+"chapters": 50
+},
+{
+"id": "Exod",
+"name": "निर्गमन",
+"chapters": 40
+},
+{
+"id": "Lev",
+"name": "लैव्यव्यवस्था",
+"chapters": 27
+},
+{
+"id": "Num",
+"name": "गिनती",
+"chapters": 36
+},
+{
+"id": "Deut",
+"name": "व्यवस्थाविवरण",
+"chapters": 34
+},
+{
+"id": "Josh",
+"name": "यहोशू",
+"chapters": 24
+},
+{
+"id": "Judg",
+"name": "न्यायियों",
+"chapters": 21
+},
+{
+"id": "Ruth",
+"name": "रूत",
+"chapters": 4
+},
+{
+"id": "1Sam",
+"name": "1 शमूएल",
+"chapters": 31
+},
+{
+"id": "2Sam",
+"name": "2 शमूएल",
+"chapters": 24
+},
+{
+"id": "1Kgs",
+"name": "1 राजाओं",
+"chapters": 22
+},
+{
+"id": "2Kgs",
+"name": "2 राजाओं",
+"chapters": 25
+},
+{
+"id": "1Chr",
+"name": "1 इतिहास",
+"chapters": 29
+},
+{
+"id": "2Chr",
+"name": "2 इतिहास",
+"chapters": 36
+},
+{
+"id": "Ezra",
+"name": "एज्रा",
+"chapters": 10
+},
+{
+"id": "Neh",
+"name": "नहेम्याह",
+"chapters": 13
+},
+{
+"id": "Esth",
+"name": "एस्तेर",
+"chapters": 10
+},
+{
+"id": "Job",
+"name": "अय्यूब",
+"chapters": 42
+},
+{
+"id": "Ps",
+"name": "भजन संहिता",
+"chapters": 150
+},
+{
+"id": "Prov",
+"name": "नीतिवचन",
+"chapters": 31
+},
+{
+"id": "Eccl",
+"name": "सभोपदेशक",
+"chapters": 12
+},
+{
+"id": "Song",
+"name": "श्रेष्ठगीत",
+"chapters": 8
+},
+{
+"id": "Isa",
+"name": "यशायाह",
+"chapters": 66
+},
+{
+"id": "Jer",
+"name": "यिर्मयाह",
+"chapters": 52
+},
+{
+"id": "Lam",
+"name": "विलापगीत",
+"chapters": 5
+},
+{
+"id": "Ezek",
+"name": "यहेजकेल",
+"chapters": 48
+},
+{
+"id": "Dan",
+"name": "दानिय्येल",
+"chapters": 12
+},
+{
+"id": "Hos",
+"name": "होशे",
+"chapters": 14
+},
+{
+"id": "Joel",
+"name": "योएल",
+"chapters": 4
+},
+{
+"id": "Amos",
+"name": "आमोस",
+"chapters": 9
+},
+{
+"id": "Obad",
+"name": "ओबद्याह",
+"chapters": 1
+},
+{
+"id": "Jonah",
+"name": "योना",
+"chapters": 4
+},
+{
+"id": "Mic",
+"name": "मीका",
+"chapters": 7
+},
+{
+"id": "Nah",
+"name": "नहूम",
+"chapters": 3
+},
+{
+"id": "Hab",
+"name": "हबक्कूक",
+"chapters": 3
+},
+{
+"id": "Zeph",
+"name": "सपन्याह",
+"chapters": 3
+},
+{
+"id": "Hag",
+"name": "हाग्गै",
+"chapters": 2
+},
+{
+"id": "Zech",
+"name": "जकर्याह",
+"chapters": 14
+},
+{
+"id": "Mal",
+"name": "मलाकी",
+"chapters": 3
+}
+]
+}

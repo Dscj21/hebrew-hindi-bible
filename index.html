@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5b3a1e">
+<title>इब्रानी–हिन्दी बाइबल</title>
+<link rel="preload" href="fonts/NotoSerifHebrew.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+</head>
+<body>
+<header>
+  <div class="bar">
+    <button id="prev" aria-label="पिछला अध्याय">‹</button>
+    <button id="title" class="title" aria-label="पुस्तक और अध्याय चुनें">उत्पत्ति 1 ▾</button>
+    <button id="next" aria-label="अगला अध्याय">›</button>
+  </div>
+  <div class="opts">
+    <label><input type="checkbox" id="optGloss" checked> हिन्दी अर्थ</label>
+    <label><input type="checkbox" id="optPron" checked> उच्चारण</label>
+    <label><input type="checkbox" id="optHindi" checked> हिन्दी पद</label>
+  </div>
+</header>
+<main id="text"><p class="loading">लोड हो रहा है…</p></main>
+<nav class="pager"><button id="prev2">‹ पिछला</button><button id="next2">अगला ›</button></nav>
+<div class="ad-slot ad-bottom" data-slot="banner"></div>
+<p class="hint">किसी भी इब्रानी शब्द पर टैप करें — अर्थ, मूल शब्द और व्याकरण देखें। अध्याय बदलने के लिए बाएँ/दाएँ स्वाइप करें।</p>
+<footer>
+  <p><b>इब्रानी पाठ:</b> <a href="https://github.com/openscriptures/morphhb">Open Scriptures Hebrew Bible (OSHB / morphhb)</a>, Westminster Leningrad Codex पर आधारित — लेम्मा व व्याकरण: CC BY 4.0, WLC पाठ: Public Domain.</p>
+  <p><b>शब्दकोश:</b> Strong's Hebrew Dictionary (Public Domain), <a href="https://github.com/openscriptures/HebrewLexicon">openscriptures/HebrewLexicon</a> से।</p>
+  <p><b>हिन्दी पद:</b> इंडियन रिवाइज्ड वर्जन (IRV) हिंदी – 2019, © 2017, 2018, 2019 Bridge Connectivity Solutions Pvt. Ltd., <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.hi">CC BY-SA 4.0</a> के अन्तर्गत; स्रोत: <a href="https://ebible.org/find/details.php?id=hin2017">eBible.org</a>। फ़ुटनोट और क्रॉस-रेफ़रेंस हटाए गए हैं; पाठ में कोई और बदलाव नहीं है।</p>
+  <p>देवनागरी उच्चारण, हिन्दी शब्दार्थ और हिन्दी व्याकरण-विवरण इस परियोजना ने जोड़े हैं (CC BY-SA 4.0); कई शब्दार्थ स्वचालित रूप से बने हैं और जाँच जारी है। मूल लाइसेंसदाता इन बदलावों का समर्थन करते हों, यह ज़रूरी नहीं।</p>
+  <p>फ़ॉन्ट: Noto Serif Hebrew, Noto Sans Devanagari (SIL OFL)।</p>
+</footer>
+<div id="shade" hidden></div>
+<section id="sheet" role="dialog" aria-modal="true" hidden>
+  <div class="grip"></div>
+  <button id="close" class="x" aria-label="बंद करें">×</button>
+  <div id="sheetBody"></div>
+</section>
+<section id="picker" hidden>
+  <div class="pbar"><button id="pback" aria-label="वापस">‹</button><b id="ptitle">पुस्तकें</b><button id="pclose" class="x" aria-label="बंद करें">×</button></div>
+  <div id="pbody"></div>
+</section>
+<script src="morph.js"></script>
+<script src="ads.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

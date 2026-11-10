@@ -1,0 +1,18 @@
+{
+  "_note": "Single ad config. Leave IDs empty to show nothing. Web = Google AdSense, Android app = AdMob (via @capacitor-community/admob). Android IDs below are Google's public TEST units - replace with real ones before release.",
+  "enabled": true,
+  "showPlaceholders": false,
+  "web": {
+    "adsenseClient": "",
+    "bannerSlot": "",
+    "inChapterSlot": ""
+  },
+  "android": {
+    "admobAppId": "ca-app-pub-3940256099942544~3347511713",
+    "bannerId": "ca-app-pub-3940256099942544/6300978111",
+    "interstitialId": "ca-app-pub-3940256099942544/1033173712",
+    "testing": true
+  },
+  "inChapterEveryVerses": 12,
+  "interstitialEveryChapters": 0
+}

@@ -1,0 +1,197 @@
+{
+"Gen": {
+"words": 20612,
+"glossed": 19400,
+"hand": 434
+},
+"Exod": {
+"words": 16713,
+"glossed": 15438,
+"hand": 0
+},
+"Lev": {
+"words": 11950,
+"glossed": 10964,
+"hand": 0
+},
+"Num": {
+"words": 16413,
+"glossed": 15615,
+"hand": 0
+},
+"Deut": {
+"words": 14294,
+"glossed": 13409,
+"hand": 0
+},
+"Josh": {
+"words": 10051,
+"glossed": 9733,
+"hand": 0
+},
+"Judg": {
+"words": 9885,
+"glossed": 9298,
+"hand": 0
+},
+"Ruth": {
+"words": 1294,
+"glossed": 1208,
+"hand": 0
+},
+"1Sam": {
+"words": 13264,
+"glossed": 12591,
+"hand": 0
+},
+"2Sam": {
+"words": 11039,
+"glossed": 10511,
+"hand": 0
+},
+"1Kgs": {
+"words": 13140,
+"glossed": 12524,
+"hand": 0
+},
+"2Kgs": {
+"words": 12281,
+"glossed": 11781,
+"hand": 0
+},
+"1Chr": {
+"words": 10747,
+"glossed": 10330,
+"hand": 0
+},
+"2Chr": {
+"words": 13316,
+"glossed": 12741,
+"hand": 0
+},
+"Ezra": {
+"words": 3754,
+"glossed": 3041,
+"hand": 0
+},
+"Neh": {
+"words": 5312,
+"glossed": 4952,
+"hand": 0
+},
+"Esth": {
+"words": 3045,
+"glossed": 2785,
+"hand": 0
+},
+"Job": {
+"words": 8343,
+"glossed": 6851,
+"hand": 0
+},
+"Ps": {
+"words": 19587,
+"glossed": 17158,
+"hand": 0
+},
+"Prov": {
+"words": 6915,
+"glossed": 5637,
+"hand": 0
+},
+"Eccl": {
+"words": 2987,
+"glossed": 2641,
+"hand": 0
+},
+"Song": {
+"words": 1251,
+"glossed": 936,
+"hand": 0
+},
+"Isa": {
+"words": 16932,
+"glossed": 14404,
+"hand": 0
+},
+"Jer": {
+"words": 21836,
+"glossed": 20365,
+"hand": 0
+},
+"Lam": {
+"words": 1542,
+"glossed": 1294,
+"hand": 0
+},
+"Ezek": {
+"words": 18730,
+"glossed": 17043,
+"hand": 0
+},
+"Dan": {
+"words": 5919,
+"glossed": 3732,
+"hand": 0
+},
+"Hos": {
+"words": 2381,
+"glossed": 2112,
+"hand": 0
+},
+"Joel": {
+"words": 957,
+"glossed": 830,
+"hand": 0
+},
+"Amos": {
+"words": 2042,
+"glossed": 1836,
+"hand": 0
+},
+"Obad": {
+"words": 291,
+"glossed": 257,
+"hand": 0
+},
+"Jonah": {
+"words": 688,
+"glossed": 630,
+"hand": 0
+},
+"Mic": {
+"words": 1396,
+"glossed": 1228,
+"hand": 0
+},
+"Nah": {
+"words": 558,
+"glossed": 428,
+"hand": 0
+},
+"Hab": {
+"words": 671,
+"glossed": 551,
+"hand": 0
+},
+"Zeph": {
+"words": 767,
+"glossed": 678,
+"hand": 0
+},
+"Hag": {
+"words": 600,
+"glossed": 568,
+"hand": 0
+},
+"Zech": {
+"words": 3128,
+"glossed": 2903,
+"hand": 0
+},
+"Mal": {
+"words": 876,
+"glossed": 810,
+"hand": 0
+}
+}

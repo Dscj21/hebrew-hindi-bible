@@ -1,0 +1,9 @@
+data/raw/
+.deploy/
+__pycache__/
+*.pyc
+node_modules/
+android/
+dist/
+screenshots/
+icon-1024.png
