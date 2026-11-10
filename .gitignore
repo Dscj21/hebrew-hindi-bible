@@ -3,7 +3,14 @@ data/raw/
 __pycache__/
 *.pyc
 node_modules/
-android/
 dist/
 screenshots/
 icon-1024.png
+capacitor/www/
+capacitor/android/app/src/main/assets/public/
+capacitor/android/**/build/
+capacitor/android/.gradle/
+capacitor/android/local.properties
+capacitor/android/capacitor-cordova-android-plugins/
+capacitor/android/app/src/main/assets/capacitor.config.json
+capacitor/android/app/src/main/assets/capacitor.plugins.json

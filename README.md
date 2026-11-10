@@ -1,24 +1,23 @@
-# इब्रानी–हिन्दी अन्तर्रेखीय बाइबल (Hebrew–Hindi interlinear) — demo: उत्पत्ति 1
+# इब्रानी–हिन्दी बाइबल (Hebrew–Hindi interlinear Old Testament)
 
-Static app, no build step: `index.html` + `style.css` + `app.js` (+ `sw.js` for offline cache) reading `data/{Book}/{chapter}.json`.
-Open `index.html#Gen/1` via any static server (e.g. `python3 -m http.server`).
+Live: https://dscj21.github.io/hebrew-hindi-bible/
 
-## Generate data
-    scripts/fetch_sources.sh Gen          # downloads OSHB Gen.xml, Strong's, IRV Hindi USFM into data/raw/ (not deployed)
-    python3 scripts/build.py Gen 1        # -> data/Gen/1.json + data/index.json   (also: Gen 1 2 3 / Gen all)
+Every Hebrew word shows: Hindi meaning (top) · Hebrew with niqqud · Devanagari pronunciation; tap a word for lemma, Strong's, Hindi grammar and English gloss. IRV Hindi verse under each verse. All 39 OT books / 929 chapters; static, no build step for the app.
 
-Hand-made inputs (edit these when adding chapters; build prints `MISSING Hindi gloss` for new lemmas):
-- `scripts/translit.py` — rule-based pointed Hebrew → Devanagari (shva na/nach, dagesh forte/lene, begadkefat, maters, furtive patach, shin/sin, finals, maqaf).
-- `scripts/pron_overrides.json` — reviewed per-word pronunciation fixes; `scripts/lemma_pron_overrides.json` for dictionary forms.
-- `scripts/lexicon_hi.json` — Hindi gloss per OSHB lemma id (e.g. `"1254 a"`), IRV vocabulary.
-- `scripts/word_glosses_hi.json` — contextual Hindi gloss per word form (or `ch:v:index`).
-- `scripts/screenshot.js` — mobile (390×844) screenshots via playwright-core.
+## Layout
+- `index.html`, `style.css`, `app.js` (render, picker, nav, swipe), `morph.js` (morphology → Hindi), `ads.js` + `ads.json` (single ad config), `sw.js` (offline cache)
+- `data/index.json` – books; `data/<Book>/<ch>.json.gz` – chapters; `data/lex.json.gz` – lexicon
+  - word = `[hebrew(with / morpheme breaks), pron, hindiGloss, lemma, morph, maqaf?]`
+- `scripts/` – `fetch_sources.sh`, `build.py`, `translit.py` (Hebrew→Devanagari), `gloss.py` (auto-composed in-context glosses), `lex/*.txt` (hand Hindi lemma glosses), overrides JSON
+- `capacitor/` – Android app (Capacitor 8 + @capacitor-community/admob). `capacitor/build-apk.sh` → `dist/*.apk`
+- `deploy-gh-pages.sh` – commit + push to GitHub Pages (`--build` to rebuild data first)
 
-## Deploy
-Upload everything except `data/raw/`, `scripts/`, `screenshots/` to any static host (GitHub Pages, Cloudflare Pages, Netlify).
+## Ads
+Edit `ads.json` only: web AdSense client/slot IDs; Android AdMob app/banner/interstitial IDs (currently Google TEST IDs; also update `admob_app_id` in `capacitor/android/app/src/main/res/values/strings.xml`). `?adsdemo=1` shows placeholder slots.
 
-## Licenses
-- Hebrew: OSHB morphhb (WLC text public domain; morphology/lemmas CC BY 4.0).
-- Strong's Hebrew Dictionary: public domain (openscriptures/HebrewLexicon).
-- Hindi: Indian Revised Version (IRV) Hindi 2019, © Bridge Connectivity Solutions, CC BY-SA 4.0 (ebible.org hin2017). Footnotes/cross-refs removed.
-- Added Devanagari pronunciation, Hindi glosses and morphology labels: CC BY-SA 4.0. Fonts: Noto (SIL OFL).
+## Sources & licenses
+- Hebrew: OSHB / morphhb (WLC text public domain; lemma & morphology CC BY 4.0)
+- Strong's Hebrew Dictionary (public domain) via openscriptures/HebrewLexicon
+- Hindi: Indian Revised Version (IRV) Hindi 2019, © Bridge Connectivity Solutions, CC BY-SA 4.0 (eBible.org hin2017)
+- Added pronunciations, Hindi glosses and grammar notes: CC BY-SA 4.0
+- Fonts: Noto Serif Hebrew, Noto Sans Devanagari (SIL OFL)

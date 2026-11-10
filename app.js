@@ -17,16 +17,19 @@
 
   // ---- data ----
   async function getJSON(u) {
-    const r = await fetch(u);
-    if (!r.ok) throw new Error(u);
+    let r = await fetch(u).catch(() => null);
+    if ((!r || !r.ok) && u.endsWith('.gz')) { u = u.slice(0, -3); r = await fetch(u); }
+    if (!r || !r.ok) throw new Error(u);
     if (!u.endsWith('.gz')) return r.json();
     const buf = await r.arrayBuffer(), b = new Uint8Array(buf);
     if (b[0] !== 0x1f || b[1] !== 0x8b) return JSON.parse(new TextDecoder().decode(b)); // server already inflated
     const s = new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip')));
     return JSON.parse(await s.text());
   }
+  // Android APK: aapt stores *.json.gz assets inflated as *.json
+  const GZ = (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) ? '' : '.gz';
   let lexP = null;
-  const loadLex = () => lexP || (lexP = getJSON('data/lex.json.gz').then(l => (lex = l)).catch(() => (lex = {})));
+  const loadLex = () => lexP || (lexP = getJSON('data/lex.json' + GZ).then(l => (lex = l)).catch(() => (lex = {})));
 
   // ---- routing: #Gen/1 ----
   const route = () => {
@@ -49,7 +52,7 @@
     if (!book(cur.b)) cur = { b: 'Gen', c: 1 };
     cur.c = Math.min(Math.max(cur.c, 1), book(cur.b).chapters);
     $('#text').innerHTML = '<p class="loading">लोड हो रहा है…</p>';
-    try { data = await getJSON(`data/${cur.b}/${cur.c}.json.gz`); }
+    try { data = await getJSON(`data/${cur.b}/${cur.c}.json` + GZ); }
     catch { $('#text').innerHTML = '<p class="loading">यह अध्याय लोड नहीं हो सका। इंटरनेट जाँचें।</p>'; return; }
     localStorage.setItem('last', `${cur.b}/${cur.c}`);
     document.title = `${data.n} ${cur.c} — इब्रानी–हिन्दी बाइबल`;

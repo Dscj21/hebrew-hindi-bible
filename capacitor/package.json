@@ -1,0 +1,15 @@
+{
+  "name": "hebrew-hindi-bible-app",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "www": "node copy-www.js",
+    "sync": "node copy-www.js && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor-community/admob": "^8.3.0",
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0"
+  }
+}
