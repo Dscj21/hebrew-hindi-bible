@@ -65,7 +65,8 @@ def resolve_maters(L):
     return [x for x in out if not (x['c'] == 'א' and x['v'] is None)]  # quiescent aleph
 
 
-def translit(word, maqaf_after=False):
+def translit(word, maqaf_after=False, dots=False):
+    """dots=True: syllables separated by a middle dot (वय्·या·कू·मू)."""
     L = resolve_maters(parse(word))
     n = len(L)
     # pass: forte / shva type
@@ -87,10 +88,10 @@ def translit(word, maqaf_after=False):
         cons = CONS[c][0 if lene else 1]
         if c == 'ש': cons = 'स' if x['dot'] == SIN else 'श'
         if c == 'ס': cons = 'स'
-        if x['forte'] and cons: res.append(cons + HAL)
+        if x['forte'] and cons: res.append((cons + HAL, 0))
         # furtive patah
         if i == n - 1 and v == 'a' and c in 'חעה' and i > 0 and L[i - 1]['v'] in FULL:
-            res.append('अ' + cons); continue
+            res.append(('अ' + cons, 1)); continue
         if v in ('a', 'A', 'h'):
             silent_end = nxt is not None and i + 1 == n - 1 and nxt['c'] in 'אע' and nxt['v'] is None
             closed = nxt is not None and not silent_end and (nxt['v'] is None or nxt.get('forte'))
@@ -100,11 +101,15 @@ def translit(word, maqaf_after=False):
             elif v == 'h' or closed: v = 'a0'
             else: v = 'a'
         if v is None:
-            res.append(cons + (HAL if (nxt is not None and cons) else ''))
+            res.append((cons + (HAL if (nxt is not None and cons) else ''), 0))
             continue
         m, ind = MATRA[v]
-        res.append(cons + m if cons else ind)
-    s = ''.join(res)
+        res.append((cons + m if cons else ind, 2 if (x['start'] and i and not x['forte']) else 1))
+    if dots:
+        s = ''.join((('-' if k == 2 else '·') if (k and j) else '') + t for j, (t, k) in enumerate(res))
+        s = re.sub('^·', '', s)
+    else:
+        s = ''.join(t for t, k in res)
     s = re.sub(HAL + '(?=[अआइईउऊएओ])', '', s)  # no halant before a vowel letter
     s = s.replace('््', '्')
     return unicodedata.normalize('NFC', s)

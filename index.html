@@ -3,47 +3,77 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#5b3a1e">
+<meta name="theme-color" content="#1f4fa3">
 <title>इब्रानी–हिन्दी बाइबल</title>
+<meta name="description" content="इब्रानी–हिन्दी अंतर्रेखीय बाइबल (पुराना नियम): हर इब्रानी शब्द का हिन्दी अर्थ, उच्चारण, व्याकरण और स्ट्रॉन्ग संख्या।">
+<meta property="og:title" content="इब्रानी–हिन्दी बाइबल"><meta property="og:description" content="हर इब्रानी शब्द का हिन्दी अर्थ, उच्चारण और व्याकरण — मुफ़्त">
+<meta property="og:image" content="icon-512.png">
 <link rel="preload" href="fonts/NotoSerifHebrew.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/NotoSansDevanagari.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
+<script>(function(){try{var s=JSON.parse(localStorage.getItem('hhb.set')||'{}');var t=s.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}})()</script>
 </head>
 <body>
-<header>
-  <div class="bar">
-    <button id="prev" aria-label="पिछला अध्याय">‹</button>
-    <button id="title" class="title" aria-label="पुस्तक और अध्याय चुनें">उत्पत्ति 1 ▾</button>
-    <button id="next" aria-label="अगला अध्याय">›</button>
-  </div>
-  <div class="opts">
-    <label><input type="checkbox" id="optGloss" checked> हिन्दी अर्थ</label>
-    <label><input type="checkbox" id="optPron" checked> उच्चारण</label>
-    <label><input type="checkbox" id="optHindi" checked> हिन्दी पद</label>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21V5M8 7h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-star-f" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" fill="currentColor"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="12" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="19" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="10" r="2" fill="currentColor"/><path d="M21 16l-5-5-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 14l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<header id="top" class="appbar">
+  <button id="title" class="title" aria-label="पुस्तक, अध्याय और पद चुनें"><span id="titleTxt">उत्पत्ति 1:1</span></button>
+  <div class="acts">
+    <button id="btnLex" class="ib alpha" aria-label="शब्दकोश (स्ट्रॉन्ग)">α</button>
+    <button id="btnSearch" class="ib" aria-label="खोजें"><svg><use href="#i-search"/></svg></button>
+    <button id="btnMenu" class="ib" aria-label="और विकल्प"><svg><use href="#i-more"/></svg></button>
   </div>
 </header>
-<main id="text"><p class="loading">लोड हो रहा है…</p></main>
-<nav class="pager"><button id="prev2">‹ पिछला</button><button id="next2">अगला ›</button></nav>
-<div class="ad-slot ad-bottom" data-slot="banner"></div>
-<p class="hint">किसी भी इब्रानी शब्द पर टैप करें — अर्थ, मूल शब्द और व्याकरण देखें। अध्याय बदलने के लिए बाएँ/दाएँ स्वाइप करें।</p>
-<footer>
-  <p><b>इब्रानी पाठ:</b> <a href="https://github.com/openscriptures/morphhb">Open Scriptures Hebrew Bible (OSHB / morphhb)</a>, Westminster Leningrad Codex पर आधारित — लेम्मा व व्याकरण: CC BY 4.0, WLC पाठ: Public Domain.</p>
-  <p><b>शब्दकोश:</b> Strong's Hebrew Dictionary (Public Domain), <a href="https://github.com/openscriptures/HebrewLexicon">openscriptures/HebrewLexicon</a> से।</p>
-  <p><b>हिन्दी पद:</b> इंडियन रिवाइज्ड वर्जन (IRV) हिंदी – 2019, © 2017, 2018, 2019 Bridge Connectivity Solutions Pvt. Ltd., <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.hi">CC BY-SA 4.0</a> के अन्तर्गत; स्रोत: <a href="https://ebible.org/find/details.php?id=hin2017">eBible.org</a>। फ़ुटनोट और क्रॉस-रेफ़रेंस हटाए गए हैं; पाठ में कोई और बदलाव नहीं है।</p>
-  <p>देवनागरी उच्चारण, हिन्दी शब्दार्थ और हिन्दी व्याकरण-विवरण इस परियोजना ने जोड़े हैं (CC BY-SA 4.0); कई शब्दार्थ स्वचालित रूप से बने हैं और जाँच जारी है। मूल लाइसेंसदाता इन बदलावों का समर्थन करते हों, यह ज़रूरी नहीं।</p>
-  <p>फ़ॉन्ट: Noto Serif Hebrew, Noto Sans Devanagari (SIL OFL)।</p>
-</footer>
-<div id="shade" hidden></div>
-<section id="sheet" role="dialog" aria-modal="true" hidden>
-  <div class="grip"></div>
-  <button id="close" class="x" aria-label="बंद करें">×</button>
-  <div id="sheetBody"></div>
-</section>
-<section id="picker" hidden>
-  <div class="pbar"><button id="pback" aria-label="वापस">‹</button><b id="ptitle">पुस्तकें</b><button id="pclose" class="x" aria-label="बंद करें">×</button></div>
-  <div id="pbody"></div>
-</section>
+<div id="pull" aria-hidden="true"><span>↓ पुस्तक / अध्याय चुनें</span></div>
+
+<main id="views">
+  <section id="v-home" class="view" hidden></section>
+  <section id="v-read" class="view" hidden>
+    <div id="page"><p class="loading">लोड हो रहा है…</p></div>
+  </section>
+  <section id="v-search" class="view" hidden>
+    <div class="sbox"><svg><use href="#i-search"/></svg><input id="q" type="search" placeholder="शब्द, स्ट्रॉन्ग (H430) या संदर्भ (उत्पत्ति 37:35)" autocomplete="off" enterkeyhint="search"></div>
+    <div class="seg" id="smode"><button data-m="all" class="on">सब</button><button data-m="ref">संदर्भ</button><button data-m="word">शब्द</button><button data-m="strong">स्ट्रॉन्ग</button></div>
+    <div id="sres"></div>
+  </section>
+  <section id="v-saved" class="view" hidden>
+    <div class="seg" id="svmode"><button data-m="fav" class="on">पसंदीदा</button><button data-m="bm">बुकमार्क</button><button data-m="hist">इतिहास</button></div>
+    <div id="svlist"></div>
+  </section>
+  <section id="v-settings" class="view" hidden></section>
+</main>
+
+<button id="fab" aria-label="त्वरित विकल्प" hidden>•••</button>
+<div id="adbar" class="ad-slot ad-bottom" data-slot="banner"></div>
+<nav id="tabs">
+  <button data-tab="home"><svg><use href="#i-home"/></svg><span>होम</span></button>
+  <button data-tab="read"><svg><use href="#i-book"/></svg><span>पढ़ें</span></button>
+  <button data-tab="search"><svg><use href="#i-search"/></svg><span>खोजें</span></button>
+  <button data-tab="saved"><svg><use href="#i-star"/></svg><span>सहेजे</span></button>
+  <button data-tab="settings"><svg><use href="#i-gear"/></svg><span>सेटिंग्स</span></button>
+</nav>
+
+<div id="layers"></div>
+<div id="menu" class="pop" hidden></div>
+<div id="toast" role="status" aria-live="polite"></div>
 <script src="morph.js"></script>
 <script src="ads.js"></script>
 <script src="app.js"></script>

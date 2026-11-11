@@ -38,5 +38,38 @@ const Morph = (() => {
       return p;
     });
   }
-  return { hi, parts };
+  // compact chip text, e.g. 'यो-व | क्रि-क़ल-कथा-3पु.ब', 'सं-पु.ब.सम्ब | 3पु.ए'
+  const GA = { m: 'पु', f: 'स्त्री', b: 'उ', c: 'सा' }, NA = { s: 'ए', p: 'ब', d: 'द्वि' }, SA = { c: 'सम्ब', d: 'नि' };
+  const VA = { p: 'पूर्ण', q: 'क्र.पूर्ण', i: 'अपूर्ण', w: 'कथा', h: 'इच्छा', j: 'जस', v: 'आज्ञा', r: 'कृद', s: 'कृद.कर्म', a: 'क्रियार्थ', c: 'क्रियार्थ.सम्ब' };
+  const LA = { b: 'ब', c: 'व', k: 'क', l: 'ल', m: 'म', d: 'ह', s: 'श', i: 'ह' };
+  const TA = { a: 'स्वी', d: 'उपपद', e: 'प्रेर', i: 'प्रश्न', j: 'विस्म', m: 'ध्यान', n: 'निषेध', o: 'कर्म', r: 'सम्ब' };
+  const gns = s => [GA[s[0]], NA[s[1]], SA[s[2]]].filter(Boolean).join('.');
+  function abbr(m, lem, aram) {
+    const c = m[0], r = m.slice(1);
+    const L = lem && !/^\d/.test(lem) && LA[lem] ? '-' + LA[lem] : '';
+    if (c === 'N') return (r[0] === 'p' ? 'नाम' : 'सं') + (gns(r.slice(1)) ? '-' + gns(r.slice(1)) : '');
+    if (c === 'A') return 'वि' + (gns(r.slice(1)) ? '-' + gns(r.slice(1)) : '');
+    if (c === 'V') {
+      const ty = r[1], x = r.slice(2), st = ((aram ? ASTEM : STEM)[r[0]] || r[0]).split(' ')[0];
+      let tail = '';
+      if ('rs'.includes(ty)) tail = gns(x);
+      else if (!'ac'.includes(ty)) tail = (P[x[0]] ? x[0] : '') + [GA[x[P[x[0]] ? 1 : 0]], NA[x[P[x[0]] ? 2 : 1]]].filter(Boolean).join('.');
+      return ['क्रि', st, VA[ty] || ty, tail].filter(Boolean).join('-');
+    }
+    if (c === 'R') return 'पूर्व' + L + (r === 'd' ? '+ह' : '');
+    if (c === 'C') return 'यो' + L;
+    if (c === 'D') return 'क्रिवि';
+    if (c === 'T') return (TA[r[0]] || 'अव्य') + L;
+    if (c === 'P') return 'सर्व' + ([r[1], [GA[r[2]], NA[r[3]]].filter(Boolean).join('.')].filter(Boolean).join(''));
+    if (c === 'S') return r[0] === 'p' ? r[1] + [GA[r[2]], NA[r[3]]].filter(Boolean).join('.') : ({ d: 'दिशा', h: 'प्र', n: 'प्र' }[r[0]] || 'प्र');
+    return m;
+  }
+  function chip(w) {
+    const lp = (w[3] || '').split('/'), mc = (w[4] || '').slice(1).split('/'), aram = (w[4] || '')[0] === 'A';
+    let li = 0;
+    const segs = mc.map(m => abbr(m, m[0] === 'S' ? null : lp[li++], aram));
+    const verb = mc.some(m => m[0] === 'V');
+    return { t: segs.join(' | '), verb };
+  }
+  return { hi, parts, chip };
 })();

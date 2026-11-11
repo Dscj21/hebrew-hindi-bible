@@ -135,20 +135,58 @@ def build_book(book, chaps, SG, VM, LEX, LEXV):
                 # pronunciation
                 if any(l.split(' ')[0] in YHWH for l in lparts if l):
                     tp = b.split('/'); pre = ''.join(tp[:-1]) if len(tp) > 1 else ''
-                    pron = (translit(pre) if pre else '') + 'यहोवा'
+                    pron = (translit(pre, dots=True) + '-' if pre else '') + 'यहोवा'
                 else:
-                    pron = PRON_OV.get(key2) or translit(b, maqaf_after=maq)
+                    pron = PRON_OV.get(key2) or translit(b, maqaf_after=maq, dots=True)
                 g = WORD_GL.get(f'{book}.{c}.{vn}.{len(words)+1}')
                 hand = g is not None
                 if g is None: g = compose(parts, LEXV, lambda l: SG.get('H' + (re.match(r'\d+', l).group() if re.match(r'\d+', l) else ''), {}).get('pos', '').startswith('n-pr'))
                 st['words'] += 1; st['glossed'] += bool(g); st['hand'] += hand
+                mains = [l for l in lparts if l and l[0].isdigit()]
+                if mains:
+                    e = CONC.setdefault(mains[-1], {})
+                    e.setdefault(g or '', []).append(BOOKI[book] * 1000000 + c * 1000 + vn)
                 wd = [b, pron, g, lem, morph]
                 if maq: wd.append(1)
                 words.append(wd)
             verses.append([vn, htxt, words])
+            IRV.setdefault(book, {}).setdefault(c, []).append([vn, htxt])
         od = os.path.join(OUT, book); os.makedirs(od, exist_ok=True)
         dump(os.path.join(od, f'{c}.json'), dict(b=book, n=name, c=c, v=verses))
     return name, nch, st
+
+CONC, IRV = {}, {}
+BOOKI = {b: i for i, b in enumerate(BOOKS)}
+
+def write_extra():
+    """conc.json: lemma -> [[gloss, [ref deltas..]], ..] (ref = book*1e6 + ch*1e3 + verse, sorted, delta-coded per gloss);
+    irv.json: {book: [[ [v, text], ..] per chapter]} for search; strongs.json: num -> [pos, pron, xlit, source, meaning, usage]."""
+    conc = {}
+    for k, d in CONC.items():
+        rows = []
+        for g, refs in sorted(d.items(), key=lambda x: -len(x[1])):
+            refs = sorted(refs); prev = 0; dl = []
+            for r in refs: dl.append(r - prev); prev = r
+            rows.append([g, dl])
+        conc[k] = rows
+    dump(os.path.join(OUT, 'conc.json'), conc)
+    irv = {b: [IRV[b][c] for c in sorted(IRV[b])] for b in BOOKS if b in IRV}
+    dump(os.path.join(OUT, 'irv.json'), irv)
+    ns = '{http://openscriptures.github.com/morphhb/namespace}'
+    txt = lambda el: re.sub(r'\s+', ' ', ''.join(el.itertext())).strip() if el is not None else ''
+    st = {}
+    for e in ET.parse(os.path.join(RAW, 'HebrewStrong.xml')).iter(ns + 'entry'):
+        w = e.find(ns + 'w')
+        src = e.find(ns + 'source')
+        srcs = ''
+        if src is not None:
+            srcs = (src.text or '')
+            for ch in src:
+                srcs += ('H' + ch.get('src', '')[1:] if ch.tag == ns + 'w' and ch.get('src') else ''.join(ch.itertext())) + (ch.tail or '')
+            srcs = re.sub(r'\s+', ' ', srcs).strip()
+        st[e.get('id')[1:]] = [w.get('pos') or '', w.get('pron') or '', w.get('xlit') or '', srcs,
+                               txt(e.find(ns + 'meaning')), txt(e.find(ns + 'usage'))]
+    dump(os.path.join(OUT, 'strongs.json'), st)
 
 def write_lex(SG, used):
     out, miss = {}, 0
@@ -193,5 +231,6 @@ if __name__ == '__main__':
     json.dump(idx, open(idxp, 'w', encoding='utf8'), ensure_ascii=False, indent=0)
     if args[:1] == ['all']:
         n, miss = write_lex(SG, LEX)
+        write_extra()
         json.dump(stats, open(os.path.join(OUT, 'stats.json'), 'w'), indent=0)
         print('lexicon', n, 'lemmas, without Hindi:', miss)

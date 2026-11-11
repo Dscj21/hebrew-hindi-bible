@@ -11,8 +11,11 @@ const Ads = (() => {
       if (admob) try {
         await admob.initialize({ initializeForTesting: !!cfg.android.testing });
         if (cfg.android.bannerId) {
-          await admob.showBanner({ adId: cfg.android.bannerId, adSize: 'ADAPTIVE_BANNER', position: 'BOTTOM_CENTER', margin: 0, isTesting: !!cfg.android.testing });
+          // banner sits just above the bottom navigation bar (60dp); --adh reserves its height in the layout
+          try { admob.addListener('bannerAdSizeChanged', s => s && s.height && document.documentElement.style.setProperty('--adh', s.height + 'px')); } catch {}
+          await admob.showBanner({ adId: cfg.android.bannerId, adSize: 'ADAPTIVE_BANNER', position: 'BOTTOM_CENTER', margin: 60, isTesting: !!cfg.android.testing });
           document.body.classList.add('has-native-banner');
+          document.documentElement.style.setProperty('--adh', '56px');
         }
         if (cfg.android.interstitialId && cfg.interstitialEveryChapters > 0)
           await admob.prepareInterstitial({ adId: cfg.android.interstitialId, isTesting: !!cfg.android.testing });
@@ -34,6 +37,7 @@ const Ads = (() => {
         el.innerHTML = `<ins class="adsbygoogle" style="display:block" data-ad-client="${cfg.web.adsenseClient}" data-ad-slot="${slot}" data-ad-format="auto" data-full-width-responsive="true"></ins>`;
         el.classList.add('on'); try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch {}
       } else if (cfg.showPlaceholders || demo()) { el.classList.add('on', 'demo'); el.textContent = 'विज्ञापन स्थान'; }
+      if (el.id === 'adbar' && el.classList.contains('on')) document.documentElement.style.setProperty('--adh', '52px');
     });
   }
   const everyVerses = () => (cfg && cfg.enabled && (cfg.web?.inChapterSlot || cfg.showPlaceholders || demo()) && !native() && cfg.inChapterEveryVerses) || 0;
