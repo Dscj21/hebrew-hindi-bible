@@ -1,6 +1,8 @@
 {
   "appId": "in.hebrewhindi.bible",
-  "appName": "इब्रानी-हिन्दी बाइबल",
+  "appName": "Hebrew–Hindi Bible",
   "webDir": "www",
-  "android": { "backgroundColor": "#fbf7f0" }
+  "android": {
+    "backgroundColor": "#ffffff"
+  }
 }

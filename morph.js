@@ -71,5 +71,66 @@ const Morph = (() => {
     const verb = mc.some(m => m[0] === 'V');
     return { t: segs.join(' | '), verb };
   }
-  return { hi, parts, chip };
+  // ---- English ----
+  const GE = { m: 'masculine', f: 'feminine', b: 'both genders', c: 'common' }, NE = { s: 'singular', p: 'plural', d: 'dual' }, STE = { c: 'construct', d: 'definite' };
+  const PE = { 1: '1st person', 2: '2nd person', 3: '3rd person' };
+  const SE = { q: 'Qal', N: 'Niphal', p: 'Piel', P: 'Pual', h: 'Hiphil', H: 'Hophal', t: 'Hithpael', o: 'Polel', O: 'Polal', r: 'Hithpolel', m: 'Poel', M: 'Poal', k: 'Palel', K: 'Pulal', Q: 'Qal passive', l: 'Pilpel', L: 'Polpal', f: 'Hithpalpel', D: 'Nithpael', j: 'Pealal', i: 'Pilel', u: 'Hothpaal', c: 'Tiphil', v: 'Hishtaphel', w: 'Nithpalel', y: 'Nithpoel', z: 'Hithpoel' };
+  const VE = { p: 'perfect', q: 'sequential perfect (weqatal)', i: 'imperfect', w: 'sequential imperfect (wayyiqtol: “and he …”)', h: 'cohortative', j: 'jussive', v: 'imperative', r: 'participle (active)', s: 'participle (passive)', a: 'infinitive absolute', c: 'infinitive construct' };
+  const VA2 = { p: 'Perf', q: 'WeqPerf', i: 'Impf', w: 'Wayy', h: 'Coh', j: 'Juss', v: 'Impv', r: 'Ptc', s: 'PtcPass', a: 'InfAbs', c: 'InfCon' };
+  const TE = { a: 'affirmative particle', d: 'definite article (the)', e: 'exhortation particle', i: 'interrogative particle', j: 'interjection', m: 'demonstrative particle', n: 'negative particle', o: 'direct object marker', r: 'relative particle' };
+  const TA2 = { a: 'Aff', d: 'Art', e: 'Exh', i: 'Interr', j: 'Interj', m: 'Dem', n: 'Neg', o: 'DirObj', r: 'Rel' };
+  const AE = { a: 'adjective', c: 'cardinal number', g: 'gentilic adjective', o: 'ordinal number', x: 'adjective' };
+  const SUFE = { '1cs': 'my / me', '2ms': 'your / you', '2fs': 'your / you (f.)', '3ms': 'his / him', '3fs': 'her', '1cp': 'our / us', '2mp': 'your / you (pl.)', '2fp': 'your / you (f. pl.)', '3mp': 'their / them', '3fp': 'their / them (f.)', '3cp': 'their / them', '2cp': 'your / you (pl.)' };
+  const PREFE = { b: 'in, with, by', c: 'and, then', d: 'the', k: 'like, as', l: 'to, for', m: 'from', i: 'interrogative (?)', s: 'who, which' };
+  const gne = s => [GE[s[0]], NE[s[1]], STE[s[2]]].filter(Boolean);
+  function en(code) {
+    const c = code[0], r = code.slice(1);
+    if (c === 'N') return [r[0] === 'p' ? 'Proper noun' : 'Noun', ...gne(r.slice(1))].join(', ');
+    if (c === 'A') return [AE[r[0]] || 'adjective', ...gne(r.slice(1))].join(', ').replace(/^./, x => x.toUpperCase());
+    if (c === 'V') {
+      const ty = r[1], x = r.slice(2), bits = ['Verb', SE[r[0]] || r[0], VE[ty] || ty];
+      if ('rs'.includes(ty)) bits.push(...gne(x));
+      else if (!'ac'.includes(ty)) { let y = x; if (PE[y[0]]) { bits.push(PE[y[0]]); y = y.slice(1); } bits.push(...[GE[y[0]], NE[y[1]]].filter(Boolean)); }
+      return bits.join(', ');
+    }
+    if (c === 'R') return 'Preposition' + (r === 'd' ? ' + article' : '');
+    if (c === 'C') return 'Conjunction';
+    if (c === 'D') return 'Adverb';
+    if (c === 'T') return (TE[r[0]] || 'particle').replace(/^./, x => x.toUpperCase());
+    if (c === 'P') return ['Pronoun', PE[r[1]], GE[r[2]], NE[r[3]]].filter(Boolean).join(', ');
+    if (c === 'S') return r[0] === 'p' ? 'Pronominal suffix, ' + [PE[r[1]], GE[r[2]], NE[r[3]]].filter(Boolean).join(', ') : ({ d: 'Directional suffix (toward)', h: 'Paragogic he', n: 'Paragogic nun' }[r[0]] || 'Suffix');
+    return code;
+  }
+  const gnsE = s => (s[0] && s[0] !== 'x' ? s[0] : '') + (s[1] || '') + (s[2] && s[2] !== 'a' ? s[2] : '');
+  function abbrEn(m, lem) {
+    const c = m[0], r = m.slice(1), L = lem && !/^\d/.test(lem) ? '-' + ({ c: 'w' }[lem] || lem) : '';
+    if (c === 'N') return (r[0] === 'p' ? 'Np' : 'N') + (gnsE(r.slice(1)) ? '-' + gnsE(r.slice(1)) : '');
+    if (c === 'A') return 'Adj' + (gnsE(r.slice(1)) ? '-' + gnsE(r.slice(1)) : '');
+    if (c === 'V') { const ty = r[1], x = r.slice(2); return ['V', SE[r[0]] || r[0], VA2[ty] || ty, x.replace(/x/g, '')].filter(Boolean).join('-'); }
+    if (c === 'R') return 'Prep' + L + (r === 'd' ? '+Art' : '');
+    if (c === 'C') return 'Cj' + L;
+    if (c === 'D') return 'Adv';
+    if (c === 'T') return (TA2[r[0]] || 'Prt') + (r[0] === 'd' ? '' : L);
+    if (c === 'P') return 'Pro-' + r.slice(1);
+    if (c === 'S') return r[0] === 'p' ? r.slice(1) : ({ d: 'Dir', h: 'Par', n: 'Par' }[r[0]] || 'Suf');
+    return m;
+  }
+  function chipL(w, lang) {
+    if (lang !== 'en') return chip(w);
+    const lp = (w[3] || '').split('/'), mc = (w[4] || '').slice(1).split('/');
+    let li = 0;
+    return { t: mc.map(m => abbrEn(m, m[0] === 'S' ? null : lp[li++])).join(' | '), verb: mc.some(m => m[0] === 'V') };
+  }
+  function partsL(w, lang) {
+    const ps = parts(w); if (lang !== 'en') return ps;
+    const mc = (w[4] || '').slice(1).split('/'), lp = (w[3] || '').split('/');
+    let li = 0;
+    return ps.map((p, i) => {
+      const m = mc[i] || '', q = Object.assign({}, p, { m: en(m) });
+      if (m[0] === 'S') { if (m[1] === 'p') q.g = SUFE[m.slice(2, 5)] || ''; }
+      else { const l = lp[li++] || ''; if (!/^\d/.test(l)) q.g = (PREFE[l] || '') + (m === 'Rd' ? ' + the' : ''); }
+      return q;
+    });
+  }
+  return { hi, en, parts, chip, chipL, partsL };
 })();

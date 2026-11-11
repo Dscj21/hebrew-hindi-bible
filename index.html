@@ -1,79 +1,92 @@
 <!doctype html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1f4fa3">
-<title>इब्रानी–हिन्दी बाइबल</title>
-<meta name="description" content="इब्रानी–हिन्दी अंतर्रेखीय बाइबल (पुराना नियम): हर इब्रानी शब्द का हिन्दी अर्थ, उच्चारण, व्याकरण और स्ट्रॉन्ग संख्या।">
-<meta property="og:title" content="इब्रानी–हिन्दी बाइबल"><meta property="og:description" content="हर इब्रानी शब्द का हिन्दी अर्थ, उच्चारण और व्याकरण — मुफ़्त">
+<meta name="theme-color" content="#ffffff">
+<title>Hebrew–Hindi Bible</title>
+<meta name="description" content="The Hebrew Old Testament word by word — Hindi meaning, Devanagari pronunciation, grammar and Strong’s number for every word, with the IRV Hindi verse.">
+<meta property="og:title" content="Hebrew–Hindi Bible"><meta property="og:description" content="Every Hebrew word with its Hindi meaning — free">
 <meta property="og:image" content="icon-512.png">
+<link rel="preload" href="fonts/Inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/NotoSerifHebrew.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/NotoSansDevanagari.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<script>(function(){try{var s=JSON.parse(localStorage.getItem('hhb.set')||'{}');var t=s.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}})()</script>
+<script>(function(){try{var s=JSON.parse(localStorage.getItem('hhb.set')||'{}');var t=s.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;var l=JSON.parse(localStorage.getItem('hhb.lang')||'null');if(l)document.documentElement.lang=l;}catch(e){}})()</script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
-  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></symbol>
-  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
-  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21V5M8 7h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
-  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
-  <symbol id="i-star-f" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" fill="currentColor"/></symbol>
-  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-  <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="12" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="19" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4" stroke="currentColor" stroke-width="2"/></symbol>
-  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
-  <symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="10" r="2" fill="currentColor"/><path d="M21 16l-5-5-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
-  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
-  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-  <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 14l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+ <defs>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.5-4.5"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M19 21l-7-4.5L5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7.5 7.5 4.5-4.5 4.5 4.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-4.5-4.5L6 21"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19.5 13.6 12 21l-7.5-7.4A5 5 0 1 1 12 7a5 5 0 1 1 7.5 6.6z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-chev-d" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-4-3-6.5-4-10-2.5 2-3.5 4-3.5 6.5C10 10 9 9 8.5 7.5 6.5 9.5 5 12 5 15a7 7 0 0 0 7 7z"/></symbol>
+  <symbol id="i-type" viewBox="0 0 24 24"><path d="M4 7V5h11v2M9.5 5v14M7 19h5"/><path d="M14 13v-1.5h7V13M17.5 11.5V19M16 19h3"/></symbol>
+  <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="4"/><path d="m10 9 5 3-5 3z"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></symbol>
+  <symbol id="i-alpha" viewBox="0 0 24 24"><path d="M15.5 6.5c-1 6-2.2 11-6 11a4 4 0 0 1 0-8c3.8 0 5 5 6.5 8"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17v.5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
+ </defs>
 </svg>
 
-<header id="top" class="appbar">
-  <button id="title" class="title" aria-label="पुस्तक, अध्याय और पद चुनें"><span id="titleTxt">उत्पत्ति 1:1</span></button>
-  <div class="acts">
-    <button id="btnLex" class="ib alpha" aria-label="शब्दकोश (स्ट्रॉन्ग)">α</button>
-    <button id="btnSearch" class="ib" aria-label="खोजें"><svg><use href="#i-search"/></svg></button>
-    <button id="btnMenu" class="ib" aria-label="और विकल्प"><svg><use href="#i-more"/></svg></button>
+<header id="top" class="topbar" hidden>
+  <button id="title" class="tbtitle"><span id="titleTxt"></span><svg class="ic sm"><use href="#i-chev-d"/></svg></button>
+  <div class="tbacts">
+    <button id="btnAa" class="icbtn" data-i18n-aria="bm.size"><svg class="ic"><use href="#i-type"/></svg></button>
+    <button id="btnMenu" class="icbtn" aria-label="Menu"><svg class="ic"><use href="#i-more"/></svg></button>
   </div>
 </header>
-<div id="pull" aria-hidden="true"><span>↓ पुस्तक / अध्याय चुनें</span></div>
+<div id="pull" aria-hidden="true"><span><svg class="ic sm"><use href="#i-chev-d"/></svg><b></b></span></div>
 
 <main id="views">
   <section id="v-home" class="view" hidden></section>
-  <section id="v-read" class="view" hidden>
-    <div id="page"><p class="loading">लोड हो रहा है…</p></div>
-  </section>
+  <section id="v-read" class="view" hidden><div id="page"></div></section>
   <section id="v-search" class="view" hidden>
-    <div class="sbox"><svg><use href="#i-search"/></svg><input id="q" type="search" placeholder="शब्द, स्ट्रॉन्ग (H430) या संदर्भ (उत्पत्ति 37:35)" autocomplete="off" enterkeyhint="search"></div>
-    <div class="seg" id="smode"><button data-m="all" class="on">सब</button><button data-m="ref">संदर्भ</button><button data-m="word">शब्द</button><button data-m="strong">स्ट्रॉन्ग</button></div>
+    <div class="phead"><h1 data-i18n="search.title"></h1></div>
+    <div class="sbox"><svg class="ic sm"><use href="#i-search"/></svg><input id="q" type="search" autocomplete="off" enterkeyhint="search"></div>
+    <div class="seg" id="smode"><button data-m="all" class="on" data-i18n="search.all"></button><button data-m="ref" data-i18n="search.ref"></button><button data-m="word" data-i18n="search.word"></button><button data-m="strong" data-i18n="search.strong"></button></div>
     <div id="sres"></div>
   </section>
   <section id="v-saved" class="view" hidden>
-    <div class="seg" id="svmode"><button data-m="fav" class="on">पसंदीदा</button><button data-m="bm">बुकमार्क</button><button data-m="hist">इतिहास</button></div>
+    <div class="phead"><h1 data-i18n="saved.title"></h1></div>
+    <div class="seg" id="svmode"><button data-m="fav" class="on" data-i18n="saved.fav"></button><button data-m="bm" data-i18n="saved.bm"></button><button data-m="hist" data-i18n="saved.hist"></button></div>
     <div id="svlist"></div>
   </section>
   <section id="v-settings" class="view" hidden></section>
 </main>
 
-<button id="fab" aria-label="त्वरित विकल्प" hidden>•••</button>
+<button id="fab" aria-label="More" hidden><svg class="ic"><use href="#i-more"/></svg></button>
 <div id="adbar" class="ad-slot ad-bottom" data-slot="banner"></div>
 <nav id="tabs">
-  <button data-tab="home"><svg><use href="#i-home"/></svg><span>होम</span></button>
-  <button data-tab="read"><svg><use href="#i-book"/></svg><span>पढ़ें</span></button>
-  <button data-tab="search"><svg><use href="#i-search"/></svg><span>खोजें</span></button>
-  <button data-tab="saved"><svg><use href="#i-star"/></svg><span>सहेजे</span></button>
-  <button data-tab="settings"><svg><use href="#i-gear"/></svg><span>सेटिंग्स</span></button>
+  <button data-tab="home"><svg class="ic"><use href="#i-home"/></svg><span data-i18n="tab.home"></span></button>
+  <button data-tab="read"><svg class="ic"><use href="#i-book"/></svg><span data-i18n="tab.read"></span></button>
+  <button data-tab="search"><svg class="ic"><use href="#i-search"/></svg><span data-i18n="tab.search"></span></button>
+  <button data-tab="saved"><svg class="ic"><use href="#i-bookmark"/></svg><span data-i18n="tab.saved"></span></button>
+  <button data-tab="settings"><svg class="ic"><use href="#i-settings"/></svg><span data-i18n="tab.settings"></span></button>
 </nav>
-
 <div id="layers"></div>
 <div id="menu" class="pop" hidden></div>
 <div id="toast" role="status" aria-live="polite"></div>
+<div id="langpick" hidden></div>
 <script src="morph.js"></script>
 <script src="ads.js"></script>
 <script src="app.js"></script>

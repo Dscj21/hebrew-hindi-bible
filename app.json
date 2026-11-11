@@ -1,0 +1,12 @@
+{
+ "_note": "App-wide links and options. Leave a URL empty to hide it. shareUrl = public app/download link used in share text and share cards; youtubeUrl = channel link shown on Home and in Settings; playStoreUrl = 'Rate us' target.",
+ "shareUrl": "",
+ "youtubeUrl": "",
+ "playStoreUrl": "",
+ "version": "3.0",
+ "languages": [
+  "en",
+  "hi"
+ ],
+ "defaultLanguage": "en"
+}

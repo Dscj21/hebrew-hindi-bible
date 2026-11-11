@@ -1,0 +1,362 @@
+{
+ "_meta": {
+  "name": "English",
+  "code": "en",
+  "dir": "ltr"
+ },
+ "app": "Hebrew–Hindi Bible",
+ "appShort": "Hebrew–Hindi",
+ "tagline": "The Hebrew Old Testament, word by word, with Hindi meanings",
+ "tab": {
+  "home": "Home",
+  "read": "Read",
+  "search": "Search",
+  "saved": "Saved",
+  "settings": "Settings"
+ },
+ "greet": {
+  "morning": "Good morning",
+  "afternoon": "Good afternoon",
+  "evening": "Good evening",
+  "night": "Peaceful night"
+ },
+ "home": {
+  "votd": "Verse of the Day",
+  "cont": "Continue reading",
+  "start": "Start reading",
+  "chapterOf": "Chapter {c} of {n}",
+  "books": "Books",
+  "quick": "Quick start",
+  "explore": "Explore",
+  "lexicon": "Lexicon",
+  "lexiconSub": "{n} Hebrew words",
+  "searchSub": "Words, references, Strong’s",
+  "savedSub": "{f} favourites · {b} bookmarks",
+  "streak": "{n}-day streak",
+  "streak1": "Day 1 — keep going",
+  "streak0": "Start your streak today",
+  "learn": "How to use",
+  "shareTitle": "Share the app",
+  "shareSub": "Help others read the Hebrew Bible in Hindi",
+  "watch": "Watch on YouTube",
+  "watchSub": "Video lessons and walkthroughs",
+  "seeAll": "See all"
+ },
+ "act": {
+  "read": "Read",
+  "share": "Share",
+  "save": "Save",
+  "saved": "Saved",
+  "copy": "Copy",
+  "close": "Close",
+  "concordance": "Concordance",
+  "more": "Show more ({n})",
+  "open": "Open",
+  "remove": "Remove",
+  "card": "Image card",
+  "done": "Done",
+  "clear": "Clear"
+ },
+ "read": {
+  "loading": "Loading…",
+  "failed": "Couldn’t load this chapter. Check your connection and try again.",
+  "verses": "{n} verses",
+  "prev": "Previous",
+  "next": "Next",
+  "credit": "Hebrew: OSHB / WLC (CC BY 4.0) · Hindi: IRV Hindi 2019 (CC BY-SA 4.0)",
+  "sources": "Sources & licences",
+  "tipDouble": "Tip: double-tap a word to open its Strong’s entry."
+ },
+ "word": {
+  "root": "Root",
+  "strongs": "Strong’s",
+  "view": "View Strong’s H{n}",
+  "grammar": "Grammar"
+ },
+ "st": {
+  "title": "Strong’s H{n}",
+  "lexical": "Lexical",
+  "translit": "Transliteration",
+  "pos": "Part of speech",
+  "phon": "Phonetic spelling",
+  "defn": "Definition",
+  "hindi": "Hindi meaning",
+  "origin": "Origin",
+  "usage": "Usage",
+  "usageN": "{n} times in the Old Testament",
+  "translated": "Translated as",
+  "kjv": "KJV",
+  "loading": "Loading…",
+  "loadingCount": "Counting…",
+  "failed": "Couldn’t load the lexicon.",
+  "all": "All"
+ },
+ "verse": {
+  "fav": "Add to favourites",
+  "unfav": "Remove from favourites",
+  "copy": "Copy (Hebrew + Hindi)",
+  "card": "Create image card",
+  "link": "Share link",
+  "favAdded": "Added to favourites",
+  "favRemoved": "Removed from favourites"
+ },
+ "card": {
+  "title": "Share card",
+  "making": "Creating image…",
+  "share": "Share",
+  "save": "Save image",
+  "saved": "Image saved",
+  "savedShare": "Image saved — share it on WhatsApp",
+  "footer": "Every Hebrew word with its Hindi meaning"
+ },
+ "picker": {
+  "books": "Books",
+  "chapter": "Chapter",
+  "chapters": "Chapters",
+  "verses": "Verses",
+  "find": "Find a book…",
+  "ot": "Old Testament",
+  "groups": [
+   "Law (Torah)",
+   "History",
+   "Poetry & Wisdom",
+   "Major Prophets",
+   "Minor Prophets"
+  ]
+ },
+ "search": {
+  "title": "Search",
+  "ph": "Word, Strong’s (H430) or reference (Gen 37:35)",
+  "all": "All",
+  "ref": "Reference",
+  "word": "Words",
+  "strong": "Strong’s",
+  "examples": "Try",
+  "recent": "Recent",
+  "tips": "Type a reference (Genesis 1:1, Gen 1 1), a Strong’s number (H7965), a Hindi word (searched in verses and meanings) or a Hebrew word.",
+  "refRes": "Reference",
+  "openRef": "Open {r}",
+  "noRef": "Reference not recognised. Example: Genesis 37:35",
+  "lexRes": "Lexicon ({n})",
+  "none": "No results.",
+  "verses": "Hindi verses",
+  "searching": "Searching…",
+  "found": "{n} verses found",
+  "first200": " — showing the first 200",
+  "noVerses": "Not found in the Hindi verses.",
+  "idxFail": "Couldn’t load the search index."
+ },
+ "saved": {
+  "title": "Saved",
+  "fav": "Favourites",
+  "bm": "Bookmarks",
+  "hist": "History",
+  "emptyFav": "No favourites yet.\nLong-press any verse while reading and tap Save.",
+  "emptyBm": "No bookmarks yet.\nTap ••• while reading to bookmark a chapter.",
+  "emptyHist": "Your reading history will appear here.",
+  "clearHist": "Clear history"
+ },
+ "set": {
+  "title": "Settings",
+  "language": "Language",
+  "appearance": "Appearance",
+  "theme": "Theme",
+  "themes": {
+   "auto": "System",
+   "light": "Light",
+   "dark": "Dark",
+   "sepia": "Sepia"
+  },
+  "textSize": "Text size",
+  "pinchHint": "Pinch with two fingers while reading to change it",
+  "words": "Word display",
+  "chip": "Grammar chip",
+  "chipSub": "Morphology code above each word",
+  "gloss": "Hindi meaning",
+  "pron": "Pronunciation (Devanagari)",
+  "dots": "Syllable dots",
+  "dotsSub": "वय्·या·कु·मू",
+  "split": "Highlight prefixes & suffixes",
+  "splitSub": "וְ (and), בְּ (in) shown in colour",
+  "sn": "Strong’s numbers",
+  "root": "Root word",
+  "hindi": "Hindi verse (IRV) under each verse",
+  "experience": "Experience",
+  "haptic": "Haptic feedback",
+  "hapticSub": "Light vibration on swipes and taps",
+  "gestures": "Gestures",
+  "data": "Data",
+  "clearHist": "Clear history",
+  "reset": "Reset all settings",
+  "about": "About & licences",
+  "version": "Version {v}",
+  "histCleared": "History cleared",
+  "resetDone": "Settings reset",
+  "follow": "Follow us",
+  "youtube": "YouTube channel"
+ },
+ "lang": {
+  "title": "Choose your language",
+  "sub": "You can change this any time in Settings.",
+  "cont": "Continue"
+ },
+ "menu": {
+  "settings": "Settings",
+  "faq": "FAQ",
+  "new": "What’s new",
+  "share": "Share app",
+  "rate": "Rate us",
+  "about": "About"
+ },
+ "g": [
+  [
+   "Swipe left / right",
+   "Next / previous chapter"
+  ],
+  [
+   "Pull down from the top",
+   "Choose book, chapter and verse"
+  ],
+  [
+   "Tap a word",
+   "Full word details"
+  ],
+  [
+   "Double-tap a word",
+   "Strong’s lexicon entry"
+  ],
+  [
+   "Long-press a verse",
+   "Save, copy or share as an image"
+  ],
+  [
+   "Pinch with two fingers",
+   "Smaller / larger text"
+  ],
+  [
+   "Drag a sheet down",
+   "Close it"
+  ]
+ ],
+ "bm": {
+  "add": "Bookmark this chapter",
+  "remove": "Remove bookmark",
+  "added": "Bookmark saved",
+  "removed": "Bookmark removed",
+  "favs": "Favourite verses",
+  "hist": "History",
+  "top": "Back to top",
+  "size": "Text size"
+ },
+ "toast": {
+  "copied": "Copied",
+  "size": "Text size {n}%",
+  "soon": "Coming soon to Google Play — thank you!"
+ },
+ "about": {
+  "title": "About",
+  "body": "{app} shows the Hebrew Old Testament word by word: each word with its Hindi meaning, Devanagari pronunciation, grammar and Strong’s number, with the IRV Hindi translation under every verse. Free and ad-supported.",
+  "heb": "Hebrew text: Open Scriptures Hebrew Bible (OSHB / morphhb), based on the Westminster Leningrad Codex — lemmas & morphology CC BY 4.0, WLC text public domain.",
+  "lex": "Lexicon: Strong’s Hebrew Dictionary (public domain), from the Open Scriptures Hebrew Lexicon.",
+  "irv": "Hindi verses: Indian Revised Version (IRV) Hindi – 2019, © 2017, 2018, 2019 Bridge Connectivity Solutions Pvt. Ltd., licensed CC BY-SA 4.0 (eBible.org). Footnotes and cross-references removed; no other changes.",
+  "ours": "Devanagari pronunciation, Hindi word meanings and grammar notes were added by this project (CC BY-SA 4.0); many meanings are generated automatically and are still being reviewed. The original licensors do not necessarily endorse these changes.",
+  "fonts": "Fonts: Inter, Noto Serif Hebrew, Noto Sans Devanagari (SIL OFL)."
+ },
+ "faq": [
+  [
+   "Where do the Hindi meanings come from?",
+   "Every Hebrew root word (lemma) has a Hindi meaning written in IRV vocabulary. Prefixes (व = and, ब = in…) and suffixes (his, my…) are combined to give each word its meaning in context."
+  ],
+  [
+   "What do the coloured letters mean?",
+   "Prefixes attached to the front of a word (such as וְ “and”, בְּ “in”) are shown in orange and pronoun suffixes in purple, so you can see the parts of each word. You can turn this off in Settings."
+  ],
+  [
+   "What are · and - in the pronunciation?",
+   "· separates syllables; - separates a prefix from the main word (वे-ख़ोल = “and all”)."
+  ],
+  [
+   "What is the grammar chip?",
+   "An optional morphology code (e.g. N-mpc | 3ms = noun, masculine plural construct + his). Turn it on in Settings › Word display."
+  ],
+  [
+   "Does it work offline?",
+   "The Android app contains the whole Old Testament. On the web, chapters you read are saved automatically."
+  ]
+ ],
+ "new": [
+  "A new, cleaner design with light and dark themes",
+  "English and Hindi app language",
+  "Verse of the Day, reading streak and progress",
+  "Strong’s lexicon with concordance",
+  "Search by word, Strong’s number or reference",
+  "Swipe, pinch, double-tap and long-press gestures",
+  "Share any verse as a beautiful image card",
+  "A Hindi meaning for every word of the Old Testament"
+ ],
+ "pos": {
+  "v": "Verb",
+  "n": "Noun",
+  "n-m": "Noun, masculine",
+  "n-f": "Noun, feminine",
+  "a": "Adjective",
+  "a-m": "Adjective, masculine",
+  "a-f": "Adjective, feminine",
+  "n-pr-m": "Proper noun (man)",
+  "n-pr-f": "Proper noun (woman)",
+  "n-pr-loc": "Proper noun (place)",
+  "n-pr": "Proper noun",
+  "n-pr-g": "Proper noun (people)",
+  "adv": "Adverb",
+  "prep": "Preposition",
+  "conj": "Conjunction",
+  "pron": "Pronoun",
+  "prt": "Particle",
+  "inj": "Interjection",
+  "p-m": "Pronoun, masculine",
+  "p-f": "Pronoun, feminine",
+  "a-gent": "Gentilic adjective",
+  "x": "Particle"
+ },
+ "books": {
+  "Gen": "Genesis",
+  "Exod": "Exodus",
+  "Lev": "Leviticus",
+  "Num": "Numbers",
+  "Deut": "Deuteronomy",
+  "Josh": "Joshua",
+  "Judg": "Judges",
+  "Ruth": "Ruth",
+  "1Sam": "1 Samuel",
+  "2Sam": "2 Samuel",
+  "1Kgs": "1 Kings",
+  "2Kgs": "2 Kings",
+  "1Chr": "1 Chronicles",
+  "2Chr": "2 Chronicles",
+  "Ezra": "Ezra",
+  "Neh": "Nehemiah",
+  "Esth": "Esther",
+  "Job": "Job",
+  "Ps": "Psalms",
+  "Prov": "Proverbs",
+  "Eccl": "Ecclesiastes",
+  "Song": "Song of Songs",
+  "Isa": "Isaiah",
+  "Jer": "Jeremiah",
+  "Lam": "Lamentations",
+  "Ezek": "Ezekiel",
+  "Dan": "Daniel",
+  "Hos": "Hosea",
+  "Joel": "Joel",
+  "Amos": "Amos",
+  "Obad": "Obadiah",
+  "Jonah": "Jonah",
+  "Mic": "Micah",
+  "Nah": "Nahum",
+  "Hab": "Habakkuk",
+  "Zeph": "Zephaniah",
+  "Hag": "Haggai",
+  "Zech": "Zechariah",
+  "Mal": "Malachi"
+ }
+}
