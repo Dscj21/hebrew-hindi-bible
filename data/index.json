@@ -3,197 +3,398 @@
 {
 "id": "Gen",
 "name": "उत्पत्ति",
-"chapters": 50
+"chapters": 50,
+"t": "ot"
 },
 {
 "id": "Exod",
 "name": "निर्गमन",
-"chapters": 40
+"chapters": 40,
+"t": "ot"
 },
 {
 "id": "Lev",
 "name": "लैव्यव्यवस्था",
-"chapters": 27
+"chapters": 27,
+"t": "ot"
 },
 {
 "id": "Num",
 "name": "गिनती",
-"chapters": 36
+"chapters": 36,
+"t": "ot"
 },
 {
 "id": "Deut",
 "name": "व्यवस्थाविवरण",
-"chapters": 34
+"chapters": 34,
+"t": "ot"
 },
 {
 "id": "Josh",
 "name": "यहोशू",
-"chapters": 24
+"chapters": 24,
+"t": "ot"
 },
 {
 "id": "Judg",
 "name": "न्यायियों",
-"chapters": 21
+"chapters": 21,
+"t": "ot"
 },
 {
 "id": "Ruth",
 "name": "रूत",
-"chapters": 4
+"chapters": 4,
+"t": "ot"
 },
 {
 "id": "1Sam",
 "name": "1 शमूएल",
-"chapters": 31
+"chapters": 31,
+"t": "ot"
 },
 {
 "id": "2Sam",
 "name": "2 शमूएल",
-"chapters": 24
+"chapters": 24,
+"t": "ot"
 },
 {
 "id": "1Kgs",
 "name": "1 राजाओं",
-"chapters": 22
+"chapters": 22,
+"t": "ot"
 },
 {
 "id": "2Kgs",
 "name": "2 राजाओं",
-"chapters": 25
+"chapters": 25,
+"t": "ot"
 },
 {
 "id": "1Chr",
 "name": "1 इतिहास",
-"chapters": 29
+"chapters": 29,
+"t": "ot"
 },
 {
 "id": "2Chr",
 "name": "2 इतिहास",
-"chapters": 36
+"chapters": 36,
+"t": "ot"
 },
 {
 "id": "Ezra",
 "name": "एज्रा",
-"chapters": 10
+"chapters": 10,
+"t": "ot"
 },
 {
 "id": "Neh",
 "name": "नहेम्याह",
-"chapters": 13
+"chapters": 13,
+"t": "ot"
 },
 {
 "id": "Esth",
 "name": "एस्तेर",
-"chapters": 10
+"chapters": 10,
+"t": "ot"
 },
 {
 "id": "Job",
 "name": "अय्यूब",
-"chapters": 42
+"chapters": 42,
+"t": "ot"
 },
 {
 "id": "Ps",
 "name": "भजन संहिता",
-"chapters": 150
+"chapters": 150,
+"t": "ot"
 },
 {
 "id": "Prov",
 "name": "नीतिवचन",
-"chapters": 31
+"chapters": 31,
+"t": "ot"
 },
 {
 "id": "Eccl",
 "name": "सभोपदेशक",
-"chapters": 12
+"chapters": 12,
+"t": "ot"
 },
 {
 "id": "Song",
 "name": "श्रेष्ठगीत",
-"chapters": 8
+"chapters": 8,
+"t": "ot"
 },
 {
 "id": "Isa",
 "name": "यशायाह",
-"chapters": 66
+"chapters": 66,
+"t": "ot"
 },
 {
 "id": "Jer",
 "name": "यिर्मयाह",
-"chapters": 52
+"chapters": 52,
+"t": "ot"
 },
 {
 "id": "Lam",
 "name": "विलापगीत",
-"chapters": 5
+"chapters": 5,
+"t": "ot"
 },
 {
 "id": "Ezek",
 "name": "यहेजकेल",
-"chapters": 48
+"chapters": 48,
+"t": "ot"
 },
 {
 "id": "Dan",
 "name": "दानिय्येल",
-"chapters": 12
+"chapters": 12,
+"t": "ot"
 },
 {
 "id": "Hos",
 "name": "होशे",
-"chapters": 14
+"chapters": 14,
+"t": "ot"
 },
 {
 "id": "Joel",
 "name": "योएल",
-"chapters": 4
+"chapters": 4,
+"t": "ot"
 },
 {
 "id": "Amos",
 "name": "आमोस",
-"chapters": 9
+"chapters": 9,
+"t": "ot"
 },
 {
 "id": "Obad",
 "name": "ओबद्याह",
-"chapters": 1
+"chapters": 1,
+"t": "ot"
 },
 {
 "id": "Jonah",
 "name": "योना",
-"chapters": 4
+"chapters": 4,
+"t": "ot"
 },
 {
 "id": "Mic",
 "name": "मीका",
-"chapters": 7
+"chapters": 7,
+"t": "ot"
 },
 {
 "id": "Nah",
 "name": "नहूम",
-"chapters": 3
+"chapters": 3,
+"t": "ot"
 },
 {
 "id": "Hab",
 "name": "हबक्कूक",
-"chapters": 3
+"chapters": 3,
+"t": "ot"
 },
 {
 "id": "Zeph",
 "name": "सपन्याह",
-"chapters": 3
+"chapters": 3,
+"t": "ot"
 },
 {
 "id": "Hag",
 "name": "हाग्गै",
-"chapters": 2
+"chapters": 2,
+"t": "ot"
 },
 {
 "id": "Zech",
 "name": "जकर्याह",
-"chapters": 14
+"chapters": 14,
+"t": "ot"
 },
 {
 "id": "Mal",
 "name": "मलाकी",
-"chapters": 3
+"chapters": 3,
+"t": "ot"
+},
+{
+"id": "Matt",
+"name": "मत्ती",
+"chapters": 28,
+"t": "nt"
+},
+{
+"id": "Mark",
+"name": "मरकुस",
+"chapters": 16,
+"t": "nt"
+},
+{
+"id": "Luke",
+"name": "लूका",
+"chapters": 24,
+"t": "nt"
+},
+{
+"id": "John",
+"name": "यूहन्ना",
+"chapters": 21,
+"t": "nt"
+},
+{
+"id": "Acts",
+"name": "प्रेरितों के काम",
+"chapters": 28,
+"t": "nt"
+},
+{
+"id": "Rom",
+"name": "रोमियों",
+"chapters": 16,
+"t": "nt"
+},
+{
+"id": "1Cor",
+"name": "1 कुरिन्थियों",
+"chapters": 16,
+"t": "nt"
+},
+{
+"id": "2Cor",
+"name": "2 कुरिन्थियों",
+"chapters": 13,
+"t": "nt"
+},
+{
+"id": "Gal",
+"name": "गलातियों",
+"chapters": 6,
+"t": "nt"
+},
+{
+"id": "Eph",
+"name": "इफिसियों",
+"chapters": 6,
+"t": "nt"
+},
+{
+"id": "Phil",
+"name": "फिलिप्पियों",
+"chapters": 4,
+"t": "nt"
+},
+{
+"id": "Col",
+"name": "कुलुस्सियों",
+"chapters": 4,
+"t": "nt"
+},
+{
+"id": "1Thess",
+"name": "1 थिस्सलुनीकियों",
+"chapters": 5,
+"t": "nt"
+},
+{
+"id": "2Thess",
+"name": "2 थिस्सलुनीकियों",
+"chapters": 3,
+"t": "nt"
+},
+{
+"id": "1Tim",
+"name": "1 तीमुथियुस",
+"chapters": 6,
+"t": "nt"
+},
+{
+"id": "2Tim",
+"name": "2 तीमुथियुस",
+"chapters": 4,
+"t": "nt"
+},
+{
+"id": "Titus",
+"name": "तीतुस",
+"chapters": 3,
+"t": "nt"
+},
+{
+"id": "Phlm",
+"name": "फिलेमोन",
+"chapters": 1,
+"t": "nt"
+},
+{
+"id": "Heb",
+"name": "इब्रानियों",
+"chapters": 13,
+"t": "nt"
+},
+{
+"id": "Jas",
+"name": "याकूब",
+"chapters": 5,
+"t": "nt"
+},
+{
+"id": "1Pet",
+"name": "1 पतरस",
+"chapters": 5,
+"t": "nt"
+},
+{
+"id": "2Pet",
+"name": "2 पतरस",
+"chapters": 3,
+"t": "nt"
+},
+{
+"id": "1John",
+"name": "1 यूहन्ना",
+"chapters": 5,
+"t": "nt"
+},
+{
+"id": "2John",
+"name": "2 यूहन्ना",
+"chapters": 1,
+"t": "nt"
+},
+{
+"id": "3John",
+"name": "3 यूहन्ना",
+"chapters": 1,
+"t": "nt"
+},
+{
+"id": "Jude",
+"name": "यहूदा",
+"chapters": 1,
+"t": "nt"
+},
+{
+"id": "Rev",
+"name": "प्रकाशितवाक्य",
+"chapters": 22,
+"t": "nt"
 }
 ]
 }

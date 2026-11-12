@@ -6,7 +6,7 @@
  },
  "app": "Hebrew–Hindi Bible",
  "appShort": "Hebrew–Hindi",
- "tagline": "The Hebrew Old Testament, word by word, with Hindi meanings",
+ "tagline": "The Hebrew Old Testament and Greek New Testament, word by word, with Hindi meanings",
  "tab": {
   "home": "Home",
   "read": "Read",
@@ -29,7 +29,7 @@
   "quick": "Quick start",
   "explore": "Explore",
   "lexicon": "Lexicon",
-  "lexiconSub": "{n} Hebrew words",
+  "lexiconSub": "{n} Hebrew & Greek words",
   "searchSub": "Words, references, Strong’s",
   "savedSub": "{f} favourites · {b} bookmarks",
   "streak": "{n}-day streak",
@@ -37,10 +37,11 @@
   "streak0": "Start your streak today",
   "learn": "How to use",
   "shareTitle": "Share the app",
-  "shareSub": "Help others read the Hebrew Bible in Hindi",
+  "shareSub": "Help others read the Bible in Hebrew and Greek with Hindi",
   "watch": "Watch on YouTube",
   "watchSub": "Video lessons and walkthroughs",
-  "seeAll": "See all"
+  "seeAll": "See all",
+  "testament": "Testament"
  },
  "act": {
   "read": "Read",
@@ -65,13 +66,17 @@
   "next": "Next",
   "credit": "Hebrew: OSHB / WLC (CC BY 4.0) · Hindi: IRV Hindi 2019 (CC BY-SA 4.0)",
   "sources": "Sources & licences",
-  "tipDouble": "Tip: double-tap a word to open its Strong’s entry."
+  "tipDouble": "Tip: double-tap a word to open its Strong’s entry.",
+  "creditNT": "Greek: OpenGNT (CC BY-SA 4.0) · Hindi: IRV Hindi 2019 (CC BY-SA 4.0)"
  },
  "word": {
   "root": "Root",
   "strongs": "Strong’s",
   "view": "View Strong’s H{n}",
-  "grammar": "Grammar"
+  "grammar": "Grammar",
+  "lemma": "Lemma",
+  "viewG": "View Strong’s G{n}",
+  "greek": "Greek"
  },
  "st": {
   "title": "Strong’s H{n}",
@@ -89,7 +94,10 @@
   "loading": "Loading…",
   "loadingCount": "Counting…",
   "failed": "Couldn’t load the lexicon.",
-  "all": "All"
+  "all": "All",
+  "titleG": "Strong’s G{n}",
+  "usageNG": "{n} times in the New Testament",
+  "greek": "Greek"
  },
  "verse": {
   "fav": "Add to favourites",
@@ -107,7 +115,8 @@
   "save": "Save image",
   "saved": "Image saved",
   "savedShare": "Image saved — share it on WhatsApp",
-  "footer": "Every Hebrew word with its Hindi meaning"
+  "footer": "Every Hebrew word with its Hindi meaning",
+  "footerNT": "Every Greek word with its Hindi meaning"
  },
  "picker": {
   "books": "Books",
@@ -122,18 +131,26 @@
    "Poetry & Wisdom",
    "Major Prophets",
    "Minor Prophets"
+  ],
+  "nt": "New Testament",
+  "groupsNT": [
+   "Gospels",
+   "History",
+   "Paul’s letters",
+   "General letters",
+   "Prophecy"
   ]
  },
  "search": {
   "title": "Search",
-  "ph": "Word, Strong’s (H430) or reference (Gen 37:35)",
+  "ph": "Word, Strong’s (H430, G26) or reference (John 3:16)",
   "all": "All",
   "ref": "Reference",
   "word": "Words",
   "strong": "Strong’s",
   "examples": "Try",
   "recent": "Recent",
-  "tips": "Type a reference (Genesis 1:1, Gen 1 1), a Strong’s number (H7965), a Hindi word (searched in verses and meanings) or a Hebrew word.",
+  "tips": "Type a reference (Genesis 1:1, John 3 16), a Strong’s number (H7965 or G26), a Hindi word (searched in verses and meanings), or a Hebrew or Greek word.",
   "refRes": "Reference",
   "openRef": "Open {r}",
   "noRef": "Reference not recognised. Example: Genesis 37:35",
@@ -255,12 +272,13 @@
  },
  "about": {
   "title": "About",
-  "body": "{app} shows the Hebrew Old Testament word by word: each word with its Hindi meaning, Devanagari pronunciation, grammar and Strong’s number, with the IRV Hindi translation under every verse. Free and ad-supported.",
+  "body": "{app} shows the Hebrew Old Testament and the Greek New Testament word by word: each word with its Hindi meaning, Devanagari pronunciation, grammar and Strong’s number, with the IRV Hindi translation under every verse. Free and ad-supported.",
   "heb": "Hebrew text: Open Scriptures Hebrew Bible (OSHB / morphhb), based on the Westminster Leningrad Codex — lemmas & morphology CC BY 4.0, WLC text public domain.",
   "lex": "Lexicon: Strong’s Hebrew Dictionary (public domain), from the Open Scriptures Hebrew Lexicon.",
   "irv": "Hindi verses: Indian Revised Version (IRV) Hindi – 2019, © 2017, 2018, 2019 Bridge Connectivity Solutions Pvt. Ltd., licensed CC BY-SA 4.0 (eBible.org). Footnotes and cross-references removed; no other changes.",
   "ours": "Devanagari pronunciation, Hindi word meanings and grammar notes were added by this project (CC BY-SA 4.0); many meanings are generated automatically and are still being reviewed. The original licensors do not necessarily endorse these changes.",
-  "fonts": "Fonts: Inter, Noto Serif Hebrew, Noto Sans Devanagari (SIL OFL)."
+  "fonts": "Fonts: Inter, Noto Serif Hebrew, Noto Serif Greek, Noto Sans Devanagari (SIL OFL).",
+  "gnt": "Greek text: OpenGNT (Open Greek New Testament, Eliran Wong) — text, lemmas & morphology CC BY-SA 4.0. Greek lexicon: Strong’s Greek Dictionary (public domain; JSON by Open Scriptures, CC BY-SA)."
  },
  "faq": [
   [
@@ -269,7 +287,11 @@
   ],
   [
    "What do the coloured letters mean?",
-   "Prefixes attached to the front of a word (such as וְ “and”, בְּ “in”) are shown in orange and pronoun suffixes in purple, so you can see the parts of each word. You can turn this off in Settings."
+   "In Hebrew, prefixes attached to the front of a word (such as וְ “and”, בְּ “in”) are shown in teal and pronoun suffixes in violet, so you can see the parts of each word. You can turn this off in Settings."
+  ],
+  [
+   "How does the New Testament work?",
+   "Switch to “New Testament” in the book picker or on Home. Each Greek word (OpenGNT) shows its Hindi meaning, a Devanagari pronunciation (Erasmian, as taught in Indian seminaries), its grammar and its Strong’s G-number. Double-tap for the Greek lexicon and concordance."
   ],
   [
    "What are · and - in the pronunciation?",
@@ -281,10 +303,14 @@
   ],
   [
    "Does it work offline?",
-   "The Android app contains the whole Old Testament. On the web, chapters you read are saved automatically."
+   "The Android app contains the whole Bible. On the web, chapters you read are saved automatically."
   ]
  ],
  "new": [
+  "Greek New Testament: every word with Hindi meaning, pronunciation and Strong’s G-number",
+  "Bigger, clearer text — Hindi meanings in bold indigo, pronunciation in amber",
+  "Ads never cover pop-ups or word details any more",
+  "Old / New Testament switch on Home and in the book picker",
   "A new, cleaner design with light and dark themes",
   "English and Hindi app language",
   "Verse of the Day, reading streak and progress",
@@ -316,7 +342,8 @@
   "p-m": "Pronoun, masculine",
   "p-f": "Pronoun, feminine",
   "a-gent": "Gentilic adjective",
-  "x": "Particle"
+  "x": "Particle",
+  "art": "Article"
  },
  "books": {
   "Gen": "Genesis",
@@ -357,6 +384,33 @@
   "Zeph": "Zephaniah",
   "Hag": "Haggai",
   "Zech": "Zechariah",
-  "Mal": "Malachi"
+  "Mal": "Malachi",
+  "Matt": "Matthew",
+  "Mark": "Mark",
+  "Luke": "Luke",
+  "John": "John",
+  "Acts": "Acts",
+  "Rom": "Romans",
+  "1Cor": "1 Corinthians",
+  "2Cor": "2 Corinthians",
+  "Gal": "Galatians",
+  "Eph": "Ephesians",
+  "Phil": "Philippians",
+  "Col": "Colossians",
+  "1Thess": "1 Thessalonians",
+  "2Thess": "2 Thessalonians",
+  "1Tim": "1 Timothy",
+  "2Tim": "2 Timothy",
+  "Titus": "Titus",
+  "Phlm": "Philemon",
+  "Heb": "Hebrews",
+  "Jas": "James",
+  "1Pet": "1 Peter",
+  "2Pet": "2 Peter",
+  "1John": "1 John",
+  "2John": "2 John",
+  "3John": "3 John",
+  "Jude": "Jude",
+  "Rev": "Revelation"
  }
 }

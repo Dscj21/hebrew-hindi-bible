@@ -115,13 +115,46 @@ const Morph = (() => {
     if (c === 'S') return r[0] === 'p' ? r.slice(1) : ({ d: 'Dir', h: 'Par', n: 'Par' }[r[0]] || 'Suf');
     return m;
   }
+
+  // ---- Greek (Robinson morphological codes, as used by OpenGNT): V-PAI-3S, N-GSM, P-1GS, T-NSM … ----
+  const GK = {
+    en: { pos: { N: 'Noun', A: 'Adjective', T: 'Article', P: 'Personal pronoun', R: 'Relative pronoun', D: 'Demonstrative pronoun', F: 'Reflexive pronoun', I: 'Interrogative pronoun', X: 'Indefinite pronoun', Q: 'Correlative pronoun', K: 'Correlative pronoun', C: 'Reciprocal pronoun', S: 'Possessive pronoun', V: 'Verb', ADV: 'Adverb', CONJ: 'Conjunction', COND: 'Conditional', PRT: 'Particle', PREP: 'Preposition', INJ: 'Interjection', ARAM: 'Aramaic word', HEB: 'Hebrew word' },
+      c: { N: 'nominative', G: 'genitive', D: 'dative', A: 'accusative', V: 'vocative' }, n: { S: 'singular', P: 'plural' }, g: { M: 'masculine', F: 'feminine', N: 'neuter' },
+      t: { P: 'present', I: 'imperfect', F: 'future', A: 'aorist', R: 'perfect', L: 'pluperfect' }, v: { A: 'active', M: 'middle', P: 'passive', E: 'middle/passive', D: 'middle deponent', O: 'passive deponent', N: 'middle/passive deponent', Q: 'impersonal active', X: '' },
+      m: { I: 'indicative', S: 'subjunctive', O: 'optative', M: 'imperative', N: 'infinitive', P: 'participle', R: 'imperative participle' }, p: { 1: '1st person', 2: '2nd person', 3: '3rd person' },
+      x: { C: 'comparative', S: 'superlative', P: 'proper name (person)', L: 'proper name (place)', T: 'title', G: 'gentilic', N: 'negative', I: 'interrogative', K: 'crasis', PRI: 'proper, indeclinable', NUI: 'number, indeclinable', OI: 'indeclinable', LI: 'letter', ATT: 'Attic', ABB: 'abbreviated' }, second: 'second ' },
+    hi: { pos: { N: 'संज्ञा', A: 'विशेषण', T: 'उपपद (the)', P: 'पुरुषवाचक सर्वनाम', R: 'सम्बन्धवाचक सर्वनाम', D: 'निश्चयवाचक सर्वनाम', F: 'निजवाचक सर्वनाम', I: 'प्रश्नवाचक सर्वनाम', X: 'अनिश्चयवाचक सर्वनाम', Q: 'सहसम्बन्धी सर्वनाम', K: 'सहसम्बन्धी सर्वनाम', C: 'पारस्परिक सर्वनाम', S: 'स्वामित्ववाचक सर्वनाम', V: 'क्रिया', ADV: 'क्रियाविशेषण', CONJ: 'समुच्चयबोधक', COND: 'शर्तबोधक', PRT: 'अव्यय', PREP: 'पूर्वसर्ग', INJ: 'विस्मयादिबोधक', ARAM: 'अरामी शब्द', HEB: 'इब्रानी शब्द' },
+      c: { N: 'कर्ता', G: 'सम्बन्ध (…का)', D: 'सम्प्रदान (…को)', A: 'कर्म', V: 'सम्बोधन' }, n: { S: 'एकवचन', P: 'बहुवचन' }, g: { M: 'पुल्लिंग', F: 'स्त्रीलिंग', N: 'नपुंसकलिंग' },
+      t: { P: 'वर्तमान', I: 'अपूर्ण भूत', F: 'भविष्यत्', A: 'एओरिस्ट (सामान्य भूत)', R: 'पूर्ण', L: 'पूर्ण भूत' }, v: { A: 'कर्तृवाच्य', M: 'मध्य वाच्य', P: 'कर्मवाच्य', E: 'मध्य/कर्मवाच्य', D: 'मध्य रूप (सक्रिय अर्थ)', O: 'कर्म रूप (सक्रिय अर्थ)', N: 'मध्य/कर्म रूप (सक्रिय अर्थ)', Q: 'भाववाच्य', X: '' },
+      m: { I: 'निश्चयार्थ', S: 'संभावनार्थ', O: 'इच्छार्थ', M: 'आज्ञार्थ', N: 'क्रियार्थक संज्ञा', P: 'कृदन्त', R: 'आज्ञार्थ कृदन्त' }, p: { 1: 'उत्तम पुरुष', 2: 'मध्यम पुरुष', 3: 'अन्य पुरुष' },
+      x: { C: 'तुलनात्मक', S: 'उत्तमावस्था', P: 'व्यक्ति का नाम', L: 'स्थान का नाम', T: 'उपाधि', G: 'जातिवाचक', N: 'निषेधवाचक', I: 'प्रश्नवाचक', K: 'संधि', PRI: 'नाम, अविकारी', NUI: 'संख्या, अविकारी', OI: 'अविकारी', LI: 'अक्षर', ATT: 'अत्तिक रूप', ABB: 'संक्षिप्त' }, second: 'द्वितीय ' } };
+  function gk(rm, lang) {
+    const L = GK[lang === 'en' ? 'en' : 'hi'], p = (rm || '').split('-'), head = p[0], out = [L.pos[head] || head];
+    const cng = s => { const m = /^([NGDAV])([SP])([MFN])?$/.exec(s); return m ? [L.c[m[1]], L.n[m[2]], L.g[m[3]]].filter(Boolean) : null; };
+    let rest = p.slice(1);
+    if (head === 'V') {
+      const m = /^(2?)([PIFARLX])([AMPEDONQX])([ISOMNPR])$/.exec(rest[0] || '');
+      if (m) { out.push((m[1] ? L.second : '') + (L.t[m[2]] || ''), L.v[m[3]], L.m[m[4]]); rest = rest.slice(1); }
+      if (rest[0] && /^\d[SP]$/.test(rest[0])) { out.push(L.p[rest[0][0]], L.n[rest[0][1]]); rest = rest.slice(1); }
+    } else if (head === 'S' && rest[0]) {  // S-1SNSM: possessor person+number, then case/number/gender
+      const m = /^(\d)([SP])(.*)$/.exec(rest[0]); if (m) { out.push(L.p[m[1]], L.n[m[2]]); const c = cng(m[3]); if (c) out.push(...c); rest = rest.slice(1); }
+    } else if (rest[0]) {
+      const m = /^(\d)?(.*)$/.exec(rest[0]), c = cng(m[2]);
+      if (c) { if (m[1]) out.push(L.p[m[1]]); out.push(...c); rest = rest.slice(1); }
+    }
+    for (const r of rest) if (r) { const m = cng(r); if (m) out.push(...m); else if (L.x[r]) out.push(L.x[r]); }
+    return out.filter(Boolean).join(', ');
+  }
+  const isGk = w => /^G\d/.test((w && w[3]) || '');
   function chipL(w, lang) {
+    if (isGk(w)) return { t: w[4] || '', verb: (w[4] || '')[0] === 'V' };
     if (lang !== 'en') return chip(w);
     const lp = (w[3] || '').split('/'), mc = (w[4] || '').slice(1).split('/');
     let li = 0;
     return { t: mc.map(m => abbrEn(m, m[0] === 'S' ? null : lp[li++])).join(' | '), verb: mc.some(m => m[0] === 'V') };
   }
   function partsL(w, lang) {
+    if (isGk(w)) return [{ h: w[0].replace(/[,.·;—]+$/, ''), m: gk(w[4], lang), k: w[3] }];
     const ps = parts(w); if (lang !== 'en') return ps;
     const mc = (w[4] || '').slice(1).split('/'), lp = (w[3] || '').split('/');
     let li = 0;
@@ -132,5 +165,5 @@ const Morph = (() => {
       return q;
     });
   }
-  return { hi, en, parts, chip, chipL, partsL };
+  return { hi, en, parts, chip, chipL, partsL, gk, isGk };
 })();

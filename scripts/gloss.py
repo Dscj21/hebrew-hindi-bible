@@ -48,6 +48,7 @@ def _attach(stem, end):
     if last in 'ेो':  # दे, ले, हो
         if end[0] == 'ू':  # 1cs future/subj: दूँगा, लूँ, होऊँ
             return (stem[:-1] + 'ू' + end[1:]) if last == 'े' else stem + 'ऊ' + end[1:]
+        if last == 'े' and end[0] == 'ो': return stem[:-1] + end  # ले + ोगे -> लोगे
         return stem + end[1:] if end[0] in 'ेो' else stem + end
     if last in VOWEL_SIGNS or last in 'अआइईउऊएओ':
         return stem + IND.get(end[0], end[0]) + end[1:]
@@ -89,6 +90,20 @@ def pron_with_post(pgn, post):
         return POSS.get(pgn, 'उसक') + {'के': 'े', 'की': 'ी', 'का': 'ा'}[post[:2]] + post[2:]
     p, n = pgn[:1], pgn[2:3]
     return ((OBLP if n == 'p' else OBL).get(p, 'उस')) + ' ' + post
+
+
+# Hebrew plurals that are singular in Hindi (water, heavens, face, life, God, compassion, youth, ...)
+PLURALIA = set('430 4325 8064 6440 2416 7356 5271 1818 2465 2896 7307'.split())
+
+
+def plural_f(w, oblique):
+    """Hindi feminine plural: बेटी -> बेटियाँ / बेटियों; बात -> बातें / बातों; माता -> माताएँ / माताओं."""
+    if w.endswith('ी'): return w[:-1] + ('ियों' if oblique else 'ियाँ')
+    if w.endswith('ि'): return w + ('यों' if oblique else 'याँ')
+    if w.endswith('ा'): return w + ('ओं' if oblique else 'एँ')
+    if w.endswith('ू'): return w[:-1] + ('ुओं' if oblique else 'ुएँ')
+    if w[-1] in 'ािीुूेैोौंँ': return None
+    return w + ('ों' if oblique else 'ें')
 
 
 def compose(parts, lexhi, ispropn):
@@ -135,7 +150,11 @@ def compose(parts, lexhi, ispropn):
         g, n = mc[2:3], mc[3:4]
         ws = noun.split(); lw = ws[-1] if ws else ''
         if pos == 'N' and lw: g = hi_gender(lw, lem)  # agreement follows the Hindi noun (मेरी शिक्षा), not Hebrew
-        if (post or n == 'p') and lw and not ispropn(lem) and (lw in OBLIQUE_WORDS or (
+        pl_done = False
+        if pos == 'N' and n == 'p' and lw and not ispropn(lem) and g == 'f' and lem.split(' ')[0] not in PLURALIA and len(ws) == 1:
+            pl = plural_f(lw, bool(post))
+            if pl: ws[-1] = pl; noun = ' '.join(ws); pl_done = True
+        if not pl_done and (post or n == 'p') and lw and not ispropn(lem) and (lw in OBLIQUE_WORDS or (
                 lw.endswith('ा') and not lw.endswith('ना') and g == 'm' and lw not in NO_OBL and not lw.endswith('ता') and len(lw) > 2)):
             ws[-1] = lw[:-1] + 'े'; noun = ' '.join(ws)
         if sp and not ispropn(lem):

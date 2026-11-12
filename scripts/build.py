@@ -218,16 +218,18 @@ if __name__ == '__main__':
             return NAMES[k] or d
     LEXV = LexView()
     idxp = os.path.join(OUT, 'index.json')
-    idx = json.load(open(idxp)) if os.path.exists(idxp) and args[:1] != ['all'] else {'books': []}
+    idx = json.load(open(idxp)) if os.path.exists(idxp) else {'books': []}
+    if args[:1] == ['all']: idx['books'] = [x for x in idx['books'] if x.get('t') == 'nt']  # NT entries come from build_nt.py
     stats = {}
     for bk in books:
         name, nch, st = build_book(bk, chaps, SG, VM, LEX, LEXV)
         stats[bk] = st
         e = next((x for x in idx['books'] if x['id'] == bk), None)
         if not e: e = {'id': bk}; idx['books'].append(e)
-        e.update(name=name, chapters=nch)
+        e.update(name=name, chapters=nch, t='ot')
         print(f"{bk:6} {name:14} ch={nch:3} words={st['words']:6} glossed={st['glossed']/max(1,st['words'])*100:5.1f}%", flush=True)
-    order = list(BOOKS); idx['books'].sort(key=lambda b: order.index(b['id']))
+    order = list(BOOKS); pos0 = {b['id']: i for i, b in enumerate(idx['books'])}
+    idx['books'].sort(key=lambda b: order.index(b['id']) if b['id'] in order else 100 + pos0[b['id']])
     json.dump(idx, open(idxp, 'w', encoding='utf8'), ensure_ascii=False, indent=0)
     if args[:1] == ['all']:
         n, miss = write_lex(SG, LEX)

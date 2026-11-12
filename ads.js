@@ -14,7 +14,8 @@ const Ads = (() => {
           // banner sits just above the bottom navigation bar (60dp); --adh reserves its height in the layout
           try { admob.addListener('bannerAdSizeChanged', s => s && s.height && document.documentElement.style.setProperty('--adh', s.height + 'px')); } catch {}
           await admob.showBanner({ adId: cfg.android.bannerId, adSize: 'ADAPTIVE_BANNER', position: 'BOTTOM_CENTER', margin: 62, isTesting: !!cfg.android.testing });
-          document.body.classList.add('has-native-banner');
+          document.body.classList.add('has-native-banner'); bannerShown = true;
+          if (suspended) try { await admob.hideBanner(); } catch {}
           document.documentElement.style.setProperty('--adh', '56px');
         }
         if (cfg.android.interstitialId && cfg.interstitialEveryChapters > 0)
@@ -49,5 +50,18 @@ const Ads = (() => {
       await admob.prepareInterstitial({ adId: cfg.android.interstitialId, isTesting: !!cfg.android.testing });
     } catch {}
   }
-  return { init, fill, everyVerses, onChapter, ready: () => cfg !== null };
+  // Overlays (bottom sheets, menus): nothing may cover them. Web banner is hidden via body.sheet-open (CSS);
+  // the native AdMob banner floats above the WebView, so it is hidden and resumed explicitly.
+  let suspended = false, bannerShown = false;
+  function suspend() {
+    document.body.classList.add('sheet-open');
+    if (suspended) return; suspended = true;
+    if (admob && bannerShown) try { admob.hideBanner().catch(() => {}); } catch {}
+  }
+  function resume() {
+    document.body.classList.remove('sheet-open');
+    if (!suspended) return; suspended = false;
+    if (admob && bannerShown) try { admob.resumeBanner().catch(() => {}); } catch {}
+  }
+  return { init, fill, everyVerses, onChapter, suspend, resume, ready: () => cfg !== null };
 })();

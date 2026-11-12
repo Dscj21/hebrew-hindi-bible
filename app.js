@@ -10,12 +10,16 @@
   const CAP = window.Capacitor, NATIVE = !!(CAP && CAP.isNativePlatform && CAP.isNativePlatform());
   const PLUG = n => NATIVE && CAP.Plugins && CAP.Plugins[n];
   const GZ = NATIVE ? '' : '.gz'; // Android: aapt stores *.json.gz assets inflated as *.json
-  const GROUP_N = [5, 12, 5, 5, 12];
+  const GROUP_N = [5, 12, 5, 5, 12], GROUP_NT = [4, 1, 13, 8, 1];
   const TABS = ['home', 'read', 'search', 'saved', 'settings'];
   const VOTD = ['Gen/1/1', 'Deut/6/4', 'Josh/1/9', 'Ps/23/1', 'Ps/27/1', 'Ps/46/2', 'Ps/91/1', 'Ps/119/105', 'Prov/3/5', 'Isa/40/31',
     'Isa/41/10', 'Isa/53/5', 'Jer/29/11', 'Lam/3/22', 'Mic/6/8', 'Num/6/24', 'Gen/12/2', 'Exod/14/14', 'Ps/34/9', 'Ps/37/4',
-    'Ps/103/2', 'Ps/139/14', 'Prov/18/10', 'Isa/26/3', 'Isa/43/2', 'Zeph/3/17', 'Hab/3/19', 'Ps/1/1', 'Jer/33/3', 'Isa/9/6'];
+    'Ps/103/2', 'Ps/139/14', 'Prov/18/10', 'Isa/26/3', 'Isa/43/2', 'Zeph/3/17', 'Hab/3/19', 'Ps/1/1', 'Jer/33/3', 'Isa/9/6',
+    'John/3/16', 'Rom/8/28', 'Phil/4/13', 'Matt/11/28', 'John/14/6', 'Rom/12/2', '1Cor/13/4', 'Eph/2/8', 'Heb/11/1', 'Matt/6/33', 'John/1/1', '2Tim/3/16', 'Gal/2/20', '1John/4/8', 'Rev/21/4'];
   const QUICK = [['Gen', 'בְּרֵאשִׁית'], ['Exod', 'שְׁמוֹת'], ['Deut', 'דְּבָרִים'], ['Ps', 'תְּהִלִּים'], ['Prov', 'מִשְׁלֵי'], ['Isa', 'יְשַׁעְיָהוּ'], ['Ruth', 'רוּת'], ['Jonah', 'יוֹנָה']];
+  const QUICK_NT = [['Matt', 'Ματθαῖος'], ['Mark', 'Μᾶρκος'], ['Luke', 'Λουκᾶς'], ['John', 'Ἰωάννης'], ['Acts', 'Πράξεις'], ['Rom', 'Ῥωμαίους'], ['Heb', 'Ἑβραίους'], ['Rev', 'Ἀποκάλυψις']];
+  const isGk = w => /^G\d/.test((w && w[3]) || '');
+  const noAcc = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/ς/g, 'σ');
   const ico = (n, c = '') => `<svg class="ic${c ? ' ' + c : ''}"><use href="#i-${n}"/></svg>`;
 
   // ---------- storage & settings ----------
@@ -93,9 +97,14 @@
     return JSON.parse(await s.text());
   }
   const once = f => { let p = null; return () => p || (p = f().catch(e => { p = null; throw e; })); };
-  let index = null, lex = {}, strongs = null, conc = null, irv = null, numKey = null;
+  let index = null, lex = {}, strongs = null, conc = null, irv = null, numKey = null, strongsG = null, concG = null, irvN = null;
   const loadIndex = once(() => getJSON('data/index.json').then(x => (index = x)));
-  const loadLex = once(() => getJSON('data/lex.json' + GZ).then(x => (lex = x)).catch(() => (lex = {})));
+  const loadLex = once(() => getJSON('data/lex.json' + GZ).then(x => (lex = Object.assign(x, lex))).catch(() => lex));
+  const loadLexG = once(() => getJSON('data/lexg.json' + GZ).then(x => { Object.assign(lex, x); }));
+  const loadStrongsG = once(() => getJSON('data/strongsg.json' + GZ).then(x => (strongsG = x)));
+  const loadConcG = once(() => getJSON('data/concg.json' + GZ).then(x => (concG = x)));
+  const loadIrvN = once(() => getJSON('data/irvn.json' + GZ).then(x => (irvN = x)));
+  const loadIrvAll = () => Promise.all([loadIrv(), loadIrvN()]);
   const loadStrongs = once(() => getJSON('data/strongs.json' + GZ).then(x => (strongs = x)));
   const loadConc = once(() => getJSON('data/conc.json' + GZ).then(x => (conc = x)));
   const loadIrv = once(() => getJSON('data/irv.json' + GZ).then(x => (irv = x)));
@@ -107,12 +116,13 @@
     return chCache.get(k);
   }
   const book = id => index && index.books.find(x => x.id === id);
+  const isNT = id => ((book(id) || {}).t === 'nt');
   const bname = id => (S.books && S.books[id]) || (EN.books && EN.books[id]) || (book(id) || {}).name || id;
   const keyOfNum = n => {
-    if (!numKey) { numKey = {}; for (const k in lex) if (!(lex[k][0] in numKey)) numKey[lex[k][0]] = k; }
+    if (!numKey) { numKey = {}; for (const k in lex) if (k[0] !== 'G' && !(lex[k][0] in numKey)) numKey[lex[k][0]] = k; }
     return numKey[n];
   };
-  const mainLemma = w => (w[3] || '').split('/').filter(x => /^\d/.test(x)).pop();
+  const mainLemma = w => isGk(w) ? w[3] : (w[3] || '').split('/').filter(x => /^\d/.test(x)).pop();
   const hebOf = ws => ws.map(w => strip(w[0]) + (w[5] ? '־' : ' ')).join('').trim();
   const refName = k => { const [b, c, v] = k.split('/'); return `${bname(b)} ${c}${v ? ':' + v : ''}`; };
   const withUrl = (txt, hash) => CFG.shareUrl ? `${txt}\n${CFG.shareUrl}${hash ? '#' + hash : ''}` : txt;
@@ -140,7 +150,7 @@
     sh.addEventListener('click', () => closeTop());
     el.addEventListener('click', e => { if (e.target.closest('[data-x]')) closeTop(); });
     dragDismiss(el, sh);
-    stack.push({ el, sh, onClose });
+    stack.push({ el, sh, onClose }); Ads.suspend();
     history.pushState({ sheet: stack.length }, '');
     return el;
   }
@@ -149,6 +159,7 @@
     o.el.style.transform = 'translateY(105%)'; o.el.classList.remove('drag'); o.sh.classList.remove('in');
     setTimeout(() => { o.el.remove(); o.sh.remove(); }, 380);
     o.onClose && o.onClose();
+    if (!stack.length && $('#menu').hidden) Ads.resume();
     if (!viaPop) { popWaiters++; history.back(); }
   }
   function closeAll() {
@@ -157,6 +168,7 @@
       const o = stack.pop(); o.el.style.transform = 'translateY(105%)'; o.sh.classList.remove('in');
       setTimeout(() => { o.el.remove(); o.sh.remove(); }, 380); o.onClose && o.onClose();
     }
+    if ($('#menu').hidden) Ads.resume();
     popWaiters++;
     return new Promise(r => { popResolve = r; history.go(-n); setTimeout(() => { if (popResolve === r) { popResolve = null; r(); } }, 400); });
   }
@@ -248,7 +260,7 @@
   }
   async function loadChapter(b, c, v) {
     const pg = $('#page'), dir = pendingDir; pendingDir = 0;
-    const dataP = Promise.all([getChapter(b, c), loadLex()]);
+    const dataP = Promise.all([getChapter(b, c), loadLex(), isNT(b) ? loadLexG().catch(() => {}) : null]);
     if (dir) {
       pg.style.transition = 'transform .2s ease-in, opacity .2s ease-in';
       pg.style.transform = `translateX(${dir > 0 ? -100 : 100}%)`; pg.style.opacity = '.2';
@@ -274,6 +286,7 @@
     for (const d of [1, -1]) { const n = neighbour(d); if (n) { const [nb, nc] = n.split('/'); setTimeout(() => getChapter(nb, +nc).catch(() => {}), 600); } }
   }
   function partsOf(w) {
+    if (isGk(w)) return esc(w[0]);
     const tp = w[0].split('/'), mc = (w[4] || '').slice(1).split('/'), lp = (w[3] || '').split('/');
     if (tp.length !== mc.length) return esc(strip(w[0]));
     let li = 0, seenMain = false;
@@ -286,6 +299,10 @@
   }
   const pronOf = p => { let s = p || ''; if (!set.dots) s = s.replace(/·/g, ''); if (!set.split) s = s.replace(/-/g, ''); return s; };
   function wordHTML(w, i, j) {
+    if (isGk(w)) {
+      const L = lex[w[3]], chg = set.chip ? Morph.chipL(w, LANG) : null;
+      return `<div class="w" data-i="${i}" data-j="${j}" role="button" tabindex="0">${chg ? `<span class="chip${chg.verb ? ' v' : ''}">${esc(chg.t)}</span>` : ''}<span class="g">${esc(w[2])}</span><span class="h gk" lang="grc">${esc(w[0])}</span><span class="p">${esc(pronOf(w[1]))}</span>${set.sn ? `<span class="sn">${esc(w[3])}</span>` : ''}${set.root && L && !L[5] ? `<span class="rt gk">${esc(L[1])}</span><span class="rp">${esc(L[2])}</span>` : ''}</div>`;
+    }
     const lems = (w[3] || '').split('/').filter(x => /^\d/.test(x));
     const L = lems.length && lex[lems[lems.length - 1]];
     const sn = lems.map(l => 'H' + parseInt(l)).join(' ');
@@ -303,7 +320,8 @@
     const p = neighbour(-1), n = neighbour(1);
     const lbl = k => esc(bname(k.split('/')[0]) + ' ' + k.split('/')[1]);
     html.push(`<nav class="navbtns"><button data-nav="-1" ${p ? '' : 'disabled'}><small>${ico('chev-l', 'sm')}${esc(t('read.prev'))}</small><b>${p ? lbl(p) : '—'}</b></button><button data-nav="1" ${n ? '' : 'disabled'}><small>${esc(t('read.next'))}${ico('chev-r', 'sm')}</small><b>${n ? lbl(n) : '—'}</b></button></nav>
-<p class="credit">${esc(t('read.credit'))}<br><a href="#" data-act="about">${esc(t('read.sources'))}</a></p>`);
+<p class="credit">${esc(t(data.g ? 'read.creditNT' : 'read.credit'))}<br><a href="#" data-act="about">${esc(t('read.sources'))}</a></p>`);
+    $('#page').classList.toggle('grk', !!data.g);
     $('#page').innerHTML = html.join('');
     Ads.fill(); observeVerses();
   }
@@ -353,15 +371,15 @@
   function partHTML(p) {
     const L = p.k && lex[p.k];
     if (!L) return `<div class="part"><div class="top"><div><div class="mean">${esc(p.g || '—')}</div><div class="role">${esc(p.m)}</div></div><span class="ph">${esc(p.h)}</span></div></div>`;
-    return `<div class="part"><div class="top"><div><div class="mean">${esc(L[3] || '—')}</div><div class="role">${esc(p.m)}</div></div><span class="ph">${esc(p.h)}</span></div>
-<div class="rootl">${esc(t('word.root'))}: <span>${esc(L[1])}</span> · ${esc(L[2])}</div>
-<button class="sbtn" data-sk="${esc(p.k)}">${esc(t('word.view', { n: L[0] }))}${ico('chev-r', 'sm')}</button></div>`;
+    return `<div class="part"><div class="top"><div><div class="mean">${esc(L[3] || '—')}</div><div class="role">${esc(p.m)}</div></div><span class="ph${p.k[0] === 'G' ? ' gk' : ''}">${esc(p.h)}</span></div>
+<div class="rootl">${esc(t(p.k[0] === 'G' ? 'word.lemma' : 'word.root'))}: <span${p.k[0] === 'G' ? ' class="gk" lang="grc"' : ''}>${esc(L[1])}</span> · ${esc(L[2])}</div>
+<button class="sbtn" data-sk="${esc(p.k)}">${esc(t(p.k[0] === 'G' ? 'word.viewG' : 'word.view', { n: L[0] }))}${ico('chev-r', 'sm')}</button></div>`;
   }
   function openWord(el) {
     const w = wordAt(el), v = cur.data.v[+el.dataset.i];
     markSel(el);
     const ch = Morph.chipL(w, LANG);
-    const s = sheet(`<div class="wsh"><div class="g">${esc(w[2])}</div><div class="h">${partsOf(w)}</div><div class="p">${esc(pronOf(w[1]))}</div>
+    const s = sheet(`<div class="wsh"><div class="g">${esc(w[2])}</div><div class="h${isGk(w) ? ' gk' : ''}">${isGk(w) ? esc(w[0].replace(/[,.·;—]+$/, '')) : partsOf(w)}</div><div class="p">${esc(pronOf(w[1]))}</div>
 <span class="chip${ch.verb ? ' v' : ''}">${esc(ch.t)}</span><div class="ref">${esc(bname(cur.b))} ${cur.c}:${v[0]}</div></div>
 ${Morph.partsL(w, LANG).map(partHTML).join('')}<p class="tipline">${esc(t('read.tipDouble'))}</p>`, { onClose: () => markSel(null) });
     s.addEventListener('click', e => { const b = e.target.closest('[data-sk]'); if (b) openStrong(b.dataset.sk); });
@@ -369,7 +387,7 @@ ${Morph.partsL(w, LANG).map(partHTML).join('')}<p class="tipline">${esc(t('read.
 
   // ---------- Strong's & concordance ----------
   const posL = p => { const P = t('pos'), q = p || ''; return (P && (P[q] || P[q.split('-').slice(0, 2).join('-')] || P[q.split('-')[0]])) || q || '—'; };
-  const linkRefs = s => esc(s).replace(/H(\d+)/g, '<a class="lnk" data-sn="$1">H$1</a>');
+  const linkRefs = s => esc(s).replace(/H0*(\d+)/g, '<a class="lnk" data-sn="$1">H$1</a>').replace(/G0*(\d+)/g, '<a class="lnk" data-sn="G$1">G$1</a>');
   function originHi(src) {
     if (!src) return '—';
     const s = src.toLowerCase(), refs = [...new Set(src.match(/H\d+/g) || [])];
@@ -384,51 +402,53 @@ ${Morph.partsL(w, LANG).map(partHTML).join('')}<p class="tipline">${esc(t('read.
     return refs.length ? `${L} से सम्बन्धित` : '—';
   }
   function concRows(k) {
-    const rows = (conc && conc[k]) || [];
+    const C = k[0] === 'G' ? concG : conc, rows = (C && C[k]) || [];
     return rows.map(([g, dl]) => { let acc = 0; return { g, refs: dl.map(d => (acc += d)) }; });
   }
   const fld = (lb, val) => `<div class="fld"><div class="lb">${esc(lb)}</div><div class="val">${val}</div></div>`;
   async function openStrong(k, onClose) {
-    await loadLex();
+    k = String(k); const gk = k[0] === 'G';
+    await loadLex(); if (gk) await loadLexG().catch(() => {});
     if (!lex[k] && /^\d+$/.test(k)) k = keyOfNum(+k) || k;
-    const L = lex[k] || [parseInt(k), '', '', '', ''], num = L[0];
+    const L = lex[k] || [parseInt(k.replace(/\D/g, '')), '', '', '', ''], num = L[0];
+    const CC = () => (gk ? concG : conc), loadC = gk ? loadConcG : loadConc;
     const el = sheet(`<div class="stb"><div class="sthead"><span class="sk" style="width:90px;height:52px"></span><div class="meta"><span class="sk" style="width:140px;height:18px"></span><span class="sk" style="width:90px;height:14px"></span></div></div>
 ${'<span class="sk" style="display:block;height:14px;margin:16px 0"></span>'.repeat(5)}</div>`, {
-      title: esc(t('st.title', { n: num })),
+      title: esc(t(gk ? 'st.titleG' : 'st.title', { n: num })),
       foot: `<button class="btn" data-act="copy">${ico('copy', 'sm')}${esc(t('act.copy'))}</button><button class="btn pri" data-act="conc">${esc(t('act.concordance'))}</button>`, onClose });
     let SG;
-    try { await loadStrongs(); SG = strongs[num] || ['', '', '', '', '', '']; }
+    try { if (gk) { await loadStrongsG(); SG = strongsG[num] || ['', '', '', '', '', '']; } else { await loadStrongs(); SG = strongs[num] || ['', '', '', '', '', '']; } }
     catch { $('.stb', el).innerHTML = `<p class="empty">${esc(t('st.failed'))}</p>`; return; }
     const draw = () => {
       const rows = concRows(k), total = rows.reduce((a, r) => a + r.refs.length, 0);
       const usage = SG[5] ? (SG[5].length > 170 ? SG[5].slice(0, 170).replace(/[,;]?\s*\S*$/, '') + '…' : SG[5]) : '';
-      $('.stb', el).innerHTML = `<div class="sthead"><span class="heb">${esc(L[1])}</span><div class="meta"><span class="tr">${esc(L[2])}<small>${esc(SG[2])}</small></span>
-<div class="pills"><span class="pill">${esc(posL(SG[0]))}</span>${conc ? `<span class="pill n">${nf(total)}×</span>` : ''}</div></div></div>
+      $('.stb', el).innerHTML = `<div class="sthead"><span class="heb${gk ? ' gk' : ''}"${gk ? ' lang="grc"' : ''}>${esc(L[1])}</span><div class="meta"><span class="tr">${esc(L[2])}<small>${esc(SG[2])}</small></span>
+<div class="pills">${gk ? `<span class="pill">${esc(t('st.greek'))}</span>` : ''}<span class="pill">${esc(posL(SG[0]))}</span>${CC() ? `<span class="pill n">${nf(total)}×</span>` : ''}</div></div></div>
 ${fld(t('st.hindi'), `<span class="big">${esc(L[3] || '—')}</span>`)}
 ${fld(t('st.defn'), esc(SG[4] || L[4] || '—'))}
-${fld(t('st.origin'), LANG === 'hi' ? `${originHi(SG[3])}${SG[3] ? `<span class="en">${linkRefs(SG[3])}</span>` : ''}` : (SG[3] ? linkRefs(SG[3]) : '—'))}
+${fld(t('st.origin'), LANG === 'hi' && !gk ? `${originHi(SG[3])}${SG[3] ? `<span class="en">${linkRefs(SG[3])}</span>` : ''}` : (SG[3] ? linkRefs(SG[3]) : '—'))}
 ${fld(t('st.phon'), esc(SG[1] || '—'))}
-${fld(t('st.usage'), `${conc ? esc(t('st.usageN', { n: nf(total) })) : esc(t('st.loadingCount'))}${usage ? `<span class="en">${esc(t('st.kjv'))}: ${esc(usage)}</span>` : ''}`)}
+${fld(t('st.usage'), `${CC() ? esc(t(gk ? 'st.usageNG' : 'st.usageN', { n: nf(total) })) : esc(t('st.loadingCount'))}${usage ? `<span class="en">${esc(t('st.kjv'))}: ${esc(usage)}</span>` : ''}`)}
 ${rows.length ? fld(`${t('st.translated')} (${rows.length})`, `<div class="tags">${rows.slice(0, 24).map((r, i) => `<button class="tag" data-g="${i}">${esc(r.g || '—')}<b>${r.refs.length}</b></button>`).join('')}</div>`) : ''}`;
     };
     draw();
-    if (!conc) loadConc().then(draw).catch(() => {});
+    if (!CC()) loadC().then(draw).catch(() => {});
     el.addEventListener('click', e => {
       const a = e.target.closest('[data-act]'), sn = e.target.closest('[data-sn]'), tg = e.target.closest('[data-g]');
       if (sn) { openStrong(sn.dataset.sn); return; }
       if (tg) { openConc(k, +tg.dataset.g); return; }
       if (!a) return;
       if (a.dataset.act === 'conc') openConc(k, -1);
-      if (a.dataset.act === 'copy') copyText(withUrl(`${t('st.title', { n: num })} — ${L[1]} (${L[2]})\n${t('st.hindi')}: ${L[3]}\n${t('st.pos')}: ${posL(SG[0])}\n${SG[4] || ''}\n— ${t('app')}`));
+      if (a.dataset.act === 'copy') copyText(withUrl(`${t(gk ? 'st.titleG' : 'st.title', { n: num })} — ${L[1]} (${L[2]})\n${t('st.hindi')}: ${L[3]}\n${t('st.pos')}: ${posL(SG[0])}\n${SG[4] || ''}\n— ${t('app')}`));
     });
   }
   const decodeRef = r => { const bi = Math.floor(r / 1e6), c = Math.floor(r / 1000) % 1000, v = r % 1000; return { b: index.books[bi].id, c, v }; };
-  const irvText = (b, c, v) => { const ch = irv && irv[b] && irv[b][c - 1]; const x = ch && ch.find(y => y[0] === v); return x ? x[1] : ''; };
+  const irvText = (b, c, v) => { const src = isNT(b) ? irvN : irv, ch = src && src[b] && src[b][c - 1]; const x = ch && ch.find(y => y[0] === v); return x ? x[1] : ''; };
   async function openConc(k, gi) {
-    const L = lex[k] || [parseInt(k)];
+    const gk = String(k)[0] === 'G', L = lex[k] || [parseInt(String(k).replace(/\D/g, ''))];
     const el = sheet(`<div class="cb">${'<span class="sk" style="display:block;height:44px;margin:12px 0"></span>'.repeat(4)}</div>`,
-      { title: `${esc(t('act.concordance'))} · H${L[0]} <span style="font-family:var(--heb);font-weight:400">${esc(L[1] || '')}</span>` });
-    try { await loadConc(); } catch { $('.cb', el).innerHTML = `<p class="empty">${esc(t('st.failed'))}</p>`; return; }
+      { title: `${esc(t('act.concordance'))} · ${gk ? 'G' : 'H'}${L[0]} <span class="${gk ? 'gk' : ''}" style="font-family:${gk ? '"Noto Serif Greek",serif' : 'var(--heb)'};font-weight:400">${esc(L[1] || '')}</span>` });
+    try { await (gk ? loadConcG() : loadConc()); } catch { $('.cb', el).innerHTML = `<p class="empty">${esc(t('st.failed'))}</p>`; return; }
     const rows = concRows(k);
     let filter = gi, shown = 120;
     const items = () => { const out = []; rows.forEach((r, i) => { if (filter < 0 || filter === i) for (const x of r.refs) out.push([x, r.g]); }); return out.sort((a, b) => a[0] - b[0]); };
@@ -439,7 +459,7 @@ ${it.slice(0, shown).map(([r, g]) => { const x = decodeRef(r); return `<div clas
 ${it.length > shown ? `<button class="btn" data-more style="width:100%;margin-top:12px">${esc(t('act.more', { n: it.length - shown }))}</button>` : ''}`;
     };
     draw();
-    if (!irv) loadIrv().then(draw).catch(() => {});
+    if (gk ? !irvN : !irv) (gk ? loadIrvN() : loadIrv()).then(draw).catch(() => {});
     el.addEventListener('click', e => {
       const f = e.target.closest('[data-f]'), g = e.target.closest('[data-go]');
       if (f) { filter = +f.dataset.f; shown = 120; draw(); }
@@ -452,12 +472,12 @@ ${it.length > shown ? `<button class="btn" data-more style="width:100%;margin-to
   // ---------- verse actions, copy, share ----------
   function verseInfo(i) {
     const [vn, hi, ws] = cur.data.v[i];
-    return { k: `${cur.b}/${cur.c}/${vn}`, heb: hebOf(ws), hi };
+    return { k: `${cur.b}/${cur.c}/${vn}`, heb: hebOf(ws), hi, gk: !!cur.data.g };
   }
   const isFav = k => store.get('fav', []).some(x => x.k === k);
   function toggleFav(info) {
     let f = store.get('fav', []); const has = f.some(x => x.k === info.k);
-    f = has ? f.filter(x => x.k !== info.k) : [{ k: info.k, heb: info.heb, hi: info.hi, t: Date.now() }, ...f];
+    f = has ? f.filter(x => x.k !== info.k) : [{ k: info.k, heb: info.heb, hi: info.hi, gk: !!info.gk, t: Date.now() }, ...f];
     store.set('fav', f); toast(t(has ? 'verse.favRemoved' : 'verse.favAdded')); buzz();
     return !has;
   }
@@ -502,7 +522,8 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('cop
   }
   async function drawCard(info) {
     const ref = refName(info.k), UI = '"Inter", "Noto Sans Devanagari", sans-serif';
-    try { await Promise.all([document.fonts.load('56px "Noto Serif Hebrew"', info.heb), document.fonts.load('500 44px "Noto Sans Devanagari"', (info.hi || '') + ref), document.fonts.load('600 30px "Inter"', 'A')]); } catch {}
+    const gk = info.gk || isNT(info.k.split('/')[0]), HF = gk ? '"Noto Serif Greek", "Noto Serif", serif' : '"Noto Serif Hebrew", serif';
+    try { await Promise.all([document.fonts.load(`56px ${gk ? '"Noto Serif Greek"' : '"Noto Serif Hebrew"'}`, info.heb), document.fonts.load('500 44px "Noto Sans Devanagari"', (info.hi || '') + ref), document.fonts.load('600 30px "Inter"', 'A')]); } catch {}
     const W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     const x = cv.getContext('2d');
     x.fillStyle = '#0d0d12'; x.fillRect(0, 0, W, H);
@@ -512,17 +533,17 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('cop
     x.fillStyle = rg2; x.fillRect(0, 0, W, H);
     // header
     x.fillStyle = '#6366f1'; x.beginPath(); if (x.roundRect) x.roundRect(90, 90, 64, 64, 18); else x.rect(90, 90, 64, 64); x.fill();
-    x.fillStyle = '#fff'; x.font = '700 38px "Noto Serif Hebrew", serif'; x.textAlign = 'center'; x.fillText('א', 122, 136);
+    x.fillStyle = '#fff'; x.font = `700 38px ${HF}`; x.textAlign = 'center'; x.fillText(gk ? 'Ω' : 'א', 122, 136);
     x.textAlign = 'left'; x.font = `600 30px ${UI}`; x.fillStyle = 'rgba(255,255,255,.92)'; x.fillText(t('app'), 176, 133);
     // measure body
     const maxW = W - 180;
-    const hb = fit(x, info.heb, '{s}px "Noto Serif Hebrew", serif', 66, 32, maxW, 440, 1.55);
+    const hb = fit(x, info.heb, `{s}px ${HF}`, gk ? 58 : 66, 30, maxW, 440, 1.55);
     const hh = fit(x, info.hi || '', `400 {s}px ${UI}`, 46, 26, maxW, 440, 1.6);
     const hH = hb.lines.length * hb.s * 1.55, hhH = hh.lines.length * hh.s * 1.6, gap = 70, refH = 60;
     const total = hH + gap + hhH + 50 + refH, top = 200, bottom = H - 200;
     let y = top + Math.max(0, (bottom - top - total) / 2);
-    x.font = `${hb.s}px "Noto Serif Hebrew", serif`; x.fillStyle = '#ffffff'; x.textAlign = 'right'; x.direction = 'rtl';
-    for (const l of hb.lines) { y += hb.s * 1.2; x.fillText(l, W - 90, y); y += hb.s * .35; }
+    x.font = `${hb.s}px ${HF}`; x.fillStyle = '#ffffff'; x.textAlign = gk ? 'left' : 'right'; x.direction = gk ? 'ltr' : 'rtl';
+    for (const l of hb.lines) { y += hb.s * 1.2; x.fillText(l, gk ? 90 : W - 90, y); y += hb.s * .35; }
     x.direction = 'ltr'; x.textAlign = 'left';
     y += gap / 2; x.fillStyle = '#818cf8'; x.fillRect(90, y - 3, 72, 5); y += gap / 2;
     x.font = `400 ${hh.s}px ${UI}`; x.fillStyle = 'rgba(255,255,255,.88)';
@@ -530,7 +551,7 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('cop
     y += 50; x.font = `600 38px ${UI}`; x.fillStyle = '#a5b4fc'; x.fillText(ref, 90, y + 30);
     // footer
     x.fillStyle = 'rgba(255,255,255,.1)'; x.fillRect(90, H - 150, W - 180, 2);
-    x.font = `500 28px ${UI}`; x.fillStyle = 'rgba(255,255,255,.65)'; x.fillText(t('card.footer'), 90, H - 92);
+    x.font = `500 28px ${UI}`; x.fillStyle = 'rgba(255,255,255,.65)'; x.fillText(t(gk ? 'card.footerNT' : 'card.footer'), 90, H - 92);
     if (CFG.shareUrl) { x.textAlign = 'right'; x.fillStyle = 'rgba(255,255,255,.5)'; x.fillText(CFG.shareUrl.replace(/^https?:\/\//, '').replace(/\/$/, ''), W - 90, H - 92); x.textAlign = 'left'; }
     return cv;
   }
@@ -567,15 +588,18 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('cop
   async function openPicker(step) {
     await loadIndex();
     const st = { b: cur ? cur.b : 'Gen', c: cur ? cur.c : 1 };
+    st.t = isNT(st.b) ? 'nt' : 'ot';
     const el = sheet('<div class="picker"></div>', { cls: 'pk' });
-    const box = $('.picker', el), groups = t('picker.groups');
+    const box = $('.picker', el);
     const books = () => {
-      box.innerHTML = `${shh(esc(t('picker.books')))}<div class="sbox" style="margin:0 0 4px">${ico('search', 'sm')}<input id="pkq" placeholder="${esc(t('picker.find'))}" autocomplete="off"></div><div class="pkl"></div>`;
+      box.innerHTML = `${shh(esc(t('picker.books')))}<div class="tswitch" role="tablist">${['ot', 'nt'].map(x => `<button data-tt="${x}" role="tab" aria-selected="${st.t === x}" class="${st.t === x ? 'on' : ''}">${esc(t('picker.' + x))}</button>`).join('')}</div><div class="sbox" style="margin:0 0 4px">${ico('search', 'sm')}<input id="pkq" placeholder="${esc(t('picker.find'))}" autocomplete="off"></div><div class="pkl"></div>`;
       const list = () => {
         let i = 0; const v = $('#pkq', box).value.trim().toLowerCase();
         const match = b => !v || bname(b.id).toLowerCase().includes(v) || b.name.includes(v) || (EN.books[b.id] || '').toLowerCase().includes(v) || b.id.toLowerCase().startsWith(v);
-        $('.pkl', box).innerHTML = GROUP_N.map((n, gi) => { const bs = index.books.slice(i, i += n).filter(match);
-          return bs.length ? `<div class="pkgroup">${esc(groups[gi])}</div><div class="blist">${bs.map(b => `<button data-b="${b.id}" class="${b.id === st.b ? 'cur' : ''}"><span>${esc(bname(b.id))}</span><small>${b.chapters}</small></button>`).join('')}</div>` : ''; }).join('');
+        const tests = v ? ['ot', 'nt'] : [st.t];
+        $('.pkl', box).innerHTML = tests.map(tt => { const list0 = index.books.filter(b => (b.t || 'ot') === tt), groups = t(tt === 'nt' ? 'picker.groupsNT' : 'picker.groups'); i = 0;
+          return (tt === 'nt' ? GROUP_NT : GROUP_N).map((n, gi) => { const bs = list0.slice(i, i += n).filter(match);
+          return bs.length ? `<div class="pkgroup">${esc(groups[gi])}</div><div class="blist">${bs.map(b => `<button data-b="${b.id}" class="${b.id === st.b ? 'cur' : ''}"><span>${esc(bname(b.id))}</span><small>${b.chapters}</small></button>`).join('')}</div>` : ''; }).join(''); }).join('');
       };
       list(); $('#pkq', box).oninput = list;
     };
@@ -594,6 +618,7 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('cop
     (step === 'books' ? books : chapters)();
     box.addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b || b.hasAttribute('data-x')) return;
+      if (b.dataset.tt) { st.t = b.dataset.tt; buzz(); books(); return; }
       if (b.dataset.step === 'books') books();
       else if (b.dataset.step === 'chapters') chapters();
       else if (b.dataset.b) { st.b = b.dataset.b; buzz(); chapters(); }
@@ -687,8 +712,9 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('cop
   });
   const MENU = [['settings', 'settings'], ['faq', 'help'], ['new', 'sparkle'], ['share', 'share'], ['rate', 'star'], ['about', 'info']];
   const drawMenu = () => { $('#menu').innerHTML = MENU.map(([k, i]) => `<button data-m="${k}">${ico(i)}<span>${esc(t('menu.' + k))}</span></button>`).join(''); };
-  $('#btnMenu').onclick = e => { e.stopPropagation(); drawMenu(); $('#menu').hidden = !$('#menu').hidden; };
-  document.addEventListener('click', e => { if (!e.target.closest('#menu')) $('#menu').hidden = true; });
+  const menuShow = on => { $('#menu').hidden = !on; if (on) Ads.suspend(); else if (!stack.length) Ads.resume(); };
+  $('#btnMenu').onclick = e => { e.stopPropagation(); drawMenu(); menuShow($('#menu').hidden); };
+  document.addEventListener('click', e => { if (!e.target.closest('#menu') && !$('#menu').hidden) menuShow(false); });
   const shareApp = () => shareText(`${t('app')} — ${t('tagline')}`, CFG.shareUrl || CFG.playStoreUrl || '');
   const rateApp = () => {
     if (CFG.playStoreUrl) window.open(CFG.playStoreUrl, '_blank', 'noopener');
@@ -696,7 +722,7 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('cop
     else toast(t('toast.soon'));
   };
   $('#menu').addEventListener('click', e => {
-    const m = e.target.closest('[data-m]'); if (!m) return; $('#menu').hidden = true;
+    const m = e.target.closest('[data-m]'); if (!m) return; menuShow(false);
     ({ settings: () => (location.hash = 'settings'), faq: openFAQ, new: openNew, about: openAbout, share: shareApp, rate: rateApp }[m.dataset.m] || (() => {}))();
   });
   // Aa: quick display sheet
@@ -725,14 +751,14 @@ ${listItem('heart', t('bm.favs'), 'fav')}${listItem('clock', t('bm.hist'), 'hist
     });
   };
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { if (stack.length) closeTop(); $('#menu').hidden = true; return; }
+    if (e.key === 'Escape') { if (stack.length) closeTop(); if (!$('#menu').hidden) menuShow(false); return; }
     if (stack.length || view !== 'read' || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
     if (e.key === 'ArrowRight') go(1); if (e.key === 'ArrowLeft') go(-1);
   });
 
   // ---------- info sheets ----------
   function openAbout() {
-    sheet(`<div class="about"><p>${esc(t('about.body', { app: t('app') }))}</p><p class="s">${esc(t('about.heb'))}</p><p class="s">${esc(t('about.lex'))}</p><p class="s">${esc(t('about.irv'))}</p>
+    sheet(`<div class="about"><p>${esc(t('about.body', { app: t('app') }))}</p><p class="s">${esc(t('about.heb'))}</p><p class="s">${esc(t('about.lex'))}</p><p class="s">${esc(t('about.gnt'))}</p><p class="s">${esc(t('about.irv'))}</p>
 <p class="s">${esc(t('about.ours'))}</p><p class="s">${esc(t('about.fonts'))}</p><p class="s">${esc(t('set.version', { v: CFG.version }))}</p></div>`, { title: esc(t('about.title')) });
   }
   const gestureHTML = () => `<div class="group">${t('g').map(([a, b]) => `<div class="row"><span class="lb">${esc(a)}<small>${esc(b)}</small></span></div>`).join('')}</div>`;
@@ -761,20 +787,22 @@ ${listItem('heart', t('bm.favs'), 'fav')}${listItem('clock', t('bm.hist'), 'hist
     const started = !!store.get('hist', []).length;
     const vk = VOTD[Math.floor(Date.now() / 864e5) % VOTD.length];
     const n = streak(), favN = store.get('fav', []).length, bmN = store.get('bm', []).length;
-    const qb = QUICK.find(q => q[0] === lb);
+    const qb = QUICK.find(q => q[0] === lb) || QUICK_NT.find(q => q[0] === lb), lbg = isNT(lb);
+    const ht = store.get('homeT', lbg ? 'nt' : 'ot'), QL = ht === 'nt' ? QUICK_NT : QUICK, vgk = isNT(vk.split('/')[0]);
     const el = $('#v-home');
     el.innerHTML = `<header class="hhead"><div><div class="over">${esc(greet())}</div><h1>${esc(t('app'))}</h1></div>
 <button class="streak${n ? ' on' : ''}" data-act="streak" aria-label="${esc(t('home.streak', { n }))}">${ico('flame')}${n}</button></header>
 <article class="votd"><div class="lbl">${ico('sparkle')}${esc(t('home.votd'))}</div>
 <div class="sk-votd"><span class="sk" style="display:block;height:28px;margin-top:16px"></span><span class="sk" style="display:block;height:28px;width:75%;margin-left:auto"></span><span class="sk" style="display:block;height:16px;margin-top:18px"></span><span class="sk" style="display:block;height:16px;width:60%"></span></div>
-<div class="hh" hidden></div><div class="ht" hidden></div><div class="hr">${esc(refName(vk))}</div>
+<div class="hh${vgk ? ' gk' : ''}" ${vgk ? 'lang="grc" ' : ''}hidden></div><div class="ht" hidden></div><div class="hr">${esc(refName(vk))}</div>
 <div class="vrow"><button class="btn pri" data-go="${vk}">${esc(t('act.read'))}</button><span class="sp"></span>
 <button class="icbtn" data-act="vfav" aria-label="${esc(t('act.save'))}">${ico('heart')}</button><button class="icbtn" data-act="vcard" aria-label="${esc(t('act.share'))}">${ico('share')}</button></div></article>
 <section class="section"><div class="stitle"><h2>${esc(t(started ? 'home.cont' : 'home.start'))}</h2></div>
-<button class="card cont" data-go="${last}"><span class="bk">${esc(qb ? qb[1].normalize('NFD').replace(/[\u0591-\u05C7]/g, '')[0] : 'א')}</span><span class="m"><small>${esc(bname(lb))}</small><b>${esc(refName(last))}</b>
+<button class="card cont" data-go="${last}"><span class="bk${lbg ? ' gk' : ''}">${esc(qb ? qb[1].normalize('NFD').replace(/[\u0591-\u05C7\u0300-\u036f]/g, '')[0] : (lbg ? 'Ω' : 'א'))}</span><span class="m"><small>${esc(bname(lb))}</small><b>${esc(refName(last))}</b>
 <span class="bar"><i style="width:${Math.max(4, Math.round(+lc / lbk.chapters * 100))}%"></i></span><small style="display:block;margin-top:6px">${esc(t('home.chapterOf', { c: lc, n: lbk.chapters }))}</small></span>${ico('chev-r')}</button></section>
 <section class="section"><div class="stitle"><h2>${esc(t('home.books'))}</h2><button data-act="books">${esc(t('home.seeAll'))}</button></div>
-<div class="hscroll">${QUICK.map(([id, h]) => { const b = book(id); return `<button class="btile" data-go="${id}/1"><div class="hn">${esc(h)}</div><b>${esc(bname(id))}</b><small>${esc(t('picker.chapters'))} · ${b ? b.chapters : ''}</small></button>`; }).join('')}</div></section>
+<div class="tswitch" role="tablist" aria-label="${esc(t('home.testament'))}">${['ot', 'nt'].map(x => `<button data-act="t-${x}" role="tab" aria-selected="${ht === x}" class="${ht === x ? 'on' : ''}">${esc(t('picker.' + x))}</button>`).join('')}</div>
+<div class="hscroll">${QL.map(([id, h]) => { const b = book(id); return `<button class="btile" data-go="${id}/1"><div class="hn${ht === 'nt' ? ' gk' : ''}"${ht === 'nt' ? ' lang="grc"' : ''}>${esc(h)}</div><b>${esc(bname(id))}</b><small>${esc(t('picker.chapters'))} · ${b ? b.chapters : ''}</small></button>`; }).join('')}</div></section>
 <section class="section"><div class="card" style="cursor:default"><div class="rowcard"><span class="ib" style="background:#fff1e6;color:#ea580c">${ico('flame')}</span><span class="m"><b>${esc(n > 1 ? t('home.streak', { n }) : n === 1 ? t('home.streak1') : t('home.streak0'))}</b></span></div><div class="week">${weekHTML()}</div></div></section>
 <section class="section"><div class="stitle"><h2>${esc(t('home.explore'))}</h2></div><div class="grid2">
 <button class="qt" data-act="lexi"><span class="ib">${ico('alpha')}</span><b>${esc(t('home.lexicon'))}</b><small>${esc(t('home.lexiconSub', { n: nf(Object.keys(lex).length || 8674) }))}</small></button>
@@ -788,7 +816,7 @@ ${CFG.youtubeUrl ? `<button class="qt" data-act="yt" style="grid-column:1/-1"><s
       if (view !== 'home') return;
       const hh = $('.hh', el), ht = $('.ht', el);
       hh.textContent = hebOf(v[2]); ht.textContent = v[1]; hh.hidden = ht.hidden = false; $('.sk-votd', el).remove();
-      el._votd = { k: vk, heb: hebOf(v[2]), hi: v[1] };
+      el._votd = { k: vk, heb: hebOf(v[2]), hi: v[1], gk: vgk };
       if (isFav(vk)) $('[data-act=vfav]', el).classList.add('on');
     } catch { const s = $('.sk-votd', el); s && s.remove(); }
   }
@@ -799,6 +827,7 @@ ${CFG.youtubeUrl ? `<button class="qt" data-act="yt" style="grid-column:1/-1"><s
     else {
       const a = b.dataset.act, vo = $('#v-home')._votd;
       if (a === 'books') openPicker('books');
+      if (a === 't-ot' || a === 't-nt') { store.set('homeT', a.slice(2)); const y = scrollY; renderHome(); scrollTo(0, y); }
       if (a === 'lexi') { setMode('strong'); location.hash = 'search'; setTimeout(() => $('#q').focus(), 80); }
       if (a === 'shareapp') shareApp();
       if (a === 'learn') openFAQ();
@@ -829,7 +858,7 @@ ${CFG.youtubeUrl ? `<button class="qt" data-act="yt" style="grid-column:1/-1"><s
   }
   function renderSearchEmpty() {
     const rq = store.get('recentQ', []);
-    const ex = LANG === 'hi' ? ['उत्पत्ति 37:35', 'भजन 23', 'H430', 'चरवाहा', 'शान्ति', 'שָׁלוֹם'] : ['Genesis 37:35', 'Psalm 23', 'H430', 'shepherd', 'शान्ति', 'שָׁלוֹם'];
+    const ex = LANG === 'hi' ? ['उत्पत्ति 37:35', 'यूहन्ना 3:16', 'H430', 'G26', 'चरवाहा', 'שָׁלוֹם', 'λόγος'] : ['Genesis 37:35', 'John 3:16', 'H430', 'G26', 'shepherd', 'שָׁלוֹם', 'λόγος'];
     $('#sres').innerHTML = `<div class="sec">${esc(t('search.examples'))}</div><div class="tags">${ex.map(x => `<button class="tag" data-q="${esc(x)}">${esc(x)}</button>`).join('')}</div>
 ${rq.length ? `<div class="sec">${esc(t('search.recent'))}</div><div class="tags">${rq.map(x => `<button class="tag" data-q="${esc(x)}">${ico('clock', 'sm')} ${esc(x)}</button>`).join('')}</div>` : ''}
 <div class="sec"></div><div class="card" style="cursor:default;color:var(--ink2);font-size:14.5px;line-height:1.6;display:flex;gap:12px">${ico('info')}<span>${esc(t('search.tips'))}</span></div>`;
@@ -843,36 +872,37 @@ ${rq.length ? `<div class="sec">${esc(t('search.recent'))}</div><div class="tags
   async function doSearch() {
     const q = $('#q').value.trim(), out = $('#sres');
     if (!q) { renderSearchEmpty(); return; }
-    await loadIndex(); await loadLex();
-    const parts = [], m = sMode, isNum = /^[hH]?\s*\d{1,4}$/.test(q), isHeb = /[\u0590-\u05FF]/.test(q), isLat = /^[a-z ]{3,}$/i.test(q);
+    await loadIndex(); await loadLex(); await loadLexG().catch(() => {});
+    const parts = [], m = sMode, isNum = /^[hHgG]?\s*\d{1,4}$/.test(q), isG = /^[gG]/.test(q), isHeb = /[\u0590-\u05FF]/.test(q), isGrk = /[\u0370-\u03FF\u1F00-\u1FFF]/.test(q), isLat = /^[a-z ]{3,}$/i.test(q);
     const ref = parseRef(q);
     if (m === 'all' || m === 'ref') {
       if (ref) { const k = `${ref.b}/${ref.c}${ref.v ? '/' + ref.v : ''}`; parts.push(`<div class="sec">${esc(t('search.refRes'))}</div><button class="card" data-go="${k}"><div class="rowcard"><span class="ib">${ico('book')}</span><span class="m"><b>${esc(t('search.openRef', { r: refName(k) }))}</b></span>${ico('chev-r')}</div></button>`); }
       else if (m === 'ref') parts.push(`<p class="empty">${esc(t('search.noRef'))}</p>`);
     }
     if (m === 'all' || m === 'strong') {
-      const ql = q.toLowerCase(), hq = noNiq(q); let hits = [];
-      if (isNum) { const n = +q.replace(/\D/g, ''); hits = Object.keys(lex).filter(k => lex[k][0] === n); }
-      else if (q.length >= 2 || isHeb) {
+      const ql = q.toLowerCase(), hq = noNiq(q), gq = noAcc(q); let hits = [];
+      if (isNum) { const n = +q.replace(/\D/g, ''); hits = Object.keys(lex).filter(k => lex[k][0] === n && (k[0] === 'G') === isG); }
+      else if (q.length >= 2 || isHeb || isGrk) {
         for (const k in lex) {
           const L = lex[k];
-          if ((L[3] && L[3].includes(q)) || (isHeb && noNiq(L[1]).includes(hq)) || (isLat && (L[4] || '').toLowerCase().includes(ql))) hits.push(k);
+          if ((L[3] && L[3].includes(q)) || (isHeb && noNiq(L[1]).includes(hq)) || (isGrk && k[0] === 'G' && noAcc(L[1]).includes(gq)) || (isLat && (L[4] || '').toLowerCase().includes(ql))) hits.push(k);
         }
         const score = k => { const h = lex[k][3] || '', e = (lex[k][4] || '').toLowerCase(), first = h.split(/[;,]/)[0].trim();
-          return (first === q || noNiq(lex[k][1]) === hq || e.split(/[;,]/)[0].trim() === ql) ? 0 : (h.startsWith(q) || e.startsWith(ql)) ? 1 : 2; };
+          return (first === q || noNiq(lex[k][1]) === hq || (isGrk && noAcc(lex[k][1]) === gq) || e.split(/[;,]/)[0].trim() === ql) ? 0 : (h.startsWith(q) || e.startsWith(ql)) ? 1 : 2; };
         hits.sort((a, b) => score(a) - score(b) || ((conc && conc[b] ? 1 : 0) - (conc && conc[a] ? 1 : 0)));
       }
       if (hits.length) parts.push(`<div class="sec">${esc(t('search.lexRes', { n: hits.length }))}</div>${hits.slice(0, m === 'strong' ? 100 : 12).map(k => { const L = lex[k];
-        return `<button class="card" data-sk="${esc(k)}"><div class="lexrow"><span class="heb">${esc(L[1])}</span><span class="m"><b>${esc(L[3] || L[4])}</b><div class="x">H${L[0]} · ${esc(L[2])}${LANG === 'en' && L[4] ? ' · ' + esc(L[4]) : ''}</div></span>${ico('chev-r')}</div></button>`; }).join('')}`);
+        const g = k[0] === 'G';
+        return `<button class="card" data-sk="${esc(k)}"><div class="lexrow"><span class="heb${g ? ' gk' : ''}">${esc(L[1])}</span><span class="m"><b>${esc(L[3] || L[4])}</b><div class="x">${g ? 'G' : 'H'}${L[0]} · ${esc(L[2])}${LANG === 'en' && L[4] ? ' · ' + esc(L[4]) : ''}</div></span>${ico('chev-r')}</div></button>`; }).join('')}`);
       else if (m === 'strong') parts.push(`<p class="empty">${esc(t('search.none'))}</p>`);
     }
-    const wantV = (m === 'all' || m === 'word') && q.length >= 2 && !isNum && !isHeb && !ref && !isLat;
+    const wantV = (m === 'all' || m === 'word') && q.length >= 2 && !isNum && !isHeb && !isGrk && !ref && !isLat;
     out.innerHTML = parts.join('') + (wantV ? `<div class="sec">${esc(t('search.verses'))}</div><div id="vres">${'<span class="sk" style="display:block;height:72px;border-radius:18px;margin-bottom:10px"></span>'.repeat(3)}</div>` : '') + (!parts.length && !wantV ? `<p class="empty">${esc(t('search.none'))}</p>` : '');
     if (!wantV) return;
-    try { await loadIrv(); } catch { $('#vres') && ($('#vres').innerHTML = `<p class="empty">${esc(t('search.idxFail'))}</p>`); return; }
+    try { await loadIrvAll(); } catch { $('#vres') && ($('#vres').innerHTML = `<p class="empty">${esc(t('search.idxFail'))}</p>`); return; }
     if ($('#q').value.trim() !== q) return;
     const res = []; let n = 0;
-    for (const b of index.books) (irv[b.id] || []).forEach((ch, ci) => { for (const [vn, x] of ch) if (x && x.includes(q)) { n++; if (res.length < 200) res.push([b.id, ci + 1, vn, x]); } });
+    for (const b of index.books) (((b.t === 'nt' ? irvN : irv) || {})[b.id] || []).forEach((ch, ci) => { for (const [vn, x] of ch) if (x && x.includes(q)) { n++; if (res.length < 200) res.push([b.id, ci + 1, vn, x]); } });
     const hl = x => esc(x).split(esc(q)).join(`<mark>${esc(q)}</mark>`);
     const vr = $('#vres'); if (!vr) return;
     vr.innerHTML = n ? `<p style="color:var(--mute);font-size:13px;margin:0 4px 10px">${esc(t('search.found', { n: nf(n) }))}${n > 200 ? esc(t('search.first200')) : ''}</p>${res.map(([b, c, v, x]) => `<button class="card" data-go="${b}/${c}/${v}"><div class="r">${esc(bname(b))} ${c}:${v}</div><div class="t">${hl(x)}</div></button>`).join('')}` : `<p class="empty">${esc(t('search.noVerses'))}</p>`;
@@ -887,7 +917,7 @@ ${rq.length ? `<div class="sec">${esc(t('search.recent'))}</div><div class="tags
     const when = x => new Date(x).toLocaleDateString(LANG === 'hi' ? 'hi-IN-u-nu-latn' : 'en-GB', { day: 'numeric', month: 'short' });
     if (!list.length) { L.innerHTML = `<div class="empty">${ico({ fav: 'heart', bm: 'bookmark', hist: 'clock' }[savedMode], 'lg')}<p>${esc(t({ fav: 'saved.emptyFav', bm: 'saved.emptyBm', hist: 'saved.emptyHist' }[savedMode]))}</p></div>`; return; }
     L.innerHTML = (savedMode === 'hist' ? `<div style="text-align:right;margin-bottom:8px"><button class="tag" data-clear>${esc(t('saved.clearHist'))}</button></div>` : '') + list.map((x, i) => savedMode === 'fav'
-      ? `<div class="card" data-go="${x.k}"><div class="r">${esc(refName(x.k))}</div><div class="hb">${esc(x.heb)}</div><div class="t">${esc(x.hi)}</div>
+      ? `<div class="card" data-go="${x.k}"><div class="r">${esc(refName(x.k))}</div><div class="hb${x.gk || isNT(x.k.split('/')[0]) ? ' gk' : ''}">${esc(x.heb)}</div><div class="t">${esc(x.hi)}</div>
 <div class="acts2"><button data-card="${i}">${ico('image')}${esc(t('act.card'))}</button><button data-copy="${i}">${ico('copy')}${esc(t('act.copy'))}</button><button data-del="${i}">${ico('x')}${esc(t('act.remove'))}</button></div></div>`
       : `<div class="card" data-go="${x.k}"><div class="rowcard"><span class="ib">${ico(savedMode === 'bm' ? 'bookmark' : 'book')}</span><span class="m"><b>${esc(refName(x.k))}</b><small>${when(x.t)}</small></span>${savedMode === 'bm' ? `<button class="icbtn" data-del="${i}" aria-label="${esc(t('act.remove'))}">${ico('x', 'sm')}</button>` : ico('chev-r')}</div></div>`).join('');
   }
@@ -951,7 +981,7 @@ ${CFG.youtubeUrl ? `<div class="gt">${esc(t('set.follow'))}</div><div class="gro
   }
 
   // ---------- boot ----------
-  window.addEventListener('hashchange', () => { $('#menu').hidden = true; route(); });
+  window.addEventListener('hashchange', () => { if (!$('#menu').hidden) menuShow(false); route(); });
   if (!location.hash) history.replaceState(null, '', '#home');
   (async () => {
     try { CFG = Object.assign(CFG, await (await fetch('app.json')).json()); } catch {}
