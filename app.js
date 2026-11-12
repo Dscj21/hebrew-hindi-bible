@@ -1,4 +1,4 @@
-// Hebrew–Hindi Bible v3 — app shell. i18n (locales/*.json, English default), tabs, interlinear reader, sheets,
+// Hebrew Greek Hindi Bible — app shell. i18n (locales/*.json, English default), tabs, interlinear reader, sheets,
 // gestures (swipe chapters, pull-down picker, long-press verse, pinch text size, double-tap Strong's, swipe-down sheets),
 // Strong's + concordance, search, saved, share cards, streak. No libraries. Links (share/YouTube/store) come from app.json.
 (() => {
@@ -68,7 +68,7 @@
     $$('[data-i18n-ph]', root).forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
     $$('[data-i18n-aria]', root).forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
     const q = $('#q'); if (q) q.placeholder = t('search.ph');
-    document.title = t('app');
+    document.title = t('brand');
   }
   const nf = n => Number(n).toLocaleString(LANG === 'hi' ? 'en-IN' : 'en-US');
 
@@ -271,7 +271,7 @@
     catch { pg.style.transform = pg.style.opacity = ''; pg.innerHTML = `<p class="empty">${esc(t('read.failed'))}</p>`; return; }
     cur = { b, c, data }; curV = v || 1;
     render();
-    document.title = `${bname(b)} ${c} — ${t('app')}`;
+    document.title = `${bname(b)} ${c} — ${t('brand')}`;
     quietScroll = Date.now() + 500;
     if (v) scrollToVerse(v, !dir); else window.scrollTo(0, 0);
     if (dir) {
@@ -551,7 +551,7 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('wa'
     const M = 90, top0 = tall ? 260 : 90;
     x.fillStyle = '#6366f1'; x.beginPath(); if (x.roundRect) x.roundRect(M, top0, 64, 64, 18); else x.rect(M, top0, 64, 64); x.fill();
     x.fillStyle = '#fff'; x.font = `700 38px ${HF}`; x.textAlign = 'center'; x.fillText(gk ? 'Ω' : 'א', M + 32, top0 + 46);
-    x.textAlign = 'left'; x.font = `600 30px ${UI}`; x.fillStyle = 'rgba(255,255,255,.92)'; x.fillText(t('app'), M + 86, top0 + 43);
+    x.textAlign = 'left'; x.font = `600 30px ${UI}`; x.fillStyle = 'rgba(255,255,255,.92)'; x.fillText(t('brand'), M + 86, top0 + 43);
     const maxW = W - 2 * M, top = top0 + 120, bottom = H - (tall ? 330 : 170), avail = bottom - top;
     const hb = fit(x, info.heb, `{s}px ${HF}`, tall ? 70 : gk ? 58 : 66, 28, maxW, avail * (sq ? .42 : .46), 1.55);
     const hh = fit(x, info.hi || '', `500 {s}px ${UI}`, tall ? 52 : 46, 24, maxW, avail * (sq ? .40 : .42), 1.6);
@@ -813,7 +813,7 @@ ${listItem('heart', t('bm.favs'), 'fav')}${listItem('clock', t('bm.hist'), 'hist
     const qb = QUICK.find(q => q[0] === lb) || QUICK_NT.find(q => q[0] === lb), lbg = isNT(lb);
     const ht = store.get('homeT', lbg ? 'nt' : 'ot'), QL = ht === 'nt' ? QUICK_NT : QUICK, vgk = isNT(vk.split('/')[0]);
     const el = $('#v-home');
-    el.innerHTML = `<header class="hhead"><div><div class="over">${esc(greet())}</div><h1>${esc(t('app'))}</h1></div>
+    el.innerHTML = `<header class="hhead"><div><div class="over">${esc(greet())}</div><h1>${esc(t('brand'))}</h1></div>
 <button class="streak${n ? ' on' : ''}" data-act="streak" aria-label="${esc(t('home.streak', { n }))}">${ico('flame')}${n}</button></header>
 <article class="votd"><div class="lbl">${ico('sparkle')}${esc(t('home.votd'))}</div>
 <div class="sk-votd"><span class="sk" style="display:block;height:28px;margin-top:16px"></span><span class="sk" style="display:block;height:28px;width:75%;margin-left:auto"></span><span class="sk" style="display:block;height:16px;margin-top:18px"></span><span class="sk" style="display:block;height:16px;width:60%"></span></div>

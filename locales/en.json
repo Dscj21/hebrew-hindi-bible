@@ -4,8 +4,8 @@
   "code": "en",
   "dir": "ltr"
  },
- "app": "Hebrew–Hindi Bible",
- "appShort": "Hebrew–Hindi",
+ "app": "Hebrew Greek Hindi Bible",
+ "appShort": "HG Hindi Bible",
  "tagline": "The Hebrew Old Testament and Greek New Testament, word by word, with Hindi meanings",
  "tab": {
   "home": "Home",
@@ -524,5 +524,6 @@
   "learnedToast": "Added to learned words",
   "unlearned": "Removed from learned words",
   "learnedN": "{n} words learned"
- }
+ },
+ "brand": "Hebrew Greek Hindi Bible"
 }

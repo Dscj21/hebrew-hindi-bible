@@ -1,4 +1,4 @@
-# इब्रानी–हिन्दी बाइबल (Hebrew–Hindi interlinear Old Testament)
+# Hebrew Greek Hindi Bible (हिब्रू ग्रीक हिंदी बाइबल) — Hebrew OT + Greek NT interlinear with Hindi
 
 Live: https://dscj21.github.io/hebrew-hindi-bible/
 
