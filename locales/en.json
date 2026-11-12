@@ -41,7 +41,9 @@
   "watch": "Watch on YouTube",
   "watchSub": "Video lessons and walkthroughs",
   "seeAll": "See all",
-  "testament": "Testament"
+  "testament": "Testament",
+  "best": "best",
+  "streakSub": "Read a chapter every day"
  },
  "act": {
   "read": "Read",
@@ -171,7 +173,11 @@
   "emptyFav": "No favourites yet.\nLong-press any verse while reading and tap Save.",
   "emptyBm": "No bookmarks yet.\nTap ••• while reading to bookmark a chapter.",
   "emptyHist": "Your reading history will appear here.",
-  "clearHist": "Clear history"
+  "clearHist": "Clear history",
+  "notes": "Notes",
+  "words": "Words",
+  "emptyNotes": "No notes or highlights yet.\nLong-press any verse to highlight it or add a note.",
+  "emptyWords": "No learned words yet.\nMark the Word of the Day as learned on Home."
  },
  "set": {
   "title": "Settings",
@@ -244,7 +250,7 @@
   ],
   [
    "Long-press a verse",
-   "Save, copy or share as an image"
+   "Highlight, add a note, listen, save or share"
   ],
   [
    "Pinch with two fingers",
@@ -304,21 +310,29 @@
   [
    "Does it work offline?",
    "The Android app contains the whole Bible. On the web, chapters you read are saved automatically."
+  ],
+  [
+   "Why can’t I hear Hebrew or Greek?",
+   "Audio uses your device’s built-in text-to-speech voices — no recordings are downloaded. Many phones have no Hebrew or Greek voice, so the app reads the Devanagari pronunciation with a Hindi voice instead. Use Settings → Audio → Check voices to see what is installed."
+  ],
+  [
+   "Are my notes backed up?",
+   "Notes, highlights and learned words are stored only on this device. Use Settings → Export backup to save a file, and Import backup to restore it."
   ]
  ],
  "new": [
+  "Listen: hear Hebrew/Greek words and whole verses, with word-by-word highlight",
+  "Word of the Day: learn one Hebrew or Greek word daily",
+  "Highlights in 5 colours and personal notes, with search and backup",
+  "Daily Verse reminder at your chosen time (Android) and best-streak badge",
+  "Share verse cards to WhatsApp — Status 9:16 or chat 1:1",
   "Greek New Testament: every word with Hindi meaning, pronunciation and Strong’s G-number",
   "Bigger, clearer text — Hindi meanings in bold indigo, pronunciation in amber",
   "Ads never cover pop-ups or word details any more",
   "Old / New Testament switch on Home and in the book picker",
   "A new, cleaner design with light and dark themes",
   "English and Hindi app language",
-  "Verse of the Day, reading streak and progress",
-  "Strong’s lexicon with concordance",
-  "Search by word, Strong’s number or reference",
-  "Swipe, pinch, double-tap and long-press gestures",
-  "Share any verse as a beautiful image card",
-  "A Hindi meaning for every word of the Old Testament"
+  "Verse of the Day, reading streak and progress"
  ],
  "pos": {
   "v": "Verb",
@@ -412,5 +426,103 @@
   "3John": "3 John",
   "Jude": "Jude",
   "Rev": "Revelation"
+ },
+ "audio": {
+  "title": "Audio",
+  "listen": "Listen",
+  "stop": "Stop",
+  "playVerse": "Play verse",
+  "playHebrew": "Play in Hebrew",
+  "playGreek": "Play in Greek",
+  "playWithHindi": "Play original, then Hindi",
+  "hebrew": "Hebrew",
+  "greek": "Greek",
+  "hindi": "Hindi",
+  "fallback": "No {lang} voice on this device. Reading the Hindi pronunciation instead.",
+  "failed": "Couldn’t play audio",
+  "noVoice": "No {lang} voice installed",
+  "noVoiceBody": "Your device doesn’t have a {lang} text-to-speech voice yet. You can still hear the Devanagari pronunciation read by a Hindi voice.",
+  "howAndroid": "To add a voice: Settings → System → Languages → Text-to-speech → Google speech engine → Install voice data, then pick the language.",
+  "howWeb": "Voices come from your browser and operating system. Chrome on Android and desktop usually include Hindi; Hebrew and Greek may need a system language pack.",
+  "ok": "Available",
+  "missing": "Not installed",
+  "mode": "Voice for original words",
+  "modeSub": "Auto uses the Hebrew/Greek voice when available, otherwise Hindi pronunciation",
+  "m": {
+   "auto": "Auto",
+   "orig": "Original",
+   "pron": "Pronunciation"
+  },
+  "withHindi": "Read Hindi after verse",
+  "withHindiSub": "After the original, play the IRV Hindi verse",
+  "test": "Check voices",
+  "testSub": "See which voices this device has",
+  "sample": "नमस्ते, आवाज़ काम कर रही है"
+ },
+ "hl": {
+  "title": "Highlight",
+  "c": {
+   "yellow": "Yellow",
+   "green": "Green",
+   "blue": "Blue",
+   "pink": "Pink",
+   "orange": "Orange"
+  },
+  "clear": "Remove highlight",
+  "added": "Highlighted",
+  "removed": "Highlight removed"
+ },
+ "note": {
+  "add": "Add note",
+  "edit": "Edit note",
+  "ph": "Write your thoughts, prayer or study note…",
+  "saved": "Note saved",
+  "removed": "Note removed"
+ },
+ "notes": {
+  "ph": "Search notes and highlights",
+  "f": {
+   "all": "All",
+   "notes": "Notes"
+  }
+ },
+ "notif": {
+  "title": "Daily reminder",
+  "daily": "Verse of the Day reminder",
+  "dailySub": "A gentle notification each morning",
+  "time": "Reminder time",
+  "word": "Include Word of the Day",
+  "wordSub": "Add today’s Hebrew/Greek word",
+  "webOnly": "Daily reminders are available in the Android app",
+  "denied": "Notifications are blocked. Allow them in Android settings.",
+  "on": "Reminder set for {t} every day"
+ },
+ "backup": {
+  "export": "Export backup",
+  "exportSub": "Notes, highlights, favourites, streak & learned words",
+  "import": "Import backup",
+  "saved": "Backup saved",
+  "restored": "Backup restored",
+  "bad": "That file isn’t a valid backup"
+ },
+ "share": {
+  "wa": "Share to WhatsApp",
+  "waShort": "WhatsApp",
+  "waFallback": "Image saved — attach it in WhatsApp",
+  "fmt": {
+   "status": "Status 9:16",
+   "square": "Chat 1:1",
+   "post": "Post 4:5"
+  }
+ },
+ "wotd": {
+  "title": "Word of the Day",
+  "times": "{n} times in the Bible",
+  "more": "Learn more",
+  "mark": "Mark learned",
+  "learned": "Learned",
+  "learnedToast": "Added to learned words",
+  "unlearned": "Removed from learned words",
+  "learnedN": "{n} words learned"
  }
 }

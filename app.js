@@ -27,7 +27,7 @@
     get(k, d) { try { const v = JSON.parse(localStorage.getItem('hhb.' + k)); return v ?? d; } catch { return d; } },
     set(k, v) { try { localStorage.setItem('hhb.' + k, JSON.stringify(v)); } catch {} }
   };
-  const DEF = { theme: 'auto', fs: 1, chip: false, gloss: true, pron: true, dots: true, split: true, sn: true, root: false, hindi: true, haptic: true };
+  const DEF = { theme: 'auto', fs: 1, chip: false, gloss: true, pron: true, dots: true, split: true, sn: true, root: false, hindi: true, haptic: true, audio: 'auto', audioHindi: false, notif: false, notifTime: '07:00', notifWord: true };
   if (!store.get('v3', false)) { const o = store.get('set', {}); delete o.chip; delete o.root; store.set('set', o); store.set('v3', true); }
   let set = Object.assign({}, DEF, store.get('set', {}));
   const mq = matchMedia('(prefers-color-scheme: dark)');
@@ -310,11 +310,12 @@
     return `<div class="w" data-i="${i}" data-j="${j}" role="button" tabindex="0">${ch ? `<span class="chip${ch.verb ? ' v' : ''}">${esc(ch.t)}</span>` : ''}<span class="g">${esc(w[2])}</span><span class="h${w[5] ? ' mq' : ''}">${partsOf(w)}</span><span class="p">${esc(pronOf(w[1]))}</span>${sn ? `<span class="sn">${sn}</span>` : ''}${set.root && L && !L[5] ? `<span class="rt">${esc(L[1])}</span><span class="rp">${esc(L[2])}</span>` : ''}</div>`;
   }
   function render() {
-    const { data, b, c } = cur, favs = new Set(store.get('fav', []).map(f => f.k)), every = Ads.everyVerses();
+    const { data, b, c } = cur, favs = new Set(store.get('fav', []).map(f => f.k)), every = Ads.everyVerses(), hl = hlGet(), notes = notesGet();
     const html = [`<header class="chhead"><span class="over">${esc(bname(b))}</span><h2>${esc(t('picker.chapter'))} ${c}</h2><small>${esc(t('read.verses', { n: data.v.length }))}</small></header>`];
     data.v.forEach(([vn, hi, ws], i) => {
-      html.push(`<article class="verse" id="v${vn}" data-i="${i}" data-v="${vn}"><div class="vhead"><span class="vn">${vn}</span>${favs.has(`${b}/${c}/${vn}`) ? '<svg class="vfav"><use href="#i-heart"/></svg>' : ''}</div>
-<div class="words">${ws.map((w, j) => wordHTML(w, i, j)).join('')}</div>${hi ? `<p class="hi">${esc(hi)}</p>` : ''}</article>`);
+      const k = `${b}/${c}/${vn}`, h = hl[k], nt = notes[k];
+      html.push(`<article class="verse${h ? ' hl hl-' + h.c : ''}" id="v${vn}" data-i="${i}" data-v="${vn}"><div class="vhead"><span class="vn">${vn}</span>${favs.has(k) ? '<svg class="vfav"><use href="#i-heart"/></svg>' : ''}${nt ? `<button class="vnote" data-note="${i}" aria-label="${esc(t('note.edit'))}">${ico('note')}</button>` : ''}<span class="sp"></span>${ws.length ? `<button class="vplay" data-play="${i}" aria-label="${esc(t('audio.playVerse'))}">${ico('playc')}</button>` : ''}</div>
+<div class="words">${ws.map((w, j) => wordHTML(w, i, j)).join('')}</div>${hi ? `<p class="hi">${esc(hi)}</p>` : ''}${nt ? `<p class="vnote-t" data-note="${i}">${ico('pen', 'sm')}<span>${esc(nt.n)}</span></p>` : ''}</article>`);
       if (every && (i + 1) % every === 0 && i + 1 < data.v.length) html.push('<div class="ad-slot ad-inline" data-slot="inline"></div>');
     });
     const p = neighbour(-1), n = neighbour(1);
@@ -354,6 +355,8 @@
   $('#page').addEventListener('click', e => {
     const nav = e.target.closest('[data-nav]'); if (nav) { buzz(); go(+nav.dataset.nav); return; }
     const a = e.target.closest('[data-act=about]'); if (a) { e.preventDefault(); openAbout(); return; }
+    const pb = e.target.closest('[data-play]'); if (pb) { buzz(); playVerse(+pb.dataset.play, set.audioHindi); return; }
+    const nb = e.target.closest('[data-note]'); if (nb) { buzz(); openNote(verseInfo(+nb.dataset.note), rerender); return; }
     if (suppressClick) { suppressClick = false; return; }
     const el = e.target.closest('.w'); if (!el) return;
     const now = Date.now();
@@ -380,9 +383,10 @@
     markSel(el);
     const ch = Morph.chipL(w, LANG);
     const s = sheet(`<div class="wsh"><div class="g">${esc(w[2])}</div><div class="h${isGk(w) ? ' gk' : ''}">${isGk(w) ? esc(w[0].replace(/[,.·;—]+$/, '')) : partsOf(w)}</div><div class="p">${esc(pronOf(w[1]))}</div>
+<button class="spk pill-btn" data-say>${ico('volume', 'sm')}<span>${esc(t('audio.listen'))}</span></button>
 <span class="chip${ch.verb ? ' v' : ''}">${esc(ch.t)}</span><div class="ref">${esc(bname(cur.b))} ${cur.c}:${v[0]}</div></div>
 ${Morph.partsL(w, LANG).map(partHTML).join('')}<p class="tipline">${esc(t('read.tipDouble'))}</p>`, { onClose: () => markSel(null) });
-    s.addEventListener('click', e => { const b = e.target.closest('[data-sk]'); if (b) openStrong(b.dataset.sk); });
+    s.addEventListener('click', e => { const sp = e.target.closest('[data-say]'); if (sp) { buzz(); speakWordText(w[0], w[1], isGk(w), sp); return; } const b = e.target.closest('[data-sk]'); if (b) openStrong(b.dataset.sk); });
   }
 
   // ---------- Strong's & concordance ----------
@@ -422,7 +426,7 @@ ${'<span class="sk" style="display:block;height:14px;margin:16px 0"></span>'.rep
     const draw = () => {
       const rows = concRows(k), total = rows.reduce((a, r) => a + r.refs.length, 0);
       const usage = SG[5] ? (SG[5].length > 170 ? SG[5].slice(0, 170).replace(/[,;]?\s*\S*$/, '') + '…' : SG[5]) : '';
-      $('.stb', el).innerHTML = `<div class="sthead"><span class="heb${gk ? ' gk' : ''}"${gk ? ' lang="grc"' : ''}>${esc(L[1])}</span><div class="meta"><span class="tr">${esc(L[2])}<small>${esc(SG[2])}</small></span>
+      $('.stb', el).innerHTML = `<div class="sthead"><span class="heb${gk ? ' gk' : ''}"${gk ? ' lang="grc"' : ''}>${esc(L[1])}</span><div class="meta"><span class="tr">${esc(L[2])}<small>${esc(SG[2])}</small><button class="icbtn spk" data-say aria-label="${esc(t('audio.listen'))}">${ico('volume', 'sm')}</button></span>
 <div class="pills">${gk ? `<span class="pill">${esc(t('st.greek'))}</span>` : ''}<span class="pill">${esc(posL(SG[0]))}</span>${CC() ? `<span class="pill n">${nf(total)}×</span>` : ''}</div></div></div>
 ${fld(t('st.hindi'), `<span class="big">${esc(L[3] || '—')}</span>`)}
 ${fld(t('st.defn'), esc(SG[4] || L[4] || '—'))}
@@ -434,6 +438,7 @@ ${rows.length ? fld(`${t('st.translated')} (${rows.length})`, `<div class="tags"
     draw();
     if (!CC()) loadC().then(draw).catch(() => {});
     el.addEventListener('click', e => {
+      const sp = e.target.closest('[data-say]'); if (sp) { buzz(); speakWordText(L[1], L[2], gk, sp); return; }
       const a = e.target.closest('[data-act]'), sn = e.target.closest('[data-sn]'), tg = e.target.closest('[data-g]');
       if (sn) { openStrong(sn.dataset.sn); return; }
       if (tg) { openConc(k, +tg.dataset.g); return; }
@@ -482,15 +487,22 @@ ${it.length > shown ? `<button class="btn" data-more style="width:100%;margin-to
     return !has;
   }
   function openVerseActions(i) {
-    const info = verseInfo(i), fav = isFav(info.k);
+    const info = verseInfo(i), fav = isFav(info.k), note = notesGet()[info.k];
     const vEl = document.getElementById('v' + cur.data.v[i][0]);
-    const el = sheet(`<p class="hi" style="margin:0 0 12px;font-size:15px;color:var(--mute);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(info.hi)}</p><div class="list">
-${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('copy', t('verse.copy'), 'copy')}${listItem('image', t('verse.card'), 'card')}${listItem('share', t('verse.link'), 'link')}</div>`,
+    const sw = () => { const c = (hlGet()[info.k] || {}).c; return `<div class="hlrow" role="group" aria-label="${esc(t('hl.title'))}">${HL.map(x => `<button class="hlsw hl-${x}${c === x ? ' on' : ''}" data-hl="${x}" aria-label="${esc(t('hl.c.' + x))}">${c === x ? ico('check', 'sm') : ''}</button>`).join('')}<button class="hlsw clr" data-hl="" aria-label="${esc(t('hl.clear'))}">${ico('x', 'sm')}</button></div>`; };
+    const el = sheet(`<p class="hi" style="margin:0 0 12px;font-size:15px;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(info.hi)}</p>
+<div class="gt" style="margin:4px 2px 8px">${esc(t('hl.title'))}</div><div class="hlwrap">${sw()}</div><div class="list">
+${listItem('pen', t(note ? 'note.edit' : 'note.add'), 'note')}${listItem('playc', t(info.gk ? 'audio.playGreek' : 'audio.playHebrew'), 'play')}${listItem('volume', t('audio.playWithHindi'), 'playhi')}
+${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('wa', t('share.wa'), 'card')}${listItem('copy', t('verse.copy'), 'copy')}${listItem('share', t('verse.link'), 'link')}</div>`,
       { title: esc(refName(info.k)), onClose: () => vEl && vEl.classList.remove('lp') });
     el.addEventListener('click', e => {
+      const h = e.target.closest('[data-hl]');
+      if (h) { setHL(info, h.dataset.hl || null); $('.hlwrap', el).innerHTML = sw(); rerender(); toast(t(hlGet()[info.k] ? 'hl.added' : 'hl.removed')); setTimeout(() => { if (el.isConnected) closeTop(); }, 280); return; }
       const a = e.target.closest('[data-act]'); if (!a) return;
       const act = a.dataset.act;
-      if (act === 'fav') { toggleFav(info); closeTop(); const y = window.scrollY; render(); window.scrollTo(0, y); }
+      if (act === 'fav') { toggleFav(info); closeTop(); rerender(); }
+      if (act === 'note') { closeTop(); setTimeout(() => openNote(info, rerender), 60); }
+      if (act === 'play' || act === 'playhi') { closeTop(); setTimeout(() => playVerse(i, act === 'playhi'), 120); }
       if (act === 'copy') { copyText(withUrl(`${info.heb}\n\n${info.hi}\n— ${refName(info.k)}`, info.k)); closeTop(); }
       if (act === 'card') { closeTop(); setTimeout(() => openCard(info), 60); }
       if (act === 'link') { closeTop(); shareText(`${refName(info.k)} — ${info.hi}\n\n${t('card.footer')} · ${t('app')}`, CFG.shareUrl ? CFG.shareUrl + '#' + info.k : ''); }
@@ -509,7 +521,6 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('cop
       else await copyText(url ? text + ' ' + url : text);
     } catch {}
   }
-  // verse share card: 1080x1350 PNG, content measured then vertically centred
   function wrap(ctx, text, maxW) {
     const words = text.split(/\s+/).filter(Boolean), lines = []; let line = '';
     for (const w of words) { const s = line ? line + ' ' + w : w; if (ctx.measureText(s).width > maxW && line) { lines.push(line); line = w; } else line = s; }
@@ -520,61 +531,73 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('cop
     for (; s >= min; s -= 2) { ctx.font = font.replace('{s}', s); lines = wrap(ctx, text, maxW); if (lines.length * s * lh <= maxH) break; }
     return { s: Math.max(s, min), lines };
   }
-  async function drawCard(info) {
+  // verse share card: 4:5 post, 1:1 chat, 9:16 WhatsApp/Instagram Status; content measured then vertically centred
+  const FMT = { post: [1080, 1350], square: [1080, 1080], status: [1080, 1920] };
+  const appLink = () => (CFG.shareUrl || CFG.playStoreUrl || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
+  async function drawCard(info, fmt = 'post') {
     const ref = refName(info.k), UI = '"Inter", "Noto Sans Devanagari", sans-serif';
     const gk = info.gk || isNT(info.k.split('/')[0]), HF = gk ? '"Noto Serif Greek", "Noto Serif", serif' : '"Noto Serif Hebrew", serif';
     try { await Promise.all([document.fonts.load(`56px ${gk ? '"Noto Serif Greek"' : '"Noto Serif Hebrew"'}`, info.heb), document.fonts.load('500 44px "Noto Sans Devanagari"', (info.hi || '') + ref), document.fonts.load('600 30px "Inter"', 'A')]); } catch {}
-    const W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const [W, H] = FMT[fmt] || FMT.post, tall = fmt === 'status', sq = fmt === 'square', cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     const x = cv.getContext('2d');
-    x.fillStyle = '#0d0d12'; x.fillRect(0, 0, W, H);
-    const rg = x.createRadialGradient(W * .9, 0, 20, W * .9, 0, 900); rg.addColorStop(0, 'rgba(99,102,241,.45)'); rg.addColorStop(1, 'rgba(99,102,241,0)');
+    const bg = x.createLinearGradient(0, 0, W * .3, H); bg.addColorStop(0, '#15123a'); bg.addColorStop(.55, '#0d0d14'); bg.addColorStop(1, '#0a0a10');
+    x.fillStyle = bg; x.fillRect(0, 0, W, H);
+    const rg = x.createRadialGradient(W * .9, 0, 20, W * .9, 0, H * .7); rg.addColorStop(0, 'rgba(99,102,241,.5)'); rg.addColorStop(1, 'rgba(99,102,241,0)');
     x.fillStyle = rg; x.fillRect(0, 0, W, H);
-    const rg2 = x.createRadialGradient(0, H, 20, 0, H, 700); rg2.addColorStop(0, 'rgba(139,92,246,.22)'); rg2.addColorStop(1, 'rgba(139,92,246,0)');
+    const rg2 = x.createRadialGradient(0, H, 20, 0, H, H * .55); rg2.addColorStop(0, 'rgba(245,158,11,.20)'); rg2.addColorStop(1, 'rgba(245,158,11,0)');
     x.fillStyle = rg2; x.fillRect(0, 0, W, H);
-    // header
-    x.fillStyle = '#6366f1'; x.beginPath(); if (x.roundRect) x.roundRect(90, 90, 64, 64, 18); else x.rect(90, 90, 64, 64); x.fill();
-    x.fillStyle = '#fff'; x.font = `700 38px ${HF}`; x.textAlign = 'center'; x.fillText(gk ? 'Ω' : 'א', 122, 136);
-    x.textAlign = 'left'; x.font = `600 30px ${UI}`; x.fillStyle = 'rgba(255,255,255,.92)'; x.fillText(t('app'), 176, 133);
-    // measure body
-    const maxW = W - 180;
-    const hb = fit(x, info.heb, `{s}px ${HF}`, gk ? 58 : 66, 30, maxW, 440, 1.55);
-    const hh = fit(x, info.hi || '', `400 {s}px ${UI}`, 46, 26, maxW, 440, 1.6);
-    const hH = hb.lines.length * hb.s * 1.55, hhH = hh.lines.length * hh.s * 1.6, gap = 70, refH = 60;
-    const total = hH + gap + hhH + 50 + refH, top = 200, bottom = H - 200;
-    let y = top + Math.max(0, (bottom - top - total) / 2);
+    // big faint letter watermark
+    x.save(); x.globalAlpha = .06; x.fillStyle = '#fff'; x.font = `${Math.round(H * .55)}px ${HF}`; x.textAlign = 'right'; x.fillText(gk ? 'Ω' : 'א', W + 40, H * .62); x.restore();
+    const M = 90, top0 = tall ? 260 : 90;
+    x.fillStyle = '#6366f1'; x.beginPath(); if (x.roundRect) x.roundRect(M, top0, 64, 64, 18); else x.rect(M, top0, 64, 64); x.fill();
+    x.fillStyle = '#fff'; x.font = `700 38px ${HF}`; x.textAlign = 'center'; x.fillText(gk ? 'Ω' : 'א', M + 32, top0 + 46);
+    x.textAlign = 'left'; x.font = `600 30px ${UI}`; x.fillStyle = 'rgba(255,255,255,.92)'; x.fillText(t('app'), M + 86, top0 + 43);
+    const maxW = W - 2 * M, top = top0 + 120, bottom = H - (tall ? 330 : 170), avail = bottom - top;
+    const hb = fit(x, info.heb, `{s}px ${HF}`, tall ? 70 : gk ? 58 : 66, 28, maxW, avail * (sq ? .42 : .46), 1.55);
+    const hh = fit(x, info.hi || '', `500 {s}px ${UI}`, tall ? 52 : 46, 24, maxW, avail * (sq ? .40 : .42), 1.6);
+    const hH = hb.lines.length * hb.s * 1.55, hhH = hh.lines.length * hh.s * 1.6, gap = sq ? 50 : 70, refH = 60;
+    const total = hH + gap + hhH + 40 + refH;
+    let y = top + Math.max(0, (avail - total) / 2);
     x.font = `${hb.s}px ${HF}`; x.fillStyle = '#ffffff'; x.textAlign = gk ? 'left' : 'right'; x.direction = gk ? 'ltr' : 'rtl';
-    for (const l of hb.lines) { y += hb.s * 1.2; x.fillText(l, gk ? 90 : W - 90, y); y += hb.s * .35; }
+    for (const l of hb.lines) { y += hb.s * 1.2; x.fillText(l, gk ? M : W - M, y); y += hb.s * .35; }
     x.direction = 'ltr'; x.textAlign = 'left';
-    y += gap / 2; x.fillStyle = '#818cf8'; x.fillRect(90, y - 3, 72, 5); y += gap / 2;
-    x.font = `400 ${hh.s}px ${UI}`; x.fillStyle = 'rgba(255,255,255,.88)';
-    for (const l of hh.lines) { y += hh.s * 1.2; x.fillText(l, 90, y); y += hh.s * .4; }
-    y += 50; x.font = `600 38px ${UI}`; x.fillStyle = '#a5b4fc'; x.fillText(ref, 90, y + 30);
-    // footer
-    x.fillStyle = 'rgba(255,255,255,.1)'; x.fillRect(90, H - 150, W - 180, 2);
-    x.font = `500 28px ${UI}`; x.fillStyle = 'rgba(255,255,255,.65)'; x.fillText(t(gk ? 'card.footerNT' : 'card.footer'), 90, H - 92);
-    if (CFG.shareUrl) { x.textAlign = 'right'; x.fillStyle = 'rgba(255,255,255,.5)'; x.fillText(CFG.shareUrl.replace(/^https?:\/\//, '').replace(/\/$/, ''), W - 90, H - 92); x.textAlign = 'left'; }
+    y += gap / 2; const ag = x.createLinearGradient(M, 0, M + 90, 0); ag.addColorStop(0, '#818cf8'); ag.addColorStop(1, '#fbbf24'); x.fillStyle = ag; x.fillRect(M, y - 3, 90, 6); y += gap / 2;
+    x.font = `500 ${hh.s}px ${UI}`; x.fillStyle = 'rgba(255,255,255,.9)';
+    for (const l of hh.lines) { y += hh.s * 1.2; x.fillText(l, M, y); y += hh.s * .4; }
+    y += 40; x.font = `700 40px ${UI}`; x.fillStyle = '#fcd34d'; x.fillText(ref, M, y + 30);
+    const fy = H - (tall ? 250 : 92);
+    x.fillStyle = 'rgba(255,255,255,.12)'; x.fillRect(M, fy - 58, W - 2 * M, 2);
+    x.font = `500 28px ${UI}`; x.fillStyle = 'rgba(255,255,255,.7)'; x.fillText(t(gk ? 'card.footerNT' : 'card.footer'), M, fy);
+    const link = appLink();
+    if (link) { if (tall) { x.fillStyle = 'rgba(255,255,255,.55)'; x.fillText(link, M, fy + 48); } else { x.textAlign = 'right'; x.fillStyle = 'rgba(255,255,255,.55)'; x.fillText(link, W - M, fy); x.textAlign = 'left'; } }
     return cv;
   }
   async function openCard(info) {
-    const el = sheet(`<div class="cardp"><div class="sk" style="aspect-ratio:4/5;border-radius:18px"></div></div>`, {
+    let fmt = store.get('cardFmt', 'status');
+    const el = sheet(`<div class="segc cfmt">${['status', 'square', 'post'].map(k => `<button data-f="${k}" class="${k === fmt ? 'on' : ''}">${esc(t('share.fmt.' + k))}</button>`).join('')}</div><div class="cardp"><div class="sk" style="aspect-ratio:9/16;border-radius:18px"></div></div>`, {
       title: esc(t('card.title')),
-      foot: `<button class="btn" data-act="save">${ico('arrow-up', 'sm')}${esc(t('card.save'))}</button><button class="btn pri" data-act="share">${ico('share', 'sm')}${esc(t('card.share'))}</button>` });
-    const cv = await drawCard(info), url = cv.toDataURL('image/png');
-    $('.cardp', el).innerHTML = `<img class="share-prev" src="${url}" alt="${esc(refName(info.k))}">`;
+      foot: `<button class="btn" data-act="save" aria-label="${esc(t('card.save'))}">${ico('download', 'sm')}</button><button class="btn" data-act="share">${ico('share', 'sm')}${esc(t('card.share'))}</button><button class="btn wa" data-act="wa">${ico('wa', 'sm')}${esc(t('share.waShort'))}</button>` });
+    let cv, url;
+    const draw = async () => { cv = await drawCard(info, fmt); url = cv.toDataURL('image/png'); $('.cardp', el).innerHTML = `<img class="share-prev f-${fmt}" src="${url}" alt="${esc(refName(info.k))}">`; };
+    await draw();
     const text = withUrl(`${refName(info.k)} — ${info.hi}`, info.k);
     el.addEventListener('click', async e => {
-      const a = e.target.closest('[data-act]'); if (!a) return; buzz();
-      const name = `hebrew-hindi-${info.k.replace(/\//g, '-')}.png`;
-      if (a.dataset.act === 'share') {
+      const f = e.target.closest('[data-f]');
+      if (f) { fmt = f.dataset.f; store.set('cardFmt', fmt); $$('.cfmt button', el).forEach(b => b.classList.toggle('on', b === f)); buzz(); await draw(); return; }
+      const a = e.target.closest('[data-act]'); if (!a || !cv) return; buzz();
+      const name = `hebrew-hindi-${info.k.replace(/\//g, '-')}-${fmt}.png`;
+      if (a.dataset.act === 'share' || a.dataset.act === 'wa') {
         const SH = PLUG('Share'), F = PLUG('Filesystem');
-        if (SH && F) {
-          try { const r = await F.writeFile({ path: name, data: url.split(',')[1], directory: 'CACHE' }); await SH.share({ title: t('app'), text, files: [r.uri] }); return; } catch (err) { console.warn(err); }
+        if (SH && F) { // Android: system share sheet with the image (WhatsApp / Status appear there)
+          try { const r = await F.writeFile({ path: name, data: url.split(',')[1], directory: 'CACHE' }); await SH.share({ title: t('app'), text, files: [r.uri], dialogTitle: a.dataset.act === 'wa' ? 'WhatsApp' : t('card.share') }); return; } catch (err) { console.warn(err); }
         }
         try {
           const blob = await new Promise(r => cv.toBlob(r, 'image/png')), file = new File([blob], name, { type: 'image/png' });
           if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], text, title: t('app') }); return; }
         } catch (err) { if (err && err.name === 'AbortError') return; }
-        download(url, name); toast(t('card.savedShare'));
+        download(url, name);
+        if (a.dataset.act === 'wa') { toast(t('share.waFallback')); setTimeout(() => window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener'), 700); }
+        else toast(t('card.savedShare'));
       } else {
         const F = PLUG('Filesystem');
         if (F) { try { await F.writeFile({ path: 'Pictures/' + name, data: url.split(',')[1], directory: 'DOCUMENTS', recursive: true }); toast(t('card.saved')); return; } catch (err) { console.warn(err); } }
@@ -785,7 +808,7 @@ ${listItem('heart', t('bm.favs'), 'fav')}${listItem('clock', t('bm.hist'), 'hist
   async function renderHome() {
     const last = lastRef(), [lb, lc] = last.split('/'), lbk = book(lb) || { chapters: 1 };
     const started = !!store.get('hist', []).length;
-    const vk = VOTD[Math.floor(Date.now() / 864e5) % VOTD.length];
+    const vk = VOTD[dayNum() % VOTD.length], best = bestStreak();
     const n = streak(), favN = store.get('fav', []).length, bmN = store.get('bm', []).length;
     const qb = QUICK.find(q => q[0] === lb) || QUICK_NT.find(q => q[0] === lb), lbg = isNT(lb);
     const ht = store.get('homeT', lbg ? 'nt' : 'ot'), QL = ht === 'nt' ? QUICK_NT : QUICK, vgk = isNT(vk.split('/')[0]);
@@ -800,10 +823,11 @@ ${listItem('heart', t('bm.favs'), 'fav')}${listItem('clock', t('bm.hist'), 'hist
 <section class="section"><div class="stitle"><h2>${esc(t(started ? 'home.cont' : 'home.start'))}</h2></div>
 <button class="card cont" data-go="${last}"><span class="bk${lbg ? ' gk' : ''}">${esc(qb ? qb[1].normalize('NFD').replace(/[\u0591-\u05C7\u0300-\u036f]/g, '')[0] : (lbg ? 'Ω' : 'א'))}</span><span class="m"><small>${esc(bname(lb))}</small><b>${esc(refName(last))}</b>
 <span class="bar"><i style="width:${Math.max(4, Math.round(+lc / lbk.chapters * 100))}%"></i></span><small style="display:block;margin-top:6px">${esc(t('home.chapterOf', { c: lc, n: lbk.chapters }))}</small></span>${ico('chev-r')}</button></section>
+<section class="section" id="wotdsec"><div class="sk" style="height:300px;border-radius:24px"></div></section>
+<section class="section"><div class="card" style="cursor:default"><div class="rowcard"><span class="ib" style="background:#fff1e6;color:#ea580c">${ico('flame')}</span><span class="m"><b>${esc(n > 1 ? t('home.streak', { n }) : n === 1 ? t('home.streak1') : t('home.streak0'))}</b><small>${esc(t('home.streakSub'))}</small></span><span class="best">${ico('trophy', 'sm')}<span><b>${best}</b><small>${esc(t('home.best'))}</small></span></span></div><div class="week">${weekHTML()}</div></div></section>
 <section class="section"><div class="stitle"><h2>${esc(t('home.books'))}</h2><button data-act="books">${esc(t('home.seeAll'))}</button></div>
 <div class="tswitch" role="tablist" aria-label="${esc(t('home.testament'))}">${['ot', 'nt'].map(x => `<button data-act="t-${x}" role="tab" aria-selected="${ht === x}" class="${ht === x ? 'on' : ''}">${esc(t('picker.' + x))}</button>`).join('')}</div>
 <div class="hscroll">${QL.map(([id, h]) => { const b = book(id); return `<button class="btile" data-go="${id}/1"><div class="hn${ht === 'nt' ? ' gk' : ''}"${ht === 'nt' ? ' lang="grc"' : ''}>${esc(h)}</div><b>${esc(bname(id))}</b><small>${esc(t('picker.chapters'))} · ${b ? b.chapters : ''}</small></button>`; }).join('')}</div></section>
-<section class="section"><div class="card" style="cursor:default"><div class="rowcard"><span class="ib" style="background:#fff1e6;color:#ea580c">${ico('flame')}</span><span class="m"><b>${esc(n > 1 ? t('home.streak', { n }) : n === 1 ? t('home.streak1') : t('home.streak0'))}</b></span></div><div class="week">${weekHTML()}</div></div></section>
 <section class="section"><div class="stitle"><h2>${esc(t('home.explore'))}</h2></div><div class="grid2">
 <button class="qt" data-act="lexi"><span class="ib">${ico('alpha')}</span><b>${esc(t('home.lexicon'))}</b><small>${esc(t('home.lexiconSub', { n: nf(Object.keys(lex).length || 8674) }))}</small></button>
 <button class="qt" data-tab="search"><span class="ib">${ico('search')}</span><b>${esc(t('tab.search'))}</b><small>${esc(t('home.searchSub'))}</small></button>
@@ -811,6 +835,7 @@ ${listItem('heart', t('bm.favs'), 'fav')}${listItem('clock', t('bm.hist'), 'hist
 <button class="qt" data-act="learn"><span class="ib">${ico('help')}</span><b>${esc(t('home.learn'))}</b><small>${esc(t('set.gestures'))} · FAQ</small></button>
 ${CFG.youtubeUrl ? `<button class="qt" data-act="yt" style="grid-column:1/-1"><span class="ib" style="background:#ffe9e9;color:#dc2626">${ico('play')}</span><b>${esc(t('home.watch'))}</b><small>${esc(t('home.watchSub'))}</small></button>` : ''}</div></section>
 <section class="section" style="margin-bottom:28px"><button class="card" data-act="shareapp"><div class="rowcard"><span class="ib">${ico('share')}</span><span class="m"><b>${esc(t('home.shareTitle'))}</b><small>${esc(t('home.shareSub'))}</small></span>${ico('chev-r')}</div></button></section>`;
+    loadWotd().then(() => { const s = $('#wotdsec', el), w = wotdFor(); if (s && view === 'home') { if (w) { s.innerHTML = wotdHTML(w); el._wotd = w; } else s.remove(); } }).catch(() => { const s = $('#wotdsec', el); s && s.remove(); });
     try {
       const [vb, vc, vv] = vk.split('/'), d = await getChapter(vb, +vc), v = d.v.find(x => x[0] === +vv) || d.v[0];
       if (view !== 'home') return;
@@ -827,6 +852,10 @@ ${CFG.youtubeUrl ? `<button class="qt" data-act="yt" style="grid-column:1/-1"><s
     else {
       const a = b.dataset.act, vo = $('#v-home')._votd;
       if (a === 'books') openPicker('books');
+      const wd = $('#v-home')._wotd;
+      if (a === 'wsay' && wd) speakWordText(wd[1], wd[2], wd[0][0] === 'G', b);
+      if (a === 'wmore' && wd) openStrong(wd[0]);
+      if (a === 'wlearn' && wd) { const on = toggleLearned(wd); b.classList.toggle('on', on); b.innerHTML = ico('check', 'sm') + esc(t(on ? 'wotd.learned' : 'wotd.mark')); }
       if (a === 't-ot' || a === 't-nt') { store.set('homeT', a.slice(2)); const y = scrollY; renderHome(); scrollTo(0, y); }
       if (a === 'lexi') { setMode('strong'); location.hash = 'search'; setTimeout(() => $('#q').focus(), 80); }
       if (a === 'shareapp') shareApp();
@@ -911,8 +940,33 @@ ${rq.length ? `<div class="sec">${esc(t('search.recent'))}</div><div class="tags
 
   // ---------- saved ----------
   $('#svmode').onclick = e => { const b = e.target.closest('[data-m]'); if (b) { buzz(); savedMode = b.dataset.m; renderSaved(); } };
+  let notesQ = '', notesF = 'all';
+  function renderNotes() {
+    const L = $('#svlist'), hl = hlGet(), notes = notesGet(), keys = [...new Set([...Object.keys(notes), ...Object.keys(hl)])];
+    const q = notesQ.trim().toLowerCase();
+    const items = keys.map(k => ({ k, n: notes[k], h: hl[k], hi: (notes[k] || hl[k]).hi || '', t: Math.max((notes[k] || {}).t || 0, (hl[k] || {}).t || 0) }))
+      .filter(x => notesF === 'all' || (notesF === 'notes' ? x.n : x.h && x.h.c === notesF))
+      .filter(x => !q || refName(x.k).toLowerCase().includes(q) || x.k.toLowerCase().includes(q) || (x.n && x.n.n.toLowerCase().includes(q)) || x.hi.includes(notesQ.trim()))
+      .sort((a, b) => b.t - a.t);
+    const chips = ['all', 'notes', ...HL].map(f => `<button class="tag${notesF === f ? ' on' : ''}${HL.includes(f) ? ' dot hl-' + f : ''}" data-nf="${f}" aria-label="${esc(HL.includes(f) ? t('hl.c.' + f) : t('notes.f.' + f))}">${HL.includes(f) ? '' : esc(t('notes.f.' + f))}</button>`).join('');
+    const head = `<div class="sbox nsb">${ico('search', 'sm')}<input id="nq" type="search" placeholder="${esc(t('notes.ph'))}" value="${esc(notesQ)}" autocomplete="off"></div><div class="tags nchips">${chips}</div>`;
+    const tools = `<div class="bkrow"><button class="tag" data-bk="exp">${ico('download', 'sm')} ${esc(t('backup.export'))}</button><button class="tag" data-bk="imp">${ico('upload', 'sm')} ${esc(t('backup.import'))}</button></div>`;
+    if (!keys.length) { L.innerHTML = `<div class="empty">${ico('pen', 'lg')}<p>${esc(t('saved.emptyNotes'))}</p></div>${tools}`; return; }
+    L.innerHTML = head + (items.length ? items.map(x => `<div class="card ncard${x.h ? ' hl hl-' + x.h.c : ''}" data-go="${x.k}"><div class="r">${esc(refName(x.k))}${x.n ? ` <span class="ntag">${ico('pen', 'sm')}${esc(t('notes.f.notes'))}</span>` : ''}</div>
+${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</div>
+<div class="acts2">${x.n ? `<button data-nedit="${esc(x.k)}">${ico('pen')}${esc(t('note.edit'))}</button>` : `<button data-nedit="${esc(x.k)}">${ico('pen')}${esc(t('note.add'))}</button>`}<button data-ndel="${esc(x.k)}">${ico('x')}${esc(t('act.remove'))}</button></div></div>`).join('') : `<p class="empty">${esc(t('search.none'))}</p>`) + tools;
+    const inp = $('#nq'); inp.oninput = () => { notesQ = inp.value; const pos = inp.selectionStart; renderNotes(); const n2 = $('#nq'); n2.focus(); try { n2.setSelectionRange(pos, pos); } catch {} };
+  }
+  function renderWords() {
+    const L = $('#svlist'), list = learnedGet();
+    if (!list.length) { L.innerHTML = `<div class="empty">${ico('alpha', 'lg')}<p>${esc(t('saved.emptyWords'))}</p></div>`; return; }
+    L.innerHTML = `<p class="cnt">${esc(t('wotd.learnedN', { n: list.length }))}</p>` + list.map(x => { const g = x.k[0] === 'G';
+      return `<button class="card" data-sk="${esc(x.k)}"><div class="lexrow"><span class="heb${g ? ' gk' : ''}">${esc(x.w)}</span><span class="m"><b>${esc(x.h)}</b><div class="x">${g ? 'G' + x.k.slice(1) : 'H' + parseInt(x.k)} · ${esc(pronOf(x.p))}</div></span>${ico('chev-r')}</div></button>`; }).join('');
+  }
   function renderSaved() {
     $$('#svmode button').forEach(b => b.classList.toggle('on', b.dataset.m === savedMode));
+    if (savedMode === 'notes') return renderNotes();
+    if (savedMode === 'words') return renderWords();
     const L = $('#svlist'), list = store.get(savedMode, []);
     const when = x => new Date(x).toLocaleDateString(LANG === 'hi' ? 'hi-IN-u-nu-latn' : 'en-GB', { day: 'numeric', month: 'short' });
     if (!list.length) { L.innerHTML = `<div class="empty">${ico({ fav: 'heart', bm: 'bookmark', hist: 'clock' }[savedMode], 'lg')}<p>${esc(t({ fav: 'saved.emptyFav', bm: 'saved.emptyBm', hist: 'saved.emptyHist' }[savedMode]))}</p></div>`; return; }
@@ -923,12 +977,237 @@ ${rq.length ? `<div class="sec">${esc(t('search.recent'))}</div><div class="tags
   }
   $('#svlist').addEventListener('click', e => {
     const list = store.get(savedMode, []), x0 = e.target;
+    const bk = x0.closest('[data-bk]'); if (bk) { buzz(); bk.dataset.bk === 'exp' ? exportBackup() : importBackup(); return; }
+    if (savedMode === 'words') { const s = x0.closest('[data-sk]'); if (s) openStrong(s.dataset.sk); return; }
+    if (savedMode === 'notes') {
+      if (x0.closest('#nq')) return;
+      const f = x0.closest('[data-nf]'); if (f) { notesF = f.dataset.nf; buzz(); renderNotes(); return; }
+      const ed = x0.closest('[data-nedit]'); if (ed) { const k = ed.dataset.nedit, o = notesGet()[k] || hlGet()[k] || {}; openNote({ k, hi: o.hi || '', gk: !!o.gk }, renderNotes); return; }
+      const dl = x0.closest('[data-ndel]'); if (dl) { const k = dl.dataset.ndel, n = notesGet(), h = hlGet(); delete n[k]; delete h[k]; store.set('notes', n); store.set('hl', h); buzz(); renderNotes(); return; }
+      const g = x0.closest('[data-go]'); if (g) location.hash = g.dataset.go; return;
+    }
     if (x0.closest('[data-clear]')) { store.set('hist', []); renderSaved(); return; }
     const d = x0.closest('[data-del]'); if (d) { list.splice(+d.dataset.del, 1); store.set(savedMode, list); buzz(); renderSaved(); return; }
     const c = x0.closest('[data-card]'); if (c) { openCard(list[+c.dataset.card]); return; }
     const cp = x0.closest('[data-copy]'); if (cp) { const x = list[+cp.dataset.copy]; copyText(withUrl(`${x.heb}\n\n${x.hi}\n— ${refName(x.k)}`, x.k)); return; }
     const g = x0.closest('[data-go]'); if (g) location.hash = g.dataset.go;
   });
+
+  // ---------- v5: audio (on-device TTS), highlights & notes, streak best, word of the day, daily reminder, backup ----------
+  const dayNum = (d = new Date()) => Math.floor((d.getTime() - d.getTimezoneOffset() * 6e4) / 864e5); // local calendar day
+  // ---- audio ----
+  const VOICE = { he: 'he-IL', el: 'el-GR', hi: 'hi-IN' };
+  let voiceList = null; const voiceOK = {};
+  function loadVoices() {
+    if (voiceList) return Promise.resolve(voiceList);
+    return new Promise(res => {
+      if (!('speechSynthesis' in window)) return res(voiceList = []);
+      let done = false; const fin = () => { if (done) return; done = true; voiceList = speechSynthesis.getVoices() || []; res(voiceList); };
+      if ((speechSynthesis.getVoices() || []).length) return fin();
+      speechSynthesis.addEventListener && speechSynthesis.addEventListener('voiceschanged', fin); setTimeout(fin, 1500);
+    });
+  }
+  const vMatch = (v, code) => { const l = (v.lang || '').toLowerCase().replace('_', '-'), p = code.slice(0, 2).toLowerCase(); return l.startsWith(p) || (p === 'he' && l.startsWith('iw')); };
+  async function hasVoice(code) {
+    if (code in voiceOK) return voiceOK[code];
+    const T = PLUG('TextToSpeech');
+    if (T) { try { const r = await T.isLanguageSupported({ lang: code }); return (voiceOK[code] = !!(r && r.supported)); } catch { return (voiceOK[code] = false); } }
+    const vs = await loadVoices(); return (voiceOK[code] = vs.some(v => vMatch(v, code)));
+  }
+  function say(text, code, rate) {
+    const T = PLUG('TextToSpeech');
+    if (T) return T.speak({ text, lang: code, rate: rate || 0.9, pitch: 1, volume: 1, category: 'playback' });
+    return new Promise((res, rej) => {
+      if (!('speechSynthesis' in window)) return rej(new Error('no-tts'));
+      const u = new SpeechSynthesisUtterance(text); u.lang = code; u.rate = rate || 0.9;
+      const v = (voiceList || []).find(x => vMatch(x, code)); if (v) u.voice = v;
+      u.onend = () => res(); u.onerror = e => (/interrupted|canceled/.test(e.error || '') ? res() : rej(e));
+      speechSynthesis.speak(u);
+    });
+  }
+  const origText = (s, gk) => gk ? String(s).replace(/[,.·;—()\[\]]/g, '').trim() : String(s).replace(/\//g, '').replace(/[\u0591-\u05AF\u05BD\u05C0\u05C3]/g, '').trim();
+  const pronText = s => String(s || '').replace(/·/g, '').replace(/-/g, ' ');
+  let fallbackNoted = false;
+  // decide how to read: original voice (he-IL / el-GR) or the Devanagari pronunciation with a Hindi voice
+  async function readPlan(gk) {
+    const code = gk ? VOICE.el : VOICE.he, mode = set.audio || 'auto';
+    if (mode !== 'pron' && await hasVoice(code)) return { code, orig: true };
+    if (mode === 'orig') return { missing: code };
+    if (await hasVoice(VOICE.hi)) {
+      if (mode === 'auto' && !fallbackNoted) { fallbackNoted = true; toast(t('audio.fallback', { lang: t(gk ? 'audio.greek' : 'audio.hebrew') })); }
+      return { code: VOICE.hi, orig: false };
+    }
+    return { missing: code };
+  }
+  function noVoice(code) {
+    const name = t(code === VOICE.el ? 'audio.greek' : code === VOICE.hi ? 'audio.hindi' : 'audio.hebrew');
+    sheet(`<div class="about"><p>${esc(t('audio.noVoiceBody', { lang: name }))}</p><p class="s">${esc(t(NATIVE ? 'audio.howAndroid' : 'audio.howWeb'))}</p></div>`, { title: esc(t('audio.noVoice', { lang: name })) });
+  }
+  let speakGen = 0;
+  function stopAudio() {
+    speakGen++;
+    const T = PLUG('TextToSpeech'); if (T) T.stop().catch(() => {}); else if ('speechSynthesis' in window) speechSynthesis.cancel();
+    $$('.w.speaking').forEach(x => x.classList.remove('speaking')); $$('.spk.on').forEach(x => x.classList.remove('on'));
+    playerShow(null);
+  }
+  async function speakWordText(orig, pron, gk, btn) {
+    stopAudio(); const gen = speakGen;
+    const pl = await readPlan(gk); if (pl.missing) { noVoice(pl.missing); return; }
+    btn && btn.classList.add('on');
+    try { await say(pl.orig ? origText(orig, gk) : pronText(pron), pl.code, pl.orig ? 0.8 : 0.85); }
+    catch { if (gen === speakGen) toast(t('audio.failed')); }
+    if (gen === speakGen) btn && btn.classList.remove('on');
+  }
+  // whole verse: word by word (exact highlight on every engine), then optionally the IRV Hindi verse
+  async function playVerse(i, withHindi) {
+    if (!cur) return;
+    stopAudio(); const gen = speakGen, [vn, hi, ws] = cur.data.v[i], gk = !!cur.data.g;
+    const pl = await readPlan(gk);
+    const hiOK = withHindi && hi && await hasVoice(VOICE.hi);
+    if (pl.missing && !hiOK) { noVoice(pl.missing); return; }
+    playerShow(`${bname(cur.b)} ${cur.c}:${vn}`);
+    const vEl = document.getElementById('v' + vn);
+    if (!pl.missing) for (let j = 0; j < ws.length; j++) {
+      if (gen !== speakGen) return;
+      const el = vEl && vEl.querySelector(`.w[data-j="${j}"]`);
+      $$('.w.speaking').forEach(x => x.classList.remove('speaking'));
+      if (el) { el.classList.add('speaking'); const r = el.getBoundingClientRect(); if (r.top < 70 || r.bottom > innerHeight - 140) { quietScroll = Date.now() + 600; window.scrollBy({ top: r.top - innerHeight / 3, behavior: 'smooth' }); } }
+      const w = ws[j];
+      try { await say(pl.orig ? origText(w[0], gk) : pronText(w[1]), pl.code, pl.orig ? 0.85 : 0.95); } catch { if (gen === speakGen) { toast(t('audio.failed')); stopAudio(); } return; }
+    }
+    if (gen !== speakGen) return;
+    $$('.w.speaking').forEach(x => x.classList.remove('speaking'));
+    if (hiOK) { vEl && vEl.classList.add('speaking-hi'); try { await say(hi, VOICE.hi, 1); } catch {} vEl && vEl.classList.remove('speaking-hi'); }
+    if (gen === speakGen) playerShow(null);
+  }
+  function playerShow(label) {
+    const p = $('#player'); if (!p) return;
+    if (!label) { p.hidden = true; return; }
+    const ab = $('#adbar'), extra = ab && ab.classList.contains('on') && getComputedStyle(ab).visibility !== 'hidden' ? ab.offsetHeight : 0;
+    p.style.bottom = `calc(var(--navh) + var(--adh) + env(safe-area-inset-bottom) + ${extra + 10}px)`;
+    p.innerHTML = `<span class="eq"><i></i><i></i><i></i></span><b>${esc(label)}</b><button class="icbtn" data-stop aria-label="${esc(t('audio.stop'))}">${ico('stop')}</button>`;
+    p.hidden = false;
+  }
+  $('#player').addEventListener('click', e => { if (e.target.closest('[data-stop]')) { buzz(); stopAudio(); } });
+  window.addEventListener('hashchange', () => { if (!$('#player').hidden) stopAudio(); });
+
+  // ---- highlights & notes (stored locally; exportable) ----
+  const HL = ['yellow', 'green', 'blue', 'pink', 'orange'];
+  const hlGet = () => store.get('hl', {}), notesGet = () => store.get('notes', {});
+  function setHL(info, c) {
+    const h = hlGet();
+    if (!c || (h[info.k] && h[info.k].c === c)) delete h[info.k]; else h[info.k] = { c, t: Date.now(), hi: info.hi, gk: !!info.gk };
+    store.set('hl', h); buzz();
+    return h[info.k] ? h[info.k].c : null;
+  }
+  function openNote(info, after) {
+    const n = notesGet()[info.k];
+    const el = sheet(`<p class="hi" style="margin:0 0 12px;font-size:15px;color:var(--ink2)">${esc(info.hi)}</p><textarea class="notearea" maxlength="4000" placeholder="${esc(t('note.ph'))}">${esc(n ? n.n : '')}</textarea>`, {
+      title: esc(`${t(n ? 'note.edit' : 'note.add')} · ${refName(info.k)}`),
+      foot: `${n ? `<button class="btn" data-act="del">${ico('x', 'sm')}${esc(t('act.remove'))}</button>` : ''}<button class="btn pri" data-act="save">${ico('check', 'sm')}${esc(t('act.save'))}</button>` });
+    const ta = $('.notearea', el); setTimeout(() => ta.focus(), 350);
+    el.addEventListener('click', e => {
+      const a = e.target.closest('[data-act]'); if (!a) return;
+      const all = notesGet(), txt = ta.value.trim();
+      if (a.dataset.act === 'del' || !txt) delete all[info.k];
+      else all[info.k] = { n: txt, t: Date.now(), hi: info.hi, gk: !!info.gk, c: (all[info.k] && all[info.k].c) || Date.now() };
+      store.set('notes', all); buzz(); toast(t(all[info.k] ? 'note.saved' : 'note.removed')); closeTop(); after && after();
+    });
+  }
+  const rerender = () => { if (cur && view === 'read') { const y = scrollY; render(); scrollTo(0, y); } };
+
+  // ---- streak: best run ----
+  function bestStreak() {
+    const days = store.get('days', []).slice().sort(); let best = 0, run = 0, prev = null;
+    for (const k of days) { const d = new Date(k + 'T12:00:00'); run = prev && Math.round((d - prev) / 864e5) === 1 ? run + 1 : 1; prev = d; best = Math.max(best, run); }
+    best = Math.max(best, store.get('best', 0), streak()); store.set('best', best); return best;
+  }
+
+  // ---- word of the day ----
+  let wotdList = null;
+  const loadWotd = once(() => getJSON('data/wotd.json' + GZ).then(x => (wotdList = x)));
+  const wotdFor = (d = new Date()) => wotdList && wotdList.length ? wotdList[dayNum(d) % wotdList.length] : null;
+  const learnedGet = () => store.get('learned', []);
+  function toggleLearned(w) {
+    let l = learnedGet(); const has = l.some(x => x.k === w[0]);
+    l = has ? l.filter(x => x.k !== w[0]) : [{ k: w[0], w: w[1], p: w[2], h: w[3], t: Date.now() }, ...l];
+    store.set('learned', l); buzz(); toast(t(has ? 'wotd.unlearned' : 'wotd.learnedToast')); return !has;
+  }
+  function wotdHTML(w) {
+    const gk = w[0][0] === 'G', learned = learnedGet().some(x => x.k === w[0]), num = (gk ? 'G' : 'H') + w[0].replace(/^G/, '').replace(/\D.*$/, '');
+    return `<article class="wotd"><div class="lbl">${ico('alpha')}${esc(t('wotd.title'))}<span class="lang">${esc(t(gk ? 'audio.greek' : 'audio.hebrew'))}</span></div>
+<div class="wrow"><div class="ww ${gk ? 'gk' : 'hb'}" lang="${gk ? 'grc' : 'he'}">${esc(w[1])}</div><button class="icbtn spk big" data-act="wsay" aria-label="${esc(t('audio.listen'))}">${ico('volume')}</button></div>
+<div class="wp">${esc(pronOf(w[2]))}</div><div class="wh">${esc(w[3])}</div>
+<div class="wm">${esc(num)} · ${esc(t('wotd.times', { n: nf(w[5]) }))}${LANG === 'en' && w[4] ? ` · <span>${esc(w[4].split(/[,;]/)[0])}</span>` : ''}</div>
+<button class="wex" data-go="${w[6]}"><span>${esc(w[7])}</span><b>${esc(refName(w[6]))}</b></button>
+<div class="vrow"><button class="btn pri" data-act="wmore">${esc(t('wotd.more'))}</button><span class="sp"></span><button class="btn lrn${learned ? ' on' : ''}" data-act="wlearn">${ico('check', 'sm')}${esc(t(learned ? 'wotd.learned' : 'wotd.mark'))}</button></div></article>`;
+  }
+
+  // ---- daily reminder (Android local notifications; web: in-app only) ----
+  let schedQ = Promise.resolve();
+  function scheduleDaily() { return (schedQ = schedQ.then(scheduleDaily0, scheduleDaily0)); }
+  async function scheduleDaily0() {
+    const LN = PLUG('LocalNotifications'); if (!LN) return;
+    try { const p = await LN.getPending(); const ids = (p.notifications || []).filter(n => +n.id >= 5000 && +n.id < 5100).map(n => ({ id: +n.id })); if (ids.length) await LN.cancel({ notifications: ids }); } catch {}
+    if (!set.notif) return;
+    await loadIndex(); if (set.notifWord) await loadWotd().catch(() => {});
+    const [hh, mm] = String(set.notifTime || '07:00').split(':').map(Number), now = new Date(), list = [];
+    for (let d = 0; d < 21; d++) {
+      const at = new Date(now.getFullYear(), now.getMonth(), now.getDate() + d, hh || 0, mm || 0, 0);
+      if (at <= now) continue;
+      const vk = VOTD[dayNum(at) % VOTD.length], [b, c, v] = vk.split('/');
+      let txt = ''; try { const ch = await getChapter(b, +c); const x = ch.v.find(y => y[0] === +v); txt = x ? x[1] : ''; } catch {}
+      const w = set.notifWord ? wotdFor(at) : null;
+      const body = (txt.length > 140 ? txt.slice(0, 138) + '…' : txt) + (w ? `\n${t('wotd.title')}: ${w[1]} (${pronText(w[2])}) — ${w[3]}` : '');
+      list.push({ id: 5000 + d, title: `${t('home.votd')} · ${refName(vk)}`, body, largeBody: txt + (w ? `\n\n${t('wotd.title')}: ${w[1]} (${pronText(w[2])}) — ${w[3]}` : ''), schedule: { at, allowWhileIdle: true }, extra: { k: vk } });
+    }
+    if (list.length) try { await LN.schedule({ notifications: list }); } catch (e) { console.warn('notif', e); }
+  }
+  async function enableNotif(on) {
+    const LN = PLUG('LocalNotifications');
+    if (on && LN) {
+      try { let p = await LN.checkPermissions(); if (p.display !== 'granted') p = await LN.requestPermissions(); if (p.display !== 'granted') { toast(t('notif.denied')); return false; } } catch { return false; }
+    }
+    set.notif = on; saveSet(); await scheduleDaily(); if (on) toast(t('notif.on', { t: set.notifTime })); return true;
+  }
+  function notifBoot() {
+    const LN = PLUG('LocalNotifications'); if (!LN) return;
+    try { LN.addListener('localNotificationActionPerformed', e => { const k = e && e.notification && e.notification.extra && e.notification.extra.k; if (k) closeAll().then(() => { location.hash = k; }); }); } catch {}
+    if (set.notif) setTimeout(() => scheduleDaily().catch(() => {}), 4000); // refresh the next 3 weeks of verses on every launch
+  }
+
+  // ---- backup: export / import (JSON) ----
+  const BK_KEYS = ['fav', 'bm', 'hl', 'notes', 'learned', 'days', 'best', 'hist'];
+  async function exportBackup() {
+    const data = {}; for (const k of BK_KEYS) data[k] = store.get(k, null);
+    const json = JSON.stringify({ app: 'hebrew-hindi-bible', v: CFG.version, exported: new Date().toISOString(), data }, null, 1);
+    const name = `hebrew-hindi-backup-${dayKey()}.json`, F = PLUG('Filesystem'), SH = PLUG('Share');
+    if (F) {
+      try { const r = await F.writeFile({ path: name, data: json, directory: 'DOCUMENTS', encoding: 'utf8' }); toast(t('backup.saved')); if (SH) SH.share({ title: name, files: [r.uri] }).catch(() => {}); return; } catch (e) { console.warn(e); }
+    }
+    download(URL.createObjectURL(new Blob([json], { type: 'application/json' })), name); toast(t('backup.saved'));
+  }
+  function mergeBackup(o) {
+    const d = o && o.data; if (!d || o.app !== 'hebrew-hindi-bible') throw new Error('bad');
+    const byK = (a, b) => { const m = new Map(); for (const x of [...(b || []), ...(a || [])]) if (x && x.k && !m.has(x.k)) m.set(x.k, x); return [...m.values()]; };
+    const obj = (a, b) => { const r = Object.assign({}, a || {}); for (const k in (b || {})) if (!r[k] || (b[k].t || 0) > (r[k].t || 0)) r[k] = b[k]; return r; };
+    store.set('fav', byK(store.get('fav', []), d.fav)); store.set('bm', byK(store.get('bm', []), d.bm)); store.set('learned', byK(store.get('learned', []), d.learned));
+    store.set('hist', byK(store.get('hist', []), d.hist).sort((a, b) => b.t - a.t).slice(0, 60));
+    store.set('hl', obj(store.get('hl', {}), d.hl)); store.set('notes', obj(store.get('notes', {}), d.notes));
+    store.set('days', [...new Set([...(store.get('days', [])), ...(d.days || [])])].sort().slice(-400)); store.set('best', Math.max(store.get('best', 0), d.best || 0));
+  }
+  function importBackup() { const f = $('#impfile'); f.value = ''; f.click(); }
+  $('#impfile').addEventListener('change', async e => {
+    const file = e.target.files && e.target.files[0]; if (!file) return;
+    try { mergeBackup(JSON.parse(await file.text())); toast(t('backup.restored')); buzz(true); if (view === 'saved') renderSaved(); rerender(); }
+    catch { toast(t('backup.bad')); }
+  });
+  async function testVoices() {
+    const rows = [];
+    for (const [k, code] of [['audio.hebrew', VOICE.he], ['audio.greek', VOICE.el], ['audio.hindi', VOICE.hi]]) rows.push(`<div class="row"><span class="lb">${esc(t(k))}<small>${code}</small></span><span class="val">${(await hasVoice(code)) ? '✓ ' + esc(t('audio.ok')) : '— ' + esc(t('audio.missing'))}</span></div>`);
+    sheet(`<div class="group">${rows.join('')}</div><p class="tipline" style="text-align:left">${esc(t(NATIVE ? 'audio.howAndroid' : 'audio.howWeb'))}</p>`, { title: esc(t('audio.test')) });
+    if (await hasVoice(VOICE.hi)) say(t('audio.sample'), VOICE.hi, 1).catch(() => {});
+  }
 
   // ---------- settings ----------
   const META = { en: { name: 'English' }, hi: { name: 'हिन्दी' } };
@@ -941,19 +1220,29 @@ ${rq.length ? `<div class="sec">${esc(t('search.recent'))}</div><div class="tags
 <div class="row col"><span class="lb">${esc(t('set.textSize'))} <span class="val" id="fsv">${Math.round(set.fs * 100)}%</span><small>${esc(t('set.pinchHint'))}</small></span>${sizeRow()}<div class="preview">${prev}</div></div></div>
 <div class="gt">${esc(t('set.words'))}</div><div class="group">${tgRow('gloss', t('set.gloss'))}${tgRow('pron', t('set.pron'))}${tgRow('dots', t('set.dots'), t('set.dotsSub'))}
 ${tgRow('split', t('set.split'), t('set.splitSub'))}${tgRow('sn', t('set.sn'))}${tgRow('chip', t('set.chip'), t('set.chipSub'))}${tgRow('root', t('set.root'))}${tgRow('hindi', t('set.hindi'))}</div>
+<div class="gt">${esc(t('audio.title'))}</div><div class="group"><div class="row col"><span class="lb" style="margin-bottom:10px">${esc(t('audio.mode'))}<small>${esc(t('audio.modeSub'))}</small></span><div class="segc">${['auto', 'orig', 'pron'].map(k => `<button data-au="${k}" class="${(set.audio || 'auto') === k ? 'on' : ''}">${esc(t('audio.m.' + k))}</button>`).join('')}</div></div>
+${tgRow('audioHindi', t('audio.withHindi'), t('audio.withHindiSub'))}<button class="row" data-x="voicetest">${ico('volume')}<span class="lb">${esc(t('audio.test'))}<small>${esc(t('audio.testSub'))}</small></span>${ico('chev-r', 'sm')}</button></div>
+<div class="gt">${esc(t('notif.title'))}</div><div class="group">${NATIVE ? `<label class="row"><span class="lb">${esc(t('notif.daily'))}<small>${esc(t('notif.dailySub'))}</small></span><span class="sw"><input type="checkbox" data-notif ${set.notif ? 'checked' : ''}><span></span></span></label>
+<label class="row"><span class="lb">${esc(t('notif.time'))}</span><input type="time" class="tm" data-ntime value="${esc(set.notifTime || '07:00')}" ${set.notif ? '' : 'disabled'}></label>${tgRow('notifWord', t('notif.word'), t('notif.wordSub'))}`
+  : `<div class="row"><span class="lb">${ico('bell', 'sm')} ${esc(t('notif.daily'))}<small>${esc(t('notif.webOnly'))}</small></span></div><label class="row"><span class="lb">${esc(t('notif.time'))}</span><input type="time" class="tm" value="${esc(set.notifTime || '07:00')}" disabled></label>`}</div>
 <div class="gt">${esc(t('set.experience'))}</div><div class="group">${tgRow('haptic', t('set.haptic'), t('set.hapticSub'))}</div>
 <div class="gt">${esc(t('set.gestures'))}</div>${gestureHTML()}
 ${CFG.youtubeUrl ? `<div class="gt">${esc(t('set.follow'))}</div><div class="group"><button class="row" data-x="yt">${ico('play')}<span class="lb">${esc(t('set.youtube'))}</span>${ico('chev-r', 'sm')}</button></div>` : ''}
-<div class="gt">${esc(t('set.data'))}</div><div class="group"><button class="row" data-x="hist">${ico('clock')}<span class="lb">${esc(t('set.clearHist'))}</span></button><button class="row" data-x="reset">${ico('settings')}<span class="lb">${esc(t('set.reset'))}</span></button>
+<div class="gt">${esc(t('set.data'))}</div><div class="group"><button class="row" data-x="exp">${ico('download')}<span class="lb">${esc(t('backup.export'))}<small>${esc(t('backup.exportSub'))}</small></span></button><button class="row" data-x="imp">${ico('upload')}<span class="lb">${esc(t('backup.import'))}</span></button><button class="row" data-x="hist">${ico('clock')}<span class="lb">${esc(t('set.clearHist'))}</span></button><button class="row" data-x="reset">${ico('settings')}<span class="lb">${esc(t('set.reset'))}</span></button>
 <button class="row" data-x="share">${ico('share')}<span class="lb">${esc(t('menu.share'))}</span>${ico('chev-r', 'sm')}</button><button class="row" data-x="about">${ico('info')}<span class="lb">${esc(t('set.about'))}</span><span class="val">${esc(CFG.version)}</span>${ico('chev-r', 'sm')}</button></div></div>`;
   }
-  $('#v-settings').addEventListener('change', e => { const k = e.target.dataset.k; if (k) { set[k] = e.target.checked; saveSet(); buzz(); if (cur) render(); renderSettings(); } });
+  $('#v-settings').addEventListener('change', async e => {
+    if (e.target.hasAttribute('data-notif')) { const ok = await enableNotif(e.target.checked); if (!ok) e.target.checked = false; renderSettings(); return; }
+    if (e.target.hasAttribute('data-ntime')) { set.notifTime = e.target.value || '07:00'; saveSet(); await scheduleDaily(); toast(t('notif.on', { t: set.notifTime })); return; }
+    if (e.target.dataset.k === 'notifWord') { set.notifWord = e.target.checked; saveSet(); scheduleDaily(); return; }
+    const k = e.target.dataset.k; if (k) { set[k] = e.target.checked; saveSet(); buzz(); if (cur) render(); renderSettings(); } });
   $('#v-settings').addEventListener('input', e => { if (e.target.classList.contains('fsr')) { set.fs = +e.target.value / 100; $('#fsv').textContent = e.target.value + '%'; saveSet(); } });
   $('#v-settings').addEventListener('click', e => {
     const b = e.target.closest('[data-t]'); if (b) { set.theme = b.dataset.t; saveSet(); buzz(); renderSettings(); return; }
+    const au = e.target.closest('[data-au]'); if (au) { set.audio = au.dataset.au; saveSet(); buzz(); fallbackNoted = false; renderSettings(); return; }
     const x = e.target.closest('[data-x]'); if (!x) return;
     ({ lang: openLangSheet, hist: () => { store.set('hist', []); toast(t('set.histCleared')); }, reset: () => { set = Object.assign({}, DEF); saveSet(); if (cur) render(); renderSettings(); toast(t('set.resetDone')); },
-      about: openAbout, share: shareApp, yt: () => CFG.youtubeUrl && window.open(CFG.youtubeUrl, '_blank', 'noopener') }[x.dataset.x] || (() => {}))();
+      about: openAbout, share: shareApp, exp: exportBackup, imp: importBackup, voicetest: testVoices, yt: () => CFG.youtubeUrl && window.open(CFG.youtubeUrl, '_blank', 'noopener') }[x.dataset.x] || (() => {}))();
   });
 
   // ---------- language ----------
@@ -990,7 +1279,7 @@ ${CFG.youtubeUrl ? `<div class="gt">${esc(t('set.follow'))}</div><div class="gro
     for (const x of CFG.languages) loadLoc(x).then(d => { if (d._meta) META[x] = d._meta; }).catch(() => {});
     if (!l) await firstLaunch();
     await Promise.all([Ads.init().catch(() => {}), loadIndex(), loadLex()]);
-    route();
+    route(); notifBoot();
   })();
   if ('serviceWorker' in navigator && !NATIVE) navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
