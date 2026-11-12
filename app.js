@@ -27,7 +27,7 @@
     get(k, d) { try { const v = JSON.parse(localStorage.getItem('hhb.' + k)); return v ?? d; } catch { return d; } },
     set(k, v) { try { localStorage.setItem('hhb.' + k, JSON.stringify(v)); } catch {} }
   };
-  const DEF = { theme: 'auto', fs: 1, chip: false, gloss: true, pron: true, dots: true, split: true, sn: true, root: false, hindi: true, haptic: true, audio: 'auto', audioHindi: false, notif: false, notifTime: '07:00', notifWord: true };
+  const DEF = { theme: 'auto', fs: 1, chip: false, gloss: true, pron: true, dots: true, split: true, sn: true, root: false, hindi: true, haptic: true, audio: 'auto', audioHindi: false, playRate: 1, playMode: 'orig', autoNext: true, netVoice: true, notif: false, notifTime: '07:00', notifWord: true };
   if (!store.get('v3', false)) { const o = store.get('set', {}); delete o.chip; delete o.root; store.set('set', o); store.set('v3', true); }
   let set = Object.assign({}, DEF, store.get('set', {}));
   const mq = matchMedia('(prefers-color-scheme: dark)');
@@ -46,7 +46,7 @@
   applySet();
 
   // ---------- i18n ----------
-  let CFG = { shareUrl: '', youtubeUrl: '', youtubeKidsUrl: '', playStoreUrl: '', version: '3.0', languages: ['en', 'hi'], defaultLanguage: 'en' };
+  let CFG = { shareUrl: '', youtubeUrl: '', youtubeKidsUrl: '', privacyUrl: '', playStoreUrl: '', version: '3.0', languages: ['en', 'hi'], defaultLanguage: 'en' };
   let EN = {}, S = {}, LANG = 'en';
   const LOC = {};
   const deep = (a, b) => { const o = Array.isArray(a) ? a.slice() : Object.assign({}, a); for (const k in b) o[k] = b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]) && a && typeof a[k] === 'object' ? deep(a[k], b[k]) : b[k]; return o; };
@@ -782,7 +782,7 @@ ${listItem('heart', t('bm.favs'), 'fav')}${listItem('clock', t('bm.hist'), 'hist
   // ---------- info sheets ----------
   function openAbout() {
     sheet(`<div class="about"><p>${esc(t('about.body', { app: t('app') }))}</p><p class="s">${esc(t('about.heb'))}</p><p class="s">${esc(t('about.lex'))}</p><p class="s">${esc(t('about.gnt'))}</p><p class="s">${esc(t('about.irv'))}</p>
-<p class="s">${esc(t('about.ours'))}</p><p class="s">${esc(t('about.fonts'))}</p><p class="s">${esc(t('set.version', { v: CFG.version }))}</p>${channels().length ? `<div class="gt" style="margin:18px 2px 8px">${esc(t('yt.title'))}</div><div class="chlist">${channelsHTML()}</div>` : ''}</div>`, { title: esc(t('about.title')) });
+<p class="s">${esc(t('about.ours'))}</p><p class="s">${esc(t('about.fonts'))}</p><p class="s">${esc(t('set.version', { v: CFG.version }))}</p><p class="s"><a href="#" data-privacy>${esc(t('set.privacy'))}</a>${CFG.contactEmail ? ` · <a href="mailto:${esc(CFG.contactEmail)}">${esc(CFG.contactEmail)}</a>` : ''}</p>${channels().length ? `<div class="gt" style="margin:18px 2px 8px">${esc(t('yt.title'))}</div><div class="chlist">${channelsHTML()}</div>` : ''}</div>`, { title: esc(t('about.title')) });
   }
   const gestureHTML = () => `<div class="group">${t('g').map(([a, b]) => `<div class="row"><span class="lb">${esc(a)}<small>${esc(b)}</small></span></div>`).join('')}</div>`;
   function openFAQ() {
@@ -836,7 +836,7 @@ ${listItem('heart', t('bm.favs'), 'fav')}${listItem('clock', t('bm.hist'), 'hist
 </div></section>
 ${channels().length ? `<section class="section"><div class="stitle"><h2>${esc(t('yt.title'))}</h2></div><div class="chlist">${channelsHTML()}</div></section>` : ''}
 <section class="section" style="margin-bottom:28px"><button class="card" data-act="shareapp"><div class="rowcard"><span class="ib">${ico('share')}</span><span class="m"><b>${esc(t('home.shareTitle'))}</b><small>${esc(t('home.shareSub'))}</small></span>${ico('chev-r')}</div></button></section>`;
-    loadWotd().then(() => { const s = $('#wotdsec', el), w = wotdFor(); if (s && view === 'home') { if (w) { s.innerHTML = wotdHTML(w); el._wotd = w; } else s.remove(); } }).catch(() => { const s = $('#wotdsec', el); s && s.remove(); });
+    loadWotd().then(() => { const s = $('#wotdsec', el), w = wotdFor(); if (s && view === 'home') { if (w) { s.innerHTML = wotdHTML(w); el._wotd = w; wotdSwipe(s); } else s.remove(); } }).catch(() => { const s = $('#wotdsec', el); s && s.remove(); });
     try {
       const [vb, vc, vv] = vk.split('/'), d = await getChapter(vb, +vc), v = d.v.find(x => x[0] === +vv) || d.v[0];
       if (view !== 'home') return;
@@ -847,6 +847,7 @@ ${channels().length ? `<section class="section"><div class="stitle"><h2>${esc(t(
     } catch { const s = $('.sk-votd', el); s && s.remove(); }
   }
   $('#v-home').addEventListener('click', e => {
+    const wl = e.target.closest('[data-wl]'); if (wl) { setWotdLang(wl.dataset.wl); return; }
     const b = e.target.closest('[data-go],[data-act],[data-tab]'); if (!b) return; buzz();
     if (b.dataset.go) location.hash = b.dataset.go;
     else if (b.dataset.tab) location.hash = b.dataset.tab;
@@ -940,7 +941,7 @@ ${rq.length ? `<div class="sec">${esc(t('search.recent'))}</div><div class="tags
 
   // ---------- saved ----------
   $('#svmode').onclick = e => { const b = e.target.closest('[data-m]'); if (b) { buzz(); savedMode = b.dataset.m; renderSaved(); } };
-  let notesQ = '', notesF = 'all';
+  let notesQ = '', notesF = 'all', wordsF = 'all';
   function renderNotes() {
     const L = $('#svlist'), hl = hlGet(), notes = notesGet(), keys = [...new Set([...Object.keys(notes), ...Object.keys(hl)])];
     const q = notesQ.trim().toLowerCase();
@@ -958,9 +959,9 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
     const inp = $('#nq'); inp.oninput = () => { notesQ = inp.value; const pos = inp.selectionStart; renderNotes(); const n2 = $('#nq'); n2.focus(); try { n2.setSelectionRange(pos, pos); } catch {} };
   }
   function renderWords() {
-    const L = $('#svlist'), list = learnedGet();
-    if (!list.length) { L.innerHTML = `<div class="empty">${ico('alpha', 'lg')}<p>${esc(t('saved.emptyWords'))}</p></div>`; return; }
-    L.innerHTML = `<p class="cnt">${esc(t('wotd.learnedN', { n: list.length }))}</p>` + list.map(x => { const g = x.k[0] === 'G';
+    const L = $('#svlist'), all = learnedGet(), list = all.filter(x => wordsF === 'all' || (x.k[0] === 'G') === (wordsF === 'el'));
+    if (!all.length) { L.innerHTML = `<div class="empty">${ico('alpha', 'lg')}<p>${esc(t('saved.emptyWords'))}</p></div>`; return; }
+    L.innerHTML = `<div class="tags nchips">${['all', 'he', 'el'].map(f => `<button class="tag${wordsF === f ? ' on' : ''}" data-wf="${f}">${esc(f === 'all' ? t('notes.f.all') : t(f === 'el' ? 'audio.greek' : 'audio.hebrew'))}</button>`).join('')}</div><p class="cnt">${esc(t('wotd.learnedN', { n: list.length }))}</p>` + list.map(x => { const g = x.k[0] === 'G';
       return `<button class="card" data-sk="${esc(x.k)}"><div class="lexrow"><span class="heb${g ? ' gk' : ''}">${esc(x.w)}</span><span class="m"><b>${esc(x.h)}</b><div class="x">${g ? 'G' + x.k.slice(1) : 'H' + parseInt(x.k)} · ${esc(pronOf(x.p))}</div></span>${ico('chev-r')}</div></button>`; }).join('');
   }
   function renderSaved() {
@@ -978,7 +979,7 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
   $('#svlist').addEventListener('click', e => {
     const list = store.get(savedMode, []), x0 = e.target;
     const bk = x0.closest('[data-bk]'); if (bk) { buzz(); bk.dataset.bk === 'exp' ? exportBackup() : importBackup(); return; }
-    if (savedMode === 'words') { const s = x0.closest('[data-sk]'); if (s) openStrong(s.dataset.sk); return; }
+    if (savedMode === 'words') { const wf = x0.closest('[data-wf]'); if (wf) { wordsF = wf.dataset.wf; buzz(); renderWords(); return; } const s = x0.closest('[data-sk]'); if (s) openStrong(s.dataset.sk); return; }
     if (savedMode === 'notes') {
       if (x0.closest('#nq')) return;
       const f = x0.closest('[data-nf]'); if (f) { notesF = f.dataset.nf; buzz(); renderNotes(); return; }
@@ -1014,82 +1015,235 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
     if (T) { try { const r = await T.isLanguageSupported({ lang: code }); return (voiceOK[code] = !!(r && r.supported)); } catch { return (voiceOK[code] = false); } }
     const vs = await loadVoices(); return (voiceOK[code] = vs.some(v => vMatch(v, code)));
   }
-  function say(text, code, rate) {
-    const T = PLUG('TextToSpeech');
-    if (T) return T.speak({ text, lang: code, rate: rate || 0.9, pitch: 1, volume: 1, category: 'playback' });
+  // ---- best voice: prefer high-quality (network / neural / enhanced) voices when the user allows online voices ----
+  const QRX = /network|neural|natural|online|enhanced|premium|wavenet|studio|google/i;
+  function voiceScore(v, code) {
+    let s = 0; const n = (v.voiceURI || '') + ' ' + (v.name || '');
+    if ((v.lang || '').toLowerCase().replace('_', '-') === code.toLowerCase()) s += 4;
+    if (set.netVoice !== false) { if (v.localService === false) s += 6; if (QRX.test(n)) s += 3; if (/-local\b/.test(n)) s -= 2; }
+    else if (v.localService === false) s -= 10;
+    if (/compact|espeak|low/i.test(n)) s -= 5;
+    return s;
+  }
+  function bestWebVoice(code) { const c = (voiceList || []).filter(x => vMatch(x, code)); return c.sort((a, b) => voiceScore(b, code) - voiceScore(a, code))[0]; }
+  let nVoices = null; const nBest = {};
+  async function bestNativeVoice(code) {
+    const k = code + (set.netVoice !== false ? '+n' : ''); if (k in nBest) return nBest[k];
+    const T = PLUG('TextToSpeech'); if (!T || !T.getSupportedVoices) return -1;
+    try { if (!nVoices) nVoices = (await T.getSupportedVoices()).voices || []; } catch { nVoices = []; }
+    let bi = -1, bs = -1e9; nVoices.forEach((v, i) => { if (!vMatch(v, code)) return; const sc = voiceScore(v, code); if (sc > bs) { bs = sc; bi = i; } });
+    return (nBest[k] = bi);
+  }
+  // speak ONE utterance; onPos(charIndex) is called on word boundaries when the engine reports them
+  // (Android TTS plugin: onRangeStart; Web Speech: onboundary). Resolves {bounds:boolean} when finished.
+  function say(text, code, rate, onPos, onStart) {
+    const T = PLUG('TextToSpeech'); let bounds = false;
+    if (T) {
+      let h = null;
+      const add = onPos && T.addListener ? new Promise(r => r(T.addListener('onRangeStart', i => { bounds = true; onPos(i.start); }))).then(x => (h = x)).catch(() => {}) : Promise.resolve();
+      return add.then(() => { onStart && onStart(); return bestNativeVoice(code).then(vi => T.speak(Object.assign({ text, lang: code, rate: (rate || 1) * rateK(), pitch: 1, volume: 1, category: 'playback' }, vi >= 0 ? { voice: vi } : {}))); })
+        .then(() => ({ bounds }), e => { throw e; }).finally(() => { try { h && h.remove(); } catch {} });
+    }
     return new Promise((res, rej) => {
       if (!('speechSynthesis' in window)) return rej(new Error('no-tts'));
-      const u = new SpeechSynthesisUtterance(text); u.lang = code; u.rate = rate || 0.9;
-      const v = (voiceList || []).find(x => vMatch(x, code)); if (v) u.voice = v;
-      u.onend = () => res(); u.onerror = e => (/interrupted|canceled/.test(e.error || '') ? res() : rej(e));
+      const u = new SpeechSynthesisUtterance(text); u.lang = code; u.rate = (rate || 1) * rateK();
+      const v = bestWebVoice(code); if (v) u.voice = v;
+      u.onstart = () => onStart && onStart();
+      u.onboundary = e => { if (onPos && (!e.name || e.name === 'word')) { bounds = true; onPos(e.charIndex); } };
+      u.onend = () => res({ bounds }); u.onerror = e => (/interrupted|canceled/.test(e.error || '') ? res({ bounds }) : rej(e));
       speechSynthesis.speak(u);
     });
   }
   const origText = (s, gk) => gk ? String(s).replace(/[,.·;—()\[\]]/g, '').trim() : String(s).replace(/\//g, '').replace(/[\u0591-\u05AF\u05BD\u05C0\u05C3]/g, '').trim();
-  const pronText = s => String(s || '').replace(/·/g, '').replace(/-/g, ' ');
-  let fallbackNoted = false;
+  const pronText = s => String(s || '').replace(/[·.]/g, '').replace(/-/g, '').trim();
+  const RATE = { orig: 0.95, pron: 1, hi: 1 }; const rateK = () => +(set.playRate || 1);
+  // ---- voice missing: friendly popup (install voice / use Hindi pronunciation), choice remembered ----
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { for (const k in voiceOK) delete voiceOK[k]; for (const k in nBest) delete nBest[k]; voiceList = null; nVoices = null; loadVoices(); } }); // re-check after returning (e.g. from voice install)
+  if ('speechSynthesis' in window && speechSynthesis.addEventListener) speechSynthesis.addEventListener('voiceschanged', () => { for (const k in voiceOK) delete voiceOK[k]; voiceList = null; });
+  async function openVoiceInstall() {
+    const T = PLUG('TextToSpeech');
+    if (T && T.openInstall) { try { await T.openInstall(); return true; } catch {} }
+    const L = PLUG('AppLauncher');
+    if (L) { try { await L.openUrl({ url: 'intent:#Intent;action=com.android.settings.TTS_SETTINGS;end' }); return true; } catch {} }
+    return false;
+  }
+  function voicePrompt(code) {
+    const name = t(code === VOICE.el ? 'audio.greek' : 'audio.hebrew');
+    return new Promise(res => {
+      let done = false; const fin = v => { if (!done) { done = true; res(v); } };
+      const el = sheet(`<div class="vprompt"><div class="vpi">${ico('volume', 'lg')}</div><p>${esc(t('audio.vpBody', { lang: name }))}</p>
+<ol class="vsteps">${t(NATIVE ? 'audio.vpStepsAndroid' : 'audio.vpStepsWeb').map(x => `<li>${esc(x.replace('{lang}', name))}</li>`).join('')}</ol>
+<label class="vdont"><input type="checkbox" data-dont> ${esc(t('audio.vpDont'))}</label></div>`, {
+        title: esc(t('audio.noVoice', { lang: name })),
+        foot: `${NATIVE ? `<button class="btn" data-v="install">${ico('download', 'sm')}${esc(t('audio.vpInstall'))}</button>` : ''}<button class="btn pri" data-v="pron">${esc(t('audio.vpPron'))}</button>`,
+        onClose: () => fin(null) });
+      el.addEventListener('click', async e => {
+        const b = e.target.closest('[data-v]'); if (!b) return;
+        const dont = $('[data-dont]', el).checked, v = b.dataset.v;
+        if (dont) store.set('voiceChoice', Object.assign(store.get('voiceChoice', {}), { [code]: v === 'pron' ? 'pron' : 'never' }));
+        buzz(); fin(v); closeTop();
+        if (v === 'install') { const ok = await openVoiceInstall(); if (!ok) noVoice(code); }
+      });
+    });
+  }
   // decide how to read: original voice (he-IL / el-GR) or the Devanagari pronunciation with a Hindi voice
-  async function readPlan(gk) {
+  async function readPlan(gk, ask = true) {
     const code = gk ? VOICE.el : VOICE.he, mode = set.audio || 'auto';
     if (mode !== 'pron' && await hasVoice(code)) return { code, orig: true };
-    if (mode === 'orig') return { missing: code };
-    if (await hasVoice(VOICE.hi)) {
-      if (mode === 'auto' && !fallbackNoted) { fallbackNoted = true; toast(t('audio.fallback', { lang: t(gk ? 'audio.greek' : 'audio.hebrew') })); }
-      return { code: VOICE.hi, orig: false };
+    const hiOK = await hasVoice(VOICE.hi);
+    if (mode === 'pron') return hiOK ? { code: VOICE.hi, orig: false } : { missing: VOICE.hi };
+    const ch = store.get('voiceChoice', {})[code];
+    if (!ch && ask) {
+      const v = await voicePrompt(code);
+      if (v !== 'pron') return { cancel: true };
     }
-    return { missing: code };
+    return hiOK ? { code: VOICE.hi, orig: false } : { missing: code };
   }
   function noVoice(code) {
     const name = t(code === VOICE.el ? 'audio.greek' : code === VOICE.hi ? 'audio.hindi' : 'audio.hebrew');
     sheet(`<div class="about"><p>${esc(t('audio.noVoiceBody', { lang: name }))}</p><p class="s">${esc(t(NATIVE ? 'audio.howAndroid' : 'audio.howWeb'))}</p></div>`, { title: esc(t('audio.noVoice', { lang: name })) });
   }
-  let speakGen = 0;
+  let speakGen = 0, hlTimer = 0;
   function stopAudio() {
-    speakGen++;
+    speakGen++; clearInterval(hlTimer); keepAwake(false);
+    if (CP.on && !CP.paused) { CP.paused = true; setTimeout(cpBar, 0); }
     const T = PLUG('TextToSpeech'); if (T) T.stop().catch(() => {}); else if ('speechSynthesis' in window) speechSynthesis.cancel();
-    $$('.w.speaking').forEach(x => x.classList.remove('speaking')); $$('.spk.on').forEach(x => x.classList.remove('on'));
+    $$('.w.speaking').forEach(x => x.classList.remove('speaking')); $$('.spk.on').forEach(x => x.classList.remove('on')); $$('.speaking-hi').forEach(x => x.classList.remove('speaking-hi'));
     playerShow(null);
   }
   async function speakWordText(orig, pron, gk, btn) {
     stopAudio(); const gen = speakGen;
-    const pl = await readPlan(gk); if (pl.missing) { noVoice(pl.missing); return; }
+    const pl = await readPlan(gk); if (pl.cancel || gen !== speakGen) return; if (pl.missing) { noVoice(pl.missing); return; }
     btn && btn.classList.add('on');
-    try { await say(pl.orig ? origText(orig, gk) : pronText(pron), pl.code, pl.orig ? 0.8 : 0.85); }
+    try { await say(pl.orig ? origText(orig, gk) : pronText(pron), pl.code, pl.orig ? 0.85 : RATE.pron); }
     catch { if (gen === speakGen) toast(t('audio.failed')); }
     if (gen === speakGen) btn && btn.classList.remove('on');
   }
-  // whole verse: word by word (exact highlight on every engine), then optionally the IRV Hindi verse
+  // whole verse as ONE utterance (no gaps). Word highlight follows engine boundary events (char offsets → word index);
+  // if the engine sends none, highlight is approximated by timing proportional to word length. Then optionally Hindi (2nd utterance).
+  async function speakVerse(i, gen, pl, withOrig, withHindi) {
+    const [vn, hi, ws] = cur.data.v[i], gk = !!cur.data.g, vEl = document.getElementById('v' + vn);
+    const mark = j => {
+      if (gen !== speakGen) return;
+      const el = vEl && vEl.querySelector(`.w[data-j="${j}"]`); if (!el || el.classList.contains('speaking')) return;
+      $$('.w.speaking').forEach(x => x.classList.remove('speaking')); el.classList.add('speaking');
+      const r = el.getBoundingClientRect(); if (r.top < 70 || r.bottom > innerHeight - 160) { quietScroll = Date.now() + 800; window.scrollBy({ top: r.top - innerHeight / 3, behavior: 'smooth' }); }
+    };
+    if (withOrig && pl && !pl.missing) {
+      const parts = ws.map(w => pl.orig ? origText(w[0], gk) : pronText(w[1])), offs = []; let text = '';
+      parts.forEach((p, j) => { if (!p) return; if (text) text += ' '; offs.push([text.length, j]); text += p; });
+      const at = c => { let j = offs.length ? offs[0][1] : 0; for (const [o, k] of offs) { if (o <= c) j = k; else break; } return j; };
+      const rate = pl.orig ? RATE.orig : RATE.pron;
+      let gotBound = false;
+      const onPos = c => { gotBound = true; clearInterval(hlTimer); mark(at(c)); };
+      let started = false;
+      const onStart = () => {
+        if (started) return; started = true;
+        mark(offs.length ? offs[0][1] : 0);
+        const t0 = Date.now(), msPerChar = (pl.orig ? 85 : 70) / (rate * rateK()), total = text.length * msPerChar;
+        clearInterval(hlTimer);
+        hlTimer = setInterval(() => { if (gotBound || gen !== speakGen) return clearInterval(hlTimer); const e = Date.now() - t0; if (e > total) return clearInterval(hlTimer); mark(at(e / msPerChar)); }, 120);
+      };
+      const safety = setTimeout(() => gen === speakGen && onStart(), 700); // engines that never fire onstart
+      try { await say(text, pl.code, rate, onPos, onStart); } catch (e) { clearInterval(hlTimer); if (gen === speakGen) { toast(t('audio.failed')); stopAudio(); } return false; }
+      clearTimeout(safety); clearInterval(hlTimer);
+    }
+    if (gen !== speakGen) return false;
+    $$('.w.speaking').forEach(x => x.classList.remove('speaking'));
+    if (withHindi && hi) { vEl && vEl.classList.add('speaking-hi'); try { await say(hi, VOICE.hi, RATE.hi); } catch {} vEl && vEl.classList.remove('speaking-hi'); }
+    return gen === speakGen;
+  }
   async function playVerse(i, withHindi) {
     if (!cur) return;
-    stopAudio(); const gen = speakGen, [vn, hi, ws] = cur.data.v[i], gk = !!cur.data.g;
-    const pl = await readPlan(gk);
-    const hiOK = withHindi && hi && await hasVoice(VOICE.hi);
+    if (CP.on) chapterStop();
+    stopAudio(); const gen = speakGen, vn = cur.data.v[i][0], gk = !!cur.data.g;
+    const pl = await readPlan(gk); if (pl.cancel || gen !== speakGen) return;
+    const hiOK = withHindi && cur.data.v[i][1] && await hasVoice(VOICE.hi);
     if (pl.missing && !hiOK) { noVoice(pl.missing); return; }
     playerShow(`${bname(cur.b)} ${cur.c}:${vn}`);
-    const vEl = document.getElementById('v' + vn);
-    if (!pl.missing) for (let j = 0; j < ws.length; j++) {
-      if (gen !== speakGen) return;
-      const el = vEl && vEl.querySelector(`.w[data-j="${j}"]`);
-      $$('.w.speaking').forEach(x => x.classList.remove('speaking'));
-      if (el) { el.classList.add('speaking'); const r = el.getBoundingClientRect(); if (r.top < 70 || r.bottom > innerHeight - 140) { quietScroll = Date.now() + 600; window.scrollBy({ top: r.top - innerHeight / 3, behavior: 'smooth' }); } }
-      const w = ws[j];
-      try { await say(pl.orig ? origText(w[0], gk) : pronText(w[1]), pl.code, pl.orig ? 0.85 : 0.95); } catch { if (gen === speakGen) { toast(t('audio.failed')); stopAudio(); } return; }
-    }
-    if (gen !== speakGen) return;
-    $$('.w.speaking').forEach(x => x.classList.remove('speaking'));
-    if (hiOK) { vEl && vEl.classList.add('speaking-hi'); try { await say(hi, VOICE.hi, 1); } catch {} vEl && vEl.classList.remove('speaking-hi'); }
+    await speakVerse(i, gen, pl, true, hiOK);
     if (gen === speakGen) playerShow(null);
   }
+  // ---- whole-chapter player: verse after verse, mini player (play/pause, prev/next, speed, mode), optional auto-next chapter ----
+  const CP = { on: false, i: 0, paused: false };
+  let chapNav = false;
+  const KA = () => PLUG('KeepAwake');
+  let wakeLock = null;
+  async function keepAwake(on) {
+    try { const k = KA(); if (k) { await (on ? k.keepAwake() : k.allowSleep()); return; } } catch {}
+    try { if (on && navigator.wakeLock && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => (wakeLock = null)); } else if (!on && wakeLock) { await wakeLock.release(); wakeLock = null; } } catch {}
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && CP.on && !CP.paused) keepAwake(true); });
+  const SPEEDS = [0.75, 1, 1.25, 1.5], MODES = ['orig', 'hi', 'both'];
+  function cpBar() {
+    const p = $('#player'); if (!p || !CP.on || !cur) return;
+    const vn = cur.data.v[CP.i] ? cur.data.v[CP.i][0] : 1, mode = set.playMode || 'orig', gk = !!cur.data.g;
+    const ab = $('#adbar'), extra = ab && ab.classList.contains('on') && getComputedStyle(ab).visibility !== 'hidden' ? ab.offsetHeight : 0;
+    p.style.bottom = `calc(var(--navh) + var(--adh) + env(safe-area-inset-bottom) + ${extra + 10}px)`;
+    p.className = 'cp';
+    p.innerHTML = `<div class="cpt"><span class="eq${CP.paused ? ' off' : ''}"><i></i><i></i><i></i></span><b>${esc(bname(cur.b))} ${cur.c}:${vn}</b>
+<button class="chip2" data-cp="mode">${esc(t('audio.cm.' + mode, { lang: t(gk ? 'audio.greek' : 'audio.hebrew') }))}</button><button class="chip2" data-cp="speed">${(+(set.playRate || 1)).toString()}×</button><button class="icbtn sm" data-cp="close" aria-label="${esc(t('act.close'))}">${ico('x', 'sm')}</button></div>
+<div class="cpc"><button class="icbtn" data-cp="prev" aria-label="${esc(t('audio.prevV'))}">${ico('prev')}</button><button class="icbtn big" data-cp="pp" aria-label="${esc(t(CP.paused ? 'audio.play' : 'audio.pause'))}">${ico(CP.paused ? 'playc' : 'pause')}</button><button class="icbtn" data-cp="next" aria-label="${esc(t('audio.nextV'))}">${ico('next')}</button></div>`;
+    p.hidden = false;
+    $$('.verse.cur-play').forEach(x => x.classList.remove('cur-play')); const vEl = document.getElementById('v' + vn); vEl && vEl.classList.add('cur-play');
+  }
+  async function chapterRun() {
+    if (!cur || !CP.on) return;
+    speakGen++; clearInterval(hlTimer); const gen = speakGen, gk = !!cur.data.g, mode = set.playMode || 'orig';
+    const T = PLUG('TextToSpeech'); try { if (T) await T.stop(); else if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch {}
+    const needOrig = mode !== 'hi';
+    const pl = needOrig ? await readPlan(gk) : null; if (gen !== speakGen) return;
+    if (pl && pl.cancel) { chapterStop(); return; }
+    const hiOK = mode !== 'orig' && await hasVoice(VOICE.hi);
+    if ((!pl || pl.missing) && !hiOK) { chapterStop(); noVoice(pl ? pl.missing : VOICE.hi); return; }
+    keepAwake(true);
+    while (CP.on && !CP.paused && gen === speakGen) {
+      if (CP.i >= cur.data.v.length) {
+        const n = set.autoNext ? neighbour(1) : null;
+        if (!n) { chapterStop(); toast(t('audio.chDone')); return; }
+        chapNav = true; CP.i = 0; location.hash = n;
+        const want = n; for (let k = 0; k < 60 && (!cur || `${cur.b}/${cur.c}` !== want || !document.getElementById('v' + cur.data.v[0][0])); k++) await new Promise(r => setTimeout(r, 100));
+        chapNav = false; if (gen !== speakGen || !CP.on) return;
+        return chapterRun();
+      }
+      cpBar();
+      const vEl = document.getElementById('v' + cur.data.v[CP.i][0]);
+      if (vEl) { const r = vEl.getBoundingClientRect(); if (r.top < 60 || r.top > innerHeight * 0.45) { quietScroll = Date.now() + 800; window.scrollBy({ top: r.top - 72, behavior: 'smooth' }); } }
+      const ok = await speakVerse(CP.i, gen, pl, needOrig, hiOK);
+      if (!ok || gen !== speakGen) return;
+      CP.i++;
+    }
+  }
+  function chapterStart(i) {
+    if (!cur) return; stopAudio(); CP.on = true; CP.paused = false; CP.i = Math.max(0, i || 0); cpBar(); chapterRun();
+  }
+  function chapterStop() {
+    CP.on = false; CP.paused = false; stopAudio(); keepAwake(false);
+    const p = $('#player'); if (p) p.className = ''; $$('.verse.cur-play').forEach(x => x.classList.remove('cur-play'));
+  }
+  function chapterCtl(a) {
+    buzz();
+    if (a === 'close') return chapterStop();
+    if (a === 'pp') { CP.paused = !CP.paused; if (CP.paused) { speakGen++; clearInterval(hlTimer); const T = PLUG('TextToSpeech'); if (T) T.stop().catch(() => {}); else if ('speechSynthesis' in window) speechSynthesis.cancel(); $$('.w.speaking').forEach(x => x.classList.remove('speaking')); keepAwake(false); cpBar(); } else chapterRun(); return; }
+    if (a === 'prev') { CP.i = Math.max(0, CP.i - 1); CP.paused = false; return chapterRun(); }
+    if (a === 'next') { CP.i = Math.min(cur.data.v.length, CP.i + 1); CP.paused = false; return chapterRun(); }
+    if (a === 'speed') { const k = SPEEDS.indexOf(+(set.playRate || 1)); set.playRate = SPEEDS[(k + 1) % SPEEDS.length]; saveSet(); if (!CP.paused) chapterRun(); else cpBar(); return; }
+    if (a === 'mode') { const k = MODES.indexOf(set.playMode || 'orig'); set.playMode = MODES[(k + 1) % MODES.length]; saveSet(); if (!CP.paused) chapterRun(); else cpBar(); return; }
+  }
+  // first visible verse = where chapter playback starts
+  function firstVisibleVerse() { if (!cur) return 0; const vs = $$('#page .verse'); for (const v of vs) { const r = v.getBoundingClientRect(); if (r.bottom > 90) return +v.dataset.i || 0; } return 0; }
+  $('#btnPlayCh') && $('#btnPlayCh').addEventListener('click', () => { buzz(); if (CP.on) chapterStop(); else chapterStart(firstVisibleVerse()); });
   function playerShow(label) {
     const p = $('#player'); if (!p) return;
-    if (!label) { p.hidden = true; return; }
+    if (!label) { if (!CP.on) { p.hidden = true; p.className = ''; } return; }
+    p.className = '';
     const ab = $('#adbar'), extra = ab && ab.classList.contains('on') && getComputedStyle(ab).visibility !== 'hidden' ? ab.offsetHeight : 0;
     p.style.bottom = `calc(var(--navh) + var(--adh) + env(safe-area-inset-bottom) + ${extra + 10}px)`;
     p.innerHTML = `<span class="eq"><i></i><i></i><i></i></span><b>${esc(label)}</b><button class="icbtn" data-stop aria-label="${esc(t('audio.stop'))}">${ico('stop')}</button>`;
     p.hidden = false;
   }
-  $('#player').addEventListener('click', e => { if (e.target.closest('[data-stop]')) { buzz(); stopAudio(); } });
-  window.addEventListener('hashchange', () => { if (!$('#player').hidden) stopAudio(); });
+  $('#player').addEventListener('click', e => { const c = e.target.closest('[data-cp]'); if (c) return chapterCtl(c.dataset.cp); if (e.target.closest('[data-stop]')) { buzz(); stopAudio(); } });
+  window.addEventListener('hashchange', () => { if (chapNav) return; if (CP.on) chapterStop(); else if (!$('#player').hidden) stopAudio(); });
 
   // ---- highlights & notes (stored locally; exportable) ----
   const HL = ['yellow', 'green', 'blue', 'pink', 'orange'];
@@ -1126,7 +1280,10 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
   // ---- word of the day ----
   let wotdList = null;
   const loadWotd = once(() => getJSON('data/wotd.json' + GZ).then(x => (wotdList = x)));
-  const wotdFor = (d = new Date()) => wotdList && wotdList.length ? wotdList[dayNum(d) % wotdList.length] : null;
+  // two daily lists: a Hebrew word AND a Greek word every day; the card's tab (stored 'wotdLang', default Hebrew) picks which one shows
+  const wotdLang = () => store.get('wotdLang', 'he');
+  const wotdOf = lang => (wotdList || []).filter(w => (w[0][0] === 'G') === (lang === 'el'));
+  const wotdFor = (d = new Date(), lang = wotdLang()) => { const l = wotdOf(lang); return l.length ? l[dayNum(d) % l.length] : null; };
   const learnedGet = () => store.get('learned', []);
   function toggleLearned(w) {
     let l = learnedGet(); const has = l.some(x => x.k === w[0]);
@@ -1135,7 +1292,7 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
   }
   function wotdHTML(w) {
     const gk = w[0][0] === 'G', learned = learnedGet().some(x => x.k === w[0]), num = (gk ? 'G' : 'H') + w[0].replace(/^G/, '').replace(/\D.*$/, '');
-    return `<article class="wotd"><div class="lbl">${ico('alpha')}${esc(t('wotd.title'))}<span class="lang">${esc(t(gk ? 'audio.greek' : 'audio.hebrew'))}</span></div>
+    return `<article class="wotd"><div class="lbl">${ico('alpha')}${esc(t('wotd.title'))}<span class="segc wseg">${['he', 'el'].map(l => `<button data-wl="${l}" class="${(l === 'el') === gk ? 'on' : ''}">${esc(t(l === 'el' ? 'audio.greek' : 'audio.hebrew'))}</button>`).join('')}</span></div>
 <div class="wrow"><div class="ww ${gk ? 'gk' : 'hb'}" lang="${gk ? 'grc' : 'he'}">${esc(w[1])}</div><button class="icbtn spk big" data-act="wsay" aria-label="${esc(t('audio.listen'))}">${ico('volume')}</button></div>
 <div class="wp">${esc(pronOf(w[2]))}</div><div class="wh">${esc(w[3])}</div>
 <div class="wm">${esc(num)} · ${esc(t('wotd.times', { n: nf(w[5]) }))}${LANG === 'en' && w[4] ? ` · <span>${esc(w[4].split(/[,;]/)[0])}</span>` : ''}</div>
@@ -1205,7 +1362,8 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
   async function testVoices() {
     const rows = [];
     for (const [k, code] of [['audio.hebrew', VOICE.he], ['audio.greek', VOICE.el], ['audio.hindi', VOICE.hi]]) rows.push(`<div class="row"><span class="lb">${esc(t(k))}<small>${code}</small></span><span class="val">${(await hasVoice(code)) ? '✓ ' + esc(t('audio.ok')) : '— ' + esc(t('audio.missing'))}</span></div>`);
-    sheet(`<div class="group">${rows.join('')}</div><p class="tipline" style="text-align:left">${esc(t(NATIVE ? 'audio.howAndroid' : 'audio.howWeb'))}</p>`, { title: esc(t('audio.test')) });
+    const el = sheet(`<div class="group">${rows.join('')}</div><p class="tipline" style="text-align:left">${esc(t(NATIVE ? 'audio.howAndroid' : 'audio.howWeb'))}</p>`, { title: esc(t('audio.test')), foot: NATIVE ? `<button class="btn pri" data-vinst>${ico('download', 'sm')}${esc(t('audio.vpInstall'))}</button>` : '' });
+    el.addEventListener('click', async e => { if (e.target.closest('[data-vinst]')) { buzz(); if (!(await openVoiceInstall())) toast(t('audio.howAndroid')); } });
     if (await hasVoice(VOICE.hi)) say(t('audio.sample'), VOICE.hi, 1).catch(() => {});
   }
 
@@ -1218,7 +1376,21 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
   const channels = () => [[CFG.youtubeUrl, 'yt.main', 'yt.mainSub', 'ytm'], [CFG.youtubeKidsUrl, 'yt.kids', 'yt.kidsSub', 'ytk']].filter(c => c[0]);
   const chHandle = u => (String(u).match(/@[\w.-]+/) || [''])[0];
   const channelsHTML = () => channels().map(([u, l, s, cls]) => `<button class="chcard ${cls}" data-yt="${esc(u)}"><span class="yi">${ico('play')}</span><span class="m"><b>${esc(t(l))}</b><small>${esc(t(s))}</small><em>${esc(chHandle(u))}</em></span>${ico('chev-r')}</button>`).join('');
-  document.addEventListener('click', e => { const y = e.target.closest('[data-yt]'); if (y) { e.preventDefault(); buzz(); openExt(y.dataset.yt); } });
+  document.addEventListener('click', e => { if (e.target.closest('[data-privacy]')) { e.preventDefault(); openPrivacy(); return; } const y = e.target.closest('[data-yt]'); if (y) { e.preventDefault(); buzz(); openExt(y.dataset.yt); } });
+  const openPrivacy = () => openExt(NATIVE ? (CFG.privacyUrl || 'https://dscj21.github.io/hebrew-hindi-bible/privacy.html') : 'privacy.html');
+
+  function setWotdLang(l) {
+    const cw = $('#v-home')._wotd; if (cw && (cw[0][0] === 'G') === (l === 'el')) return;
+    store.set('wotdLang', l); buzz(); const s = $('#wotdsec'), w = wotdFor(new Date(), l); if (!s || !w) return;
+    $('#v-home')._wotd = w; const old = s.querySelector('.wotd'); s.innerHTML = wotdHTML(w); const n = s.querySelector('.wotd');
+    n.classList.add(l === 'el' ? 'in-r' : 'in-l'); if (set.notif) scheduleDaily();
+  }
+  function wotdSwipe(s) {
+    let x0 = null, y0 = 0;
+    s.addEventListener('touchstart', e => { const t0 = e.touches[0]; x0 = t0.clientX; y0 = t0.clientY; }, { passive: true });
+    s.addEventListener('touchend', e => { if (x0 == null) return; const t1 = e.changedTouches[0], dx = t1.clientX - x0, dy = t1.clientY - y0; x0 = null;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) { e.stopPropagation(); setWotdLang(dx < 0 ? 'el' : 'he'); } });
+  }
 
   // ---------- settings ----------
   const META = { en: { name: 'English' }, hi: { name: 'हिन्दी' } };
@@ -1232,7 +1404,7 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
 <div class="gt">${esc(t('set.words'))}</div><div class="group">${tgRow('gloss', t('set.gloss'))}${tgRow('pron', t('set.pron'))}${tgRow('dots', t('set.dots'), t('set.dotsSub'))}
 ${tgRow('split', t('set.split'), t('set.splitSub'))}${tgRow('sn', t('set.sn'))}${tgRow('chip', t('set.chip'), t('set.chipSub'))}${tgRow('root', t('set.root'))}${tgRow('hindi', t('set.hindi'))}</div>
 <div class="gt">${esc(t('audio.title'))}</div><div class="group"><div class="row col"><span class="lb" style="margin-bottom:10px">${esc(t('audio.mode'))}<small>${esc(t('audio.modeSub'))}</small></span><div class="segc">${['auto', 'orig', 'pron'].map(k => `<button data-au="${k}" class="${(set.audio || 'auto') === k ? 'on' : ''}">${esc(t('audio.m.' + k))}</button>`).join('')}</div></div>
-${tgRow('audioHindi', t('audio.withHindi'), t('audio.withHindiSub'))}<button class="row" data-x="voicetest">${ico('volume')}<span class="lb">${esc(t('audio.test'))}<small>${esc(t('audio.testSub'))}</small></span>${ico('chev-r', 'sm')}</button></div>
+${tgRow('audioHindi', t('audio.withHindi'), t('audio.withHindiSub'))}${tgRow('autoNext', t('audio.autoNext'), t('audio.autoNextSub'))}${tgRow('netVoice', t('audio.netVoice'), t('audio.netVoiceSub'))}<button class="row" data-x="voicetest">${ico('volume')}<span class="lb">${esc(t('audio.test'))}<small>${esc(t('audio.testSub'))}</small></span>${ico('chev-r', 'sm')}</button></div>
 <div class="gt">${esc(t('notif.title'))}</div><div class="group">${NATIVE ? `<label class="row"><span class="lb">${esc(t('notif.daily'))}<small>${esc(t('notif.dailySub'))}</small></span><span class="sw"><input type="checkbox" data-notif ${set.notif ? 'checked' : ''}><span></span></span></label>
 <label class="row"><span class="lb">${esc(t('notif.time'))}</span><input type="time" class="tm" data-ntime value="${esc(set.notifTime || '07:00')}" ${set.notif ? '' : 'disabled'}></label>${tgRow('notifWord', t('notif.word'), t('notif.wordSub'))}`
   : `<div class="row"><span class="lb">${ico('bell', 'sm')} ${esc(t('notif.daily'))}<small>${esc(t('notif.webOnly'))}</small></span></div><label class="row"><span class="lb">${esc(t('notif.time'))}</span><input type="time" class="tm" value="${esc(set.notifTime || '07:00')}" disabled></label>`}</div>
@@ -1240,20 +1412,21 @@ ${tgRow('audioHindi', t('audio.withHindi'), t('audio.withHindiSub'))}<button cla
 <div class="gt">${esc(t('set.gestures'))}</div>${gestureHTML()}
 ${channels().length ? `<div class="gt">${esc(t('yt.title'))}</div><div class="group">${channels().map(([u, l, sb]) => `<button class="row" data-yt="${esc(u)}"><span class="yti">${ico('play')}</span><span class="lb">${esc(t(l))}<small>${esc(t(sb))} · ${esc(chHandle(u))}</small></span>${ico('chev-r', 'sm')}</button>`).join('')}</div>` : ''}
 <div class="gt">${esc(t('set.data'))}</div><div class="group"><button class="row" data-x="exp">${ico('download')}<span class="lb">${esc(t('backup.export'))}<small>${esc(t('backup.exportSub'))}</small></span></button><button class="row" data-x="imp">${ico('upload')}<span class="lb">${esc(t('backup.import'))}</span></button><button class="row" data-x="hist">${ico('clock')}<span class="lb">${esc(t('set.clearHist'))}</span></button><button class="row" data-x="reset">${ico('settings')}<span class="lb">${esc(t('set.reset'))}</span></button>
-<button class="row" data-x="share">${ico('share')}<span class="lb">${esc(t('menu.share'))}</span>${ico('chev-r', 'sm')}</button><button class="row" data-x="about">${ico('info')}<span class="lb">${esc(t('set.about'))}</span><span class="val">${esc(CFG.version)}</span>${ico('chev-r', 'sm')}</button></div></div>`;
+<button class="row" data-x="share">${ico('share')}<span class="lb">${esc(t('menu.share'))}</span>${ico('chev-r', 'sm')}</button><button class="row" data-x="privacy">${ico('info')}<span class="lb">${esc(t('set.privacy'))}</span>${ico('chev-r', 'sm')}</button><button class="row" data-x="about">${ico('info')}<span class="lb">${esc(t('set.about'))}</span><span class="val">${esc(CFG.version)}</span>${ico('chev-r', 'sm')}</button></div></div>`;
   }
   $('#v-settings').addEventListener('change', async e => {
     if (e.target.hasAttribute('data-notif')) { const ok = await enableNotif(e.target.checked); if (!ok) e.target.checked = false; renderSettings(); return; }
     if (e.target.hasAttribute('data-ntime')) { set.notifTime = e.target.value || '07:00'; saveSet(); await scheduleDaily(); toast(t('notif.on', { t: set.notifTime })); return; }
+    if (e.target.dataset.k === 'netVoice') { set.netVoice = e.target.checked; saveSet(); buzz(); return; }
     if (e.target.dataset.k === 'notifWord') { set.notifWord = e.target.checked; saveSet(); scheduleDaily(); return; }
     const k = e.target.dataset.k; if (k) { set[k] = e.target.checked; saveSet(); buzz(); if (cur) render(); renderSettings(); } });
   $('#v-settings').addEventListener('input', e => { if (e.target.classList.contains('fsr')) { set.fs = +e.target.value / 100; $('#fsv').textContent = e.target.value + '%'; saveSet(); } });
   $('#v-settings').addEventListener('click', e => {
     const b = e.target.closest('[data-t]'); if (b) { set.theme = b.dataset.t; saveSet(); buzz(); renderSettings(); return; }
-    const au = e.target.closest('[data-au]'); if (au) { set.audio = au.dataset.au; saveSet(); buzz(); fallbackNoted = false; renderSettings(); return; }
+    const au = e.target.closest('[data-au]'); if (au) { set.audio = au.dataset.au; store.set('voiceChoice', {}); saveSet(); buzz(); renderSettings(); return; }
     const x = e.target.closest('[data-x]'); if (!x) return;
     ({ lang: openLangSheet, hist: () => { store.set('hist', []); toast(t('set.histCleared')); }, reset: () => { set = Object.assign({}, DEF); saveSet(); if (cur) render(); renderSettings(); toast(t('set.resetDone')); },
-      about: openAbout, share: shareApp, exp: exportBackup, imp: importBackup, voicetest: testVoices }[x.dataset.x] || (() => {}))();
+      about: openAbout, privacy: openPrivacy, share: shareApp, exp: exportBackup, imp: importBackup, voicetest: testVoices }[x.dataset.x] || (() => {}))();
   });
 
   // ---------- language ----------

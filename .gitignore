@@ -15,3 +15,4 @@ capacitor/android/capacitor-cordova-android-plugins/
 capacitor/android/app/src/main/assets/capacitor.config.json
 capacitor/android/app/src/main/assets/capacitor.plugins.json
 capacitor/android/app/src/debug/assets/
+samples/

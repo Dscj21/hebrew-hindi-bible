@@ -216,7 +216,8 @@
   "histCleared": "History cleared",
   "resetDone": "Settings reset",
   "follow": "Follow us",
-  "youtube": "YouTube channel"
+  "youtube": "YouTube channel",
+  "privacy": "Privacy policy"
  },
  "lang": {
   "title": "Choose your language",
@@ -440,7 +441,7 @@
   "hindi": "Hindi",
   "fallback": "No {lang} voice on this device. Reading the Hindi pronunciation instead.",
   "failed": "Couldn’t play audio",
-  "noVoice": "No {lang} voice installed",
+  "noVoice": "{lang} voice not installed",
   "noVoiceBody": "Your device doesn’t have a {lang} text-to-speech voice yet. You can still hear the Devanagari pronunciation read by a Hindi voice.",
   "howAndroid": "To add a voice: Settings → System → Languages → Text-to-speech → Google speech engine → Install voice data, then pick the language.",
   "howWeb": "Voices come from your browser and operating system. Chrome on Android and desktop usually include Hindi; Hebrew and Greek may need a system language pack.",
@@ -457,7 +458,36 @@
   "withHindiSub": "After the original, play the IRV Hindi verse",
   "test": "Check voices",
   "testSub": "See which voices this device has",
-  "sample": "नमस्ते, आवाज़ काम कर रही है"
+  "sample": "नमस्ते, आवाज़ काम कर रही है",
+  "vpBody": "Your phone doesn’t have a {lang} text-to-speech voice yet. Install it for natural {lang} audio, or listen to the Devanagari pronunciation read by a Hindi voice.",
+  "vpStepsAndroid": [
+   "Tap “Install voice”",
+   "Choose Google Speech Services (Speech Recognition & Synthesis)",
+   "Install voice data → {lang} → download",
+   "Come back to the app and tap play again"
+  ],
+  "vpStepsWeb": [
+   "Install the {lang} language/voice in your device’s language settings",
+   "Restart the browser and tap play again"
+  ],
+  "vpDont": "Don’t show this again",
+  "vpInstall": "Install voice",
+  "vpPron": "Use Hindi pronunciation",
+  "playChapter": "Play chapter",
+  "cm": {
+   "orig": "{lang}",
+   "hi": "Hindi",
+   "both": "{lang} + Hindi"
+  },
+  "prevV": "Previous verse",
+  "nextV": "Next verse",
+  "play": "Play",
+  "pause": "Pause",
+  "chDone": "Chapter finished",
+  "autoNext": "Continue to next chapter",
+  "autoNextSub": "Chapter playback goes on automatically",
+  "netVoice": "Best quality voices",
+  "netVoiceSub": "Prefer natural online voices when connected (uses data)"
  },
  "hl": {
   "title": "Highlight",

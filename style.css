@@ -421,3 +421,23 @@ input.tm{border:1px solid var(--line2);border-radius:10px;padding:8px 10px;font:
 .row[data-yt*=Kids] .yti{background:linear-gradient(135deg,#f59e0b,#ec4899 55%,#8b5cf6)}
 .about .chlist .chcard{box-shadow:none;background:var(--card2)}
 img.lp-logo{width:88px;height:88px;border-radius:22px;background:none;display:block;object-fit:cover;box-shadow:0 12px 30px rgba(48,27,132,.35)}
+.vprompt{text-align:left}.vprompt .vpi{width:56px;height:56px;border-radius:16px;background:var(--acc-soft);color:var(--acc-ink);display:grid;place-items:center;margin:0 0 10px}
+.vprompt p{margin:0 0 10px;line-height:1.6;color:var(--ink2)}.vsteps{margin:0 0 12px;padding-left:22px;line-height:1.7;color:var(--ink)}.vsteps li{margin:2px 0}
+.vdont{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:14.5px}.vdont input{width:18px;height:18px;accent-color:var(--acc)}
+.wotd .lbl .wseg{margin-left:auto;letter-spacing:0;text-transform:none;font-weight:600;background:var(--card);padding:2px}
+.wotd .lbl .wseg button{border:0;background:none;font:inherit;font-size:13px;padding:4px 12px;border-radius:9px;color:var(--ink2);cursor:pointer}
+.wotd .lbl .wseg button.on{background:var(--acc);color:var(--on-acc)}
+.wotd.in-r{animation:wIn .28s var(--ease)}.wotd.in-l{animation:wInL .28s var(--ease)}
+@keyframes wIn{from{opacity:.3;transform:translateX(30px)}to{opacity:1;transform:none}}@keyframes wInL{from{opacity:.3;transform:translateX(-30px)}to{opacity:1;transform:none}}
+/* chapter player */
+#player.cp{flex-direction:column;align-items:stretch;gap:2px;border-radius:22px;padding:10px 10px 6px 16px}
+#player.cp .cpt{display:flex;align-items:center;gap:8px}#player.cp .cpt b{flex:1;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#player.cp .chip2{border:0;border-radius:999px;padding:5px 10px;font:inherit;font-size:13px;font-weight:650;background:rgba(255,255,255,.14);color:var(--bg);cursor:pointer;white-space:nowrap}
+[data-theme=dark] #player.cp .chip2{background:rgba(0,0,0,.12)}
+#player.cp .icbtn.sm{width:32px;height:32px}
+#player.cp .cpc{display:flex;justify-content:center;align-items:center;gap:22px}
+#player.cp .cpc .icbtn{width:44px;height:44px}#player.cp .cpc .icbtn.big{width:52px;height:52px}#player.cp .cpc .icbtn.big .ic{width:34px;height:34px}
+#player .eq.off i{animation:none;height:4px}
+.verse.cur-play{background:var(--acc-soft);border-radius:18px;margin-left:-8px;margin-right:-8px;padding-left:8px;padding-right:8px;transition:background .3s}
+.verse.hl.cur-play{box-shadow:inset 4px 0 0 var(--hlb),0 0 0 2px var(--acc)}
+#btnPlayCh .ic{width:23px;height:23px}

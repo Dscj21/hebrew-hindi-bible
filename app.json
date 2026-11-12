@@ -1,5 +1,5 @@
 {
- "_note": "App-wide links and options. Leave a URL empty to hide it. shareUrl = public app/download link used in share text and share cards; youtubeUrl / youtubeKidsUrl = channel links shown on Home ('Our channels'), in Settings and About; playStoreUrl = 'Rate us' target.",
+ "_note": "App-wide links and options. Leave a URL empty to hide it. shareUrl = public app/download link used in share text and share cards; youtubeUrl / youtubeKidsUrl = channel links shown on Home ('Our channels'), in Settings and About; playStoreUrl = 'Rate us' target. privacyUrl = privacy policy (Play Store requirement); contactEmail = support email.",
  "shareUrl": "",
  "youtubeUrl": "https://www.youtube.com/@BlueSparrowSpiritual",
  "playStoreUrl": "",
@@ -9,5 +9,7 @@
   "hi"
  ],
  "defaultLanguage": "en",
- "youtubeKidsUrl": "https://www.youtube.com/@BlueSparrowKids"
+ "youtubeKidsUrl": "https://www.youtube.com/@BlueSparrowKids",
+ "privacyUrl": "https://dscj21.github.io/hebrew-hindi-bible/privacy.html",
+ "contactEmail": "bluesparrowrecords7@gmail.com"
 }

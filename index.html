@@ -44,7 +44,7 @@
   <symbol id="i-alpha" viewBox="0 0 24 24"><path d="M15.5 6.5c-1 6-2.2 11-6 11a4 4 0 0 1 0-8c3.8 0 5 5 6.5 8"/></symbol>
   <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
   <symbol id="i-playc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M10 8.5v7l5.5-3.5z"/></symbol>
-  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2.5"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="7" y="5.5" width="3.2" height="13" rx="1.2"/><rect x="13.8" y="5.5" width="3.2" height="13" rx="1.2"/></symbol><symbol id="i-prev" viewBox="0 0 24 24"><path d="M7 6v12M18 6.5v11L9.5 12z"/></symbol><symbol id="i-next" viewBox="0 0 24 24"><path d="M17 6v12M6 6.5v11l8.5-5.5z"/></symbol><symbol id="i-headph" viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3.5" y="14" width="4.5" height="6.5" rx="1.8"/><rect x="16" y="14" width="4.5" height="6.5" rx="1.8"/></symbol><symbol id="i-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2.5"/></symbol>
   <symbol id="i-note" viewBox="0 0 24 24"><path d="M5 3.5h10l4 4V20a.5.5 0 0 1-.5.5h-13A.5.5 0 0 1 5 20z"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4"/></symbol>
   <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></symbol>
   <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
@@ -61,6 +61,7 @@
 <header id="top" class="topbar" hidden>
   <button id="title" class="tbtitle"><span id="titleTxt"></span><svg class="ic sm"><use href="#i-chev-d"/></svg></button>
   <div class="tbacts">
+    <button id="btnPlayCh" class="icbtn" data-i18n-aria="audio.playChapter"><svg class="ic"><use href="#i-headph"/></svg></button>
     <button id="btnAa" class="icbtn" data-i18n-aria="bm.size"><svg class="ic"><use href="#i-type"/></svg></button>
     <button id="btnMenu" class="icbtn" aria-label="Menu"><svg class="ic"><use href="#i-more"/></svg></button>
   </div>
