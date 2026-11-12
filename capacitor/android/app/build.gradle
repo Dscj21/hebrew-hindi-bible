@@ -17,7 +17,12 @@ android {
         }
     }
     buildTypes {
+        // AdMob app ID per build type (ad unit IDs live in ads.json; debug gets Google TEST IDs)
+        debug {
+            resValue "string", "admob_app_id", "ca-app-pub-3940256099942544~3347511713"
+        }
         release {
+            resValue "string", "admob_app_id", "ca-app-pub-5235855521275178~1066678732"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

@@ -9,7 +9,7 @@ const Ads = (() => {
     if (native()) {
       admob = window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
       if (admob) try {
-        await admob.initialize({ initializeForTesting: !!cfg.android.testing });
+        await admob.initialize({ initializeForTesting: !!cfg.android.testing, testingDevices: cfg.android.testingDevices || [] });
         if (cfg.android.bannerId) {
           // banner sits just above the bottom navigation bar (60dp); --adh reserves its height in the layout
           try { admob.addListener('bannerAdSizeChanged', s => s && s.height && document.documentElement.style.setProperty('--adh', s.height + 'px')); } catch {}

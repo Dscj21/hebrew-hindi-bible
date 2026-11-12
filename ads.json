@@ -1,5 +1,5 @@
 {
-  "_note": "Single ad config. Leave IDs empty to show nothing. Web = Google AdSense, Android app = AdMob (via @capacitor-community/admob). Android IDs below are Google's public TEST units - replace with real ones before release.",
+  "_note": "Single ad config. Leave IDs empty to show nothing. Web = Google AdSense; Android app = AdMob (@capacitor-community/admob). 'android' = LIVE IDs used by release builds. 'androidDebug' = Google's public TEST IDs; capacitor/copy-www.js writes them into the debug build only. Add your phone's AdMob test-device ID (shown in logcat as 'Use RequestConfiguration...setTestDeviceIds') to android.testingDevices so you never see or click your own live ads, even in the release build.",
   "enabled": true,
   "showPlaceholders": false,
   "web": {
@@ -8,11 +8,19 @@
     "inChapterSlot": ""
   },
   "android": {
+    "admobAppId": "ca-app-pub-5235855521275178~1066678732",
+    "bannerId": "ca-app-pub-5235855521275178/4814352057",
+    "interstitialId": "",
+    "testing": false,
+    "testingDevices": []
+  },
+  "inChapterEveryVerses": 12,
+  "interstitialEveryChapters": 0,
+  "androidDebug": {
     "admobAppId": "ca-app-pub-3940256099942544~3347511713",
     "bannerId": "ca-app-pub-3940256099942544/6300978111",
     "interstitialId": "ca-app-pub-3940256099942544/1033173712",
-    "testing": true
-  },
-  "inChapterEveryVerses": 12,
-  "interstitialEveryChapters": 0
+    "testing": true,
+    "testingDevices": []
+  }
 }

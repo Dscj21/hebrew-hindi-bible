@@ -4,5 +4,4 @@
     <string name="title_activity_main">Hebrew Greek Hindi Bible</string>
     <string name="package_name">in.hebrewhindi.bible</string>
     <string name="custom_url_scheme">in.hebrewhindi.bible</string>
-    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
 </resources>

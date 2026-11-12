@@ -33,7 +33,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
-        <!-- AdMob app ID (Google public TEST id; replace with the real one from ads.json before release) -->
+        <!-- AdMob app ID: set per build type in app/build.gradle (debug = Google TEST id, release = live id) -->
         <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="@string/admob_app_id"/>
     </application>
 

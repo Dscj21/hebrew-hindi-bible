@@ -1,5 +1,5 @@
 // Offline-ish: app shell precached; chapters cached as you read (stale-while-revalidate).
-const C = 'hhb-v13';
+const C = 'hhb-v14';
 const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'morph.js', 'ads.js', 'ads.json', 'app.json', 'locales/en.json', 'locales/hi.json', 'manifest.json', 'icon.svg',
   'data/index.json', 'data/lex.json.gz', 'fonts/Inter.woff2', 'fonts/NotoSerifHebrew.woff2', 'fonts/NotoSansDevanagari.woff2',
   'fonts/NotoSerifGreek.woff2', 'fonts/NotoSerifGreekExt.woff2'];
