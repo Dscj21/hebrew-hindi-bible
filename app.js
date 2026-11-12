@@ -856,7 +856,7 @@ ${channels().length ? `<section class="section"><div class="stitle"><h2>${esc(t(
       if (a === 'books') openPicker('books');
       const wd = $('#v-home')._wotd;
       if (a === 'wsay' && wd) speakWordText(wd[1], wd[2], wd[0][0] === 'G', b);
-      if (a === 'wmore' && wd) openStrong(wd[0]);
+      if (a === 'wmore' && wd) openStrong(wd[9] || wd[0]);
       if (a === 'wlearn' && wd) { const on = toggleLearned(wd); b.classList.toggle('on', on); b.innerHTML = ico('check', 'sm') + esc(t(on ? 'wotd.learned' : 'wotd.mark')); }
       if (a === 't-ot' || a === 't-nt') { store.set('homeT', a.slice(2)); const y = scrollY; renderHome(); scrollTo(0, y); }
       if (a === 'lexi') { setMode('strong'); location.hash = 'search'; setTimeout(() => $('#q').focus(), 80); }
@@ -962,7 +962,7 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
     const L = $('#svlist'), all = learnedGet(), list = all.filter(x => wordsF === 'all' || (x.k[0] === 'G') === (wordsF === 'el'));
     if (!all.length) { L.innerHTML = `<div class="empty">${ico('alpha', 'lg')}<p>${esc(t('saved.emptyWords'))}</p></div>`; return; }
     L.innerHTML = `<div class="tags nchips">${['all', 'he', 'el'].map(f => `<button class="tag${wordsF === f ? ' on' : ''}" data-wf="${f}">${esc(f === 'all' ? t('notes.f.all') : t(f === 'el' ? 'audio.greek' : 'audio.hebrew'))}</button>`).join('')}</div><p class="cnt">${esc(t('wotd.learnedN', { n: list.length }))}</p>` + list.map(x => { const g = x.k[0] === 'G';
-      return `<button class="card" data-sk="${esc(x.k)}"><div class="lexrow"><span class="heb${g ? ' gk' : ''}">${esc(x.w)}</span><span class="m"><b>${esc(x.h)}</b><div class="x">${g ? 'G' + x.k.slice(1) : 'H' + parseInt(x.k)} · ${esc(pronOf(x.p))}</div></span>${ico('chev-r')}</div></button>`; }).join('');
+      return `<button class="card" data-sk="${esc(x.sk || x.k)}"><div class="lexrow"><span class="heb${g ? ' gk' : ''}">${esc(x.w)}</span><span class="m"><b>${esc(x.h)}</b><div class="x">${esc(x.n || (g ? 'G' + x.k.slice(1) : 'H' + parseInt(x.k)))} · ${esc(pronOf(x.p))}</div></span>${ico('chev-r')}</div></button>`; }).join('');
   }
   function renderSaved() {
     $$('#svmode button').forEach(b => b.classList.toggle('on', b.dataset.m === savedMode));
@@ -1285,18 +1285,20 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
   const wotdOf = lang => (wotdList || []).filter(w => (w[0][0] === 'G') === (lang === 'el'));
   const wotdFor = (d = new Date(), lang = wotdLang()) => { const l = wotdOf(lang); return l.length ? l[dayNum(d) % l.length] : null; };
   const learnedGet = () => store.get('learned', []);
+  // entry: [key, lemma, pron, hindi, english, count, refIRV, hindiVerse, navRefWLC?, strongKey?, numLabel?]
+  const wotdNum = w => w[10] || ((w[0][0] === 'G' ? 'G' : 'H') + w[0].replace(/^G/, '').replace(/\D.*$/, ''));
   function toggleLearned(w) {
     let l = learnedGet(); const has = l.some(x => x.k === w[0]);
-    l = has ? l.filter(x => x.k !== w[0]) : [{ k: w[0], w: w[1], p: w[2], h: w[3], t: Date.now() }, ...l];
+    l = has ? l.filter(x => x.k !== w[0]) : [{ k: w[0], w: w[1], p: w[2], h: w[3], t: Date.now(), sk: w[9] || w[0], n: wotdNum(w) }, ...l];
     store.set('learned', l); buzz(); toast(t(has ? 'wotd.unlearned' : 'wotd.learnedToast')); return !has;
   }
   function wotdHTML(w) {
-    const gk = w[0][0] === 'G', learned = learnedGet().some(x => x.k === w[0]), num = (gk ? 'G' : 'H') + w[0].replace(/^G/, '').replace(/\D.*$/, '');
+    const gk = w[0][0] === 'G', learned = learnedGet().some(x => x.k === w[0]), num = wotdNum(w);
     return `<article class="wotd"><div class="lbl">${ico('alpha')}${esc(t('wotd.title'))}<span class="segc wseg">${['he', 'el'].map(l => `<button data-wl="${l}" class="${(l === 'el') === gk ? 'on' : ''}">${esc(t(l === 'el' ? 'audio.greek' : 'audio.hebrew'))}</button>`).join('')}</span></div>
 <div class="wrow"><div class="ww ${gk ? 'gk' : 'hb'}" lang="${gk ? 'grc' : 'he'}">${esc(w[1])}</div><button class="icbtn spk big" data-act="wsay" aria-label="${esc(t('audio.listen'))}">${ico('volume')}</button></div>
 <div class="wp">${esc(pronOf(w[2]))}</div><div class="wh">${esc(w[3])}</div>
 <div class="wm">${esc(num)} · ${esc(t('wotd.times', { n: nf(w[5]) }))}${LANG === 'en' && w[4] ? ` · <span>${esc(w[4].split(/[,;]/)[0])}</span>` : ''}</div>
-<button class="wex" data-go="${w[6]}"><span>${esc(w[7])}</span><b>${esc(refName(w[6]))}</b></button>
+<button class="wex" data-go="${w[8] || w[6]}"><span>${esc(w[7])}</span><b>${esc(refName(w[6]))}</b></button>
 <div class="vrow"><button class="btn pri" data-act="wmore">${esc(t('wotd.more'))}</button><span class="sp"></span><button class="btn lrn${learned ? ' on' : ''}" data-act="wlearn">${ico('check', 'sm')}${esc(t(learned ? 'wotd.learned' : 'wotd.mark'))}</button></div></article>`;
   }
 
