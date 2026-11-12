@@ -1,12 +1,13 @@
 {
- "_note": "App-wide links and options. Leave a URL empty to hide it. shareUrl = public app/download link used in share text and share cards; youtubeUrl = channel link shown on Home and in Settings; playStoreUrl = 'Rate us' target.",
+ "_note": "App-wide links and options. Leave a URL empty to hide it. shareUrl = public app/download link used in share text and share cards; youtubeUrl / youtubeKidsUrl = channel links shown on Home ('Our channels'), in Settings and About; playStoreUrl = 'Rate us' target.",
  "shareUrl": "",
- "youtubeUrl": "",
+ "youtubeUrl": "https://www.youtube.com/@BlueSparrowSpiritual",
  "playStoreUrl": "",
  "version": "5.1",
  "languages": [
   "en",
   "hi"
  ],
- "defaultLanguage": "en"
+ "defaultLanguage": "en",
+ "youtubeKidsUrl": "https://www.youtube.com/@BlueSparrowKids"
 }

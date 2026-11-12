@@ -525,5 +525,12 @@
   "unlearned": "Removed from learned words",
   "learnedN": "{n} words learned"
  },
- "brand": "Hebrew Greek Hindi Bible"
+ "brand": "Hebrew Greek Hindi Bible",
+ "yt": {
+  "title": "Our channels",
+  "main": "Watch on YouTube",
+  "mainSub": "Blue Sparrow Spiritual",
+  "kids": "For Kids",
+  "kidsSub": "Blue Sparrow Kids"
+ }
 }

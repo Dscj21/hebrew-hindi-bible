@@ -46,7 +46,7 @@
   applySet();
 
   // ---------- i18n ----------
-  let CFG = { shareUrl: '', youtubeUrl: '', playStoreUrl: '', version: '3.0', languages: ['en', 'hi'], defaultLanguage: 'en' };
+  let CFG = { shareUrl: '', youtubeUrl: '', youtubeKidsUrl: '', playStoreUrl: '', version: '3.0', languages: ['en', 'hi'], defaultLanguage: 'en' };
   let EN = {}, S = {}, LANG = 'en';
   const LOC = {};
   const deep = (a, b) => { const o = Array.isArray(a) ? a.slice() : Object.assign({}, a); for (const k in b) o[k] = b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]) && a && typeof a[k] === 'object' ? deep(a[k], b[k]) : b[k]; return o; };
@@ -782,7 +782,7 @@ ${listItem('heart', t('bm.favs'), 'fav')}${listItem('clock', t('bm.hist'), 'hist
   // ---------- info sheets ----------
   function openAbout() {
     sheet(`<div class="about"><p>${esc(t('about.body', { app: t('app') }))}</p><p class="s">${esc(t('about.heb'))}</p><p class="s">${esc(t('about.lex'))}</p><p class="s">${esc(t('about.gnt'))}</p><p class="s">${esc(t('about.irv'))}</p>
-<p class="s">${esc(t('about.ours'))}</p><p class="s">${esc(t('about.fonts'))}</p><p class="s">${esc(t('set.version', { v: CFG.version }))}</p></div>`, { title: esc(t('about.title')) });
+<p class="s">${esc(t('about.ours'))}</p><p class="s">${esc(t('about.fonts'))}</p><p class="s">${esc(t('set.version', { v: CFG.version }))}</p>${channels().length ? `<div class="gt" style="margin:18px 2px 8px">${esc(t('yt.title'))}</div><div class="chlist">${channelsHTML()}</div>` : ''}</div>`, { title: esc(t('about.title')) });
   }
   const gestureHTML = () => `<div class="group">${t('g').map(([a, b]) => `<div class="row"><span class="lb">${esc(a)}<small>${esc(b)}</small></span></div>`).join('')}</div>`;
   function openFAQ() {
@@ -833,7 +833,8 @@ ${listItem('heart', t('bm.favs'), 'fav')}${listItem('clock', t('bm.hist'), 'hist
 <button class="qt" data-tab="search"><span class="ib">${ico('search')}</span><b>${esc(t('tab.search'))}</b><small>${esc(t('home.searchSub'))}</small></button>
 <button class="qt" data-tab="saved"><span class="ib">${ico('bookmark')}</span><b>${esc(t('tab.saved'))}</b><small>${esc(t('home.savedSub', { f: favN, b: bmN }))}</small></button>
 <button class="qt" data-act="learn"><span class="ib">${ico('help')}</span><b>${esc(t('home.learn'))}</b><small>${esc(t('set.gestures'))} · FAQ</small></button>
-${CFG.youtubeUrl ? `<button class="qt" data-act="yt" style="grid-column:1/-1"><span class="ib" style="background:#ffe9e9;color:#dc2626">${ico('play')}</span><b>${esc(t('home.watch'))}</b><small>${esc(t('home.watchSub'))}</small></button>` : ''}</div></section>
+</div></section>
+${channels().length ? `<section class="section"><div class="stitle"><h2>${esc(t('yt.title'))}</h2></div><div class="chlist">${channelsHTML()}</div></section>` : ''}
 <section class="section" style="margin-bottom:28px"><button class="card" data-act="shareapp"><div class="rowcard"><span class="ib">${ico('share')}</span><span class="m"><b>${esc(t('home.shareTitle'))}</b><small>${esc(t('home.shareSub'))}</small></span>${ico('chev-r')}</div></button></section>`;
     loadWotd().then(() => { const s = $('#wotdsec', el), w = wotdFor(); if (s && view === 'home') { if (w) { s.innerHTML = wotdHTML(w); el._wotd = w; } else s.remove(); } }).catch(() => { const s = $('#wotdsec', el); s && s.remove(); });
     try {
@@ -860,7 +861,6 @@ ${CFG.youtubeUrl ? `<button class="qt" data-act="yt" style="grid-column:1/-1"><s
       if (a === 'lexi') { setMode('strong'); location.hash = 'search'; setTimeout(() => $('#q').focus(), 80); }
       if (a === 'shareapp') shareApp();
       if (a === 'learn') openFAQ();
-      if (a === 'yt' && CFG.youtubeUrl) window.open(CFG.youtubeUrl, '_blank', 'noopener');
       if (a === 'vcard' && vo) openCard(vo);
       if (a === 'vfav' && vo) { const on = toggleFav(vo); b.classList.toggle('on', on); }
     }
@@ -1209,6 +1209,17 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
     if (await hasVoice(VOICE.hi)) say(t('audio.sample'), VOICE.hi, 1).catch(() => {});
   }
 
+  // ---- our YouTube channels (open externally: Android hands youtube.com links to the YouTube app) ----
+  function openExt(url) {
+    if (!url) return; const L = PLUG('AppLauncher');
+    if (L) L.openUrl({ url }).catch(() => window.open(url, '_system'));
+    else window.open(url, '_blank', 'noopener');
+  }
+  const channels = () => [[CFG.youtubeUrl, 'yt.main', 'yt.mainSub', 'ytm'], [CFG.youtubeKidsUrl, 'yt.kids', 'yt.kidsSub', 'ytk']].filter(c => c[0]);
+  const chHandle = u => (String(u).match(/@[\w.-]+/) || [''])[0];
+  const channelsHTML = () => channels().map(([u, l, s, cls]) => `<button class="chcard ${cls}" data-yt="${esc(u)}"><span class="yi">${ico('play')}</span><span class="m"><b>${esc(t(l))}</b><small>${esc(t(s))}</small><em>${esc(chHandle(u))}</em></span>${ico('chev-r')}</button>`).join('');
+  document.addEventListener('click', e => { const y = e.target.closest('[data-yt]'); if (y) { e.preventDefault(); buzz(); openExt(y.dataset.yt); } });
+
   // ---------- settings ----------
   const META = { en: { name: 'English' }, hi: { name: 'हिन्दी' } };
   const langName = l => (META[l] && META[l].name) || l;
@@ -1227,7 +1238,7 @@ ${tgRow('audioHindi', t('audio.withHindi'), t('audio.withHindiSub'))}<button cla
   : `<div class="row"><span class="lb">${ico('bell', 'sm')} ${esc(t('notif.daily'))}<small>${esc(t('notif.webOnly'))}</small></span></div><label class="row"><span class="lb">${esc(t('notif.time'))}</span><input type="time" class="tm" value="${esc(set.notifTime || '07:00')}" disabled></label>`}</div>
 <div class="gt">${esc(t('set.experience'))}</div><div class="group">${tgRow('haptic', t('set.haptic'), t('set.hapticSub'))}</div>
 <div class="gt">${esc(t('set.gestures'))}</div>${gestureHTML()}
-${CFG.youtubeUrl ? `<div class="gt">${esc(t('set.follow'))}</div><div class="group"><button class="row" data-x="yt">${ico('play')}<span class="lb">${esc(t('set.youtube'))}</span>${ico('chev-r', 'sm')}</button></div>` : ''}
+${channels().length ? `<div class="gt">${esc(t('yt.title'))}</div><div class="group">${channels().map(([u, l, sb]) => `<button class="row" data-yt="${esc(u)}"><span class="yti">${ico('play')}</span><span class="lb">${esc(t(l))}<small>${esc(t(sb))} · ${esc(chHandle(u))}</small></span>${ico('chev-r', 'sm')}</button>`).join('')}</div>` : ''}
 <div class="gt">${esc(t('set.data'))}</div><div class="group"><button class="row" data-x="exp">${ico('download')}<span class="lb">${esc(t('backup.export'))}<small>${esc(t('backup.exportSub'))}</small></span></button><button class="row" data-x="imp">${ico('upload')}<span class="lb">${esc(t('backup.import'))}</span></button><button class="row" data-x="hist">${ico('clock')}<span class="lb">${esc(t('set.clearHist'))}</span></button><button class="row" data-x="reset">${ico('settings')}<span class="lb">${esc(t('set.reset'))}</span></button>
 <button class="row" data-x="share">${ico('share')}<span class="lb">${esc(t('menu.share'))}</span>${ico('chev-r', 'sm')}</button><button class="row" data-x="about">${ico('info')}<span class="lb">${esc(t('set.about'))}</span><span class="val">${esc(CFG.version)}</span>${ico('chev-r', 'sm')}</button></div></div>`;
   }
@@ -1242,7 +1253,7 @@ ${CFG.youtubeUrl ? `<div class="gt">${esc(t('set.follow'))}</div><div class="gro
     const au = e.target.closest('[data-au]'); if (au) { set.audio = au.dataset.au; saveSet(); buzz(); fallbackNoted = false; renderSettings(); return; }
     const x = e.target.closest('[data-x]'); if (!x) return;
     ({ lang: openLangSheet, hist: () => { store.set('hist', []); toast(t('set.histCleared')); }, reset: () => { set = Object.assign({}, DEF); saveSet(); if (cur) render(); renderSettings(); toast(t('set.resetDone')); },
-      about: openAbout, share: shareApp, exp: exportBackup, imp: importBackup, voicetest: testVoices, yt: () => CFG.youtubeUrl && window.open(CFG.youtubeUrl, '_blank', 'noopener') }[x.dataset.x] || (() => {}))();
+      about: openAbout, share: shareApp, exp: exportBackup, imp: importBackup, voicetest: testVoices }[x.dataset.x] || (() => {}))();
   });
 
   // ---------- language ----------
@@ -1259,7 +1270,7 @@ ${CFG.youtubeUrl ? `<div class="gt">${esc(t('set.follow'))}</div><div class="gro
   function firstLaunch() {
     return new Promise(res => {
       const lp = $('#langpick'); let sel = CFG.defaultLanguage || 'en';
-      const draw = () => { lp.innerHTML = `<div class="lp-logo">א</div><h1>${esc(t('lang.title'))}<span>${LANG === 'hi' ? 'Choose your language' : 'अपनी भाषा चुनें'}</span></h1><p>${esc(t('lang.sub'))}</p>${langOpts(sel)}<button class="btn pri" data-go>${esc(t('lang.cont'))}</button>`; };
+      const draw = () => { lp.innerHTML = `<img class="lp-logo" src="logo-256.png" alt="" width="88" height="88"><h1>${esc(t('lang.title'))}<span>${LANG === 'hi' ? 'Choose your language' : 'अपनी भाषा चुनें'}</span></h1><p>${esc(t('lang.sub'))}</p>${langOpts(sel)}<button class="btn pri" data-go>${esc(t('lang.cont'))}</button>`; };
       draw(); lp.hidden = false;
       lp.addEventListener('click', async e => {
         const b = e.target.closest('[data-l]');
