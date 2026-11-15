@@ -125,7 +125,8 @@
   const mainLemma = w => isGk(w) ? w[3] : (w[3] || '').split('/').filter(x => /^\d/.test(x)).pop();
   const hebOf = ws => ws.map(w => strip(w[0]) + (w[5] ? '־' : ' ')).join('').trim();
   const refName = k => { const [b, c, v] = k.split('/'); return `${bname(b)} ${c}${v ? ':' + v : ''}`; };
-  const withUrl = (txt, hash) => CFG.shareUrl ? `${txt}\n${CFG.shareUrl}${hash ? '#' + hash : ''}` : txt;
+  const isStore = u => /play\.google\.com/.test(u || '');
+  const withUrl = (txt, hash) => CFG.shareUrl ? `${txt}\n${CFG.shareUrl}${hash && !isStore(CFG.shareUrl) ? '#' + hash : ''}` : txt;
 
   // ---------- streak ----------
   const dayKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -315,7 +316,7 @@
     data.v.forEach(([vn, hi, ws], i) => {
       const k = `${b}/${c}/${vn}`, h = hl[k], nt = notes[k];
       html.push(`<article class="verse${h ? ' hl hl-' + h.c : ''}" id="v${vn}" data-i="${i}" data-v="${vn}"><div class="vhead"><span class="vn">${vn}</span>${favs.has(k) ? '<svg class="vfav"><use href="#i-heart"/></svg>' : ''}${nt ? `<button class="vnote" data-note="${i}" aria-label="${esc(t('note.edit'))}">${ico('note')}</button>` : ''}<span class="sp"></span>${ws.length ? `<button class="vplay" data-play="${i}" aria-label="${esc(t('audio.playVerse'))}">${ico('playc')}</button>` : ''}</div>
-<div class="words">${ws.map((w, j) => wordHTML(w, i, j)).join('')}</div>${hi ? `<p class="hi">${esc(hi)}</p>` : ''}${nt ? `<p class="vnote-t" data-note="${i}">${ico('pen', 'sm')}<span>${esc(nt.n)}</span></p>` : ''}</article>`);
+${ws.length ? `<div class="words">${ws.map((w, j) => wordHTML(w, i, j)).join('')}</div>` : `<p class="nowords">${esc(t(data.g ? 'read.noWordsNT' : 'read.noWords'))}</p>`}${hi ? `<p class="hi">${esc(hi)}</p>` : ''}${nt ? `<p class="vnote-t" data-note="${i}">${ico('pen', 'sm')}<span>${esc(nt.n)}</span></p>` : ''}</article>`);
       if (every && (i + 1) % every === 0 && i + 1 < data.v.length) html.push('<div class="ad-slot ad-inline" data-slot="inline"></div>');
     });
     const p = neighbour(-1), n = neighbour(1);
@@ -505,13 +506,20 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('wa'
       if (act === 'play' || act === 'playhi') { closeTop(); setTimeout(() => playVerse(i, act === 'playhi'), 120); }
       if (act === 'copy') { copyText(withUrl(`${info.heb}\n\n${info.hi}\n— ${refName(info.k)}`, info.k)); closeTop(); }
       if (act === 'card') { closeTop(); setTimeout(() => openCard(info), 60); }
-      if (act === 'link') { closeTop(); shareText(`${refName(info.k)} — ${info.hi}\n\n${t('card.footer')} · ${t('app')}`, CFG.shareUrl ? CFG.shareUrl + '#' + info.k : ''); }
+      if (act === 'link') { closeTop(); shareText(`${refName(info.k)} — ${info.hi}\n\n${t('card.footer')} · ${t('app')}`, isStore(CFG.shareUrl) ? 'https://dscj21.github.io/hebrew-hindi-bible/#' + info.k : CFG.shareUrl ? CFG.shareUrl + '#' + info.k : ''); }
     });
   }
   async function copyText(s) {
     try { await navigator.clipboard.writeText(s); }
     catch { const ta = document.createElement('textarea'); ta.value = s; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch {} ta.remove(); }
     toast(t('toast.copied')); buzz();
+  }
+  // Open WhatsApp directly with the text; false if it could not be opened (caller falls back)
+  async function openWhatsApp(text) {
+    const q = encodeURIComponent(text), L = PLUG('AppLauncher');
+    if (L) { try { await L.openUrl({ url: 'whatsapp://send?text=' + q }); return true; } catch {} return false; }
+    if (/Android|iPhone|iPad/i.test(navigator.userAgent)) { location.href = 'whatsapp://send?text=' + q; return true; }
+    return !!window.open('https://wa.me/?text=' + q, '_blank', 'noopener');
   }
   async function shareText(text, url) {
     const SH = PLUG('Share'), o = { title: t('app'), text }; if (url) o.url = url;
@@ -533,7 +541,7 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('wa'
   }
   // verse share card: 4:5 post, 1:1 chat, 9:16 WhatsApp/Instagram Status; content measured then vertically centred
   const FMT = { post: [1080, 1350], square: [1080, 1080], status: [1080, 1920] };
-  const appLink = () => (CFG.shareUrl || CFG.playStoreUrl || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
+  const appLink = () => isStore(CFG.shareUrl || CFG.playStoreUrl) ? 'Google Play · ' + t('app') : (CFG.shareUrl || CFG.playStoreUrl || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
   async function drawCard(info, fmt = 'post') {
     const ref = refName(info.k), UI = '"Inter", "Noto Sans Devanagari", sans-serif';
     const gk = info.gk || isNT(info.k.split('/')[0]), HF = gk ? '"Noto Serif Greek", "Noto Serif", serif' : '"Noto Serif Hebrew", serif';
@@ -586,6 +594,7 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('wa'
       if (f) { fmt = f.dataset.f; store.set('cardFmt', fmt); $$('.cfmt button', el).forEach(b => b.classList.toggle('on', b === f)); buzz(); await draw(); return; }
       const a = e.target.closest('[data-act]'); if (!a || !cv) return; buzz();
       const name = `hebrew-hindi-${info.k.replace(/\//g, '-')}-${fmt}.png`;
+      if (a.dataset.act === 'wa' && await openWhatsApp(text)) return;
       if (a.dataset.act === 'share' || a.dataset.act === 'wa') {
         const SH = PLUG('Share'), F = PLUG('Filesystem');
         if (SH && F) { // Android: system share sheet with the image (WhatsApp / Status appear there)

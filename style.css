@@ -441,3 +441,4 @@ img.lp-logo{width:88px;height:88px;border-radius:22px;background:none;display:bl
 .verse.cur-play{background:var(--acc-soft);border-radius:18px;margin-left:-8px;margin-right:-8px;padding-left:8px;padding-right:8px;transition:background .3s}
 .verse.hl.cur-play{box-shadow:inset 4px 0 0 var(--hlb),0 0 0 2px var(--acc)}
 #btnPlayCh .ic{width:23px;height:23px}
+.nowords{margin:10px 2px 0;padding:10px 12px;border-radius:12px;background:var(--card2);color:var(--ink2);font-size:calc(14px * var(--fs));line-height:1.6;font-style:italic}

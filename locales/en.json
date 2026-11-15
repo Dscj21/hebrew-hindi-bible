@@ -69,7 +69,9 @@
   "credit": "Hebrew: OSHB / WLC (CC BY 4.0) · Hindi: IRV Hindi 2019 (CC BY-SA 4.0)",
   "sources": "Sources & licences",
   "tipDouble": "Tip: double-tap a word to open its Strong’s entry.",
-  "creditNT": "Greek: OpenGNT (CC BY-SA 4.0) · Hindi: IRV Hindi 2019 (CC BY-SA 4.0)"
+  "creditNT": "Greek: OpenGNT (CC BY-SA 4.0) · Hindi: IRV Hindi 2019 (CC BY-SA 4.0)",
+  "noWordsNT": "The original-language text for this verse is not in the source manuscript we use (it appears in later manuscripts). The Hindi text is shown below.",
+  "noWords": "No original-language words for this verse."
  },
  "word": {
   "root": "Root",
