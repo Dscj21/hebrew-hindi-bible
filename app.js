@@ -359,6 +359,7 @@ ${ws.length ? `<div class="words">${ws.map((w, j) => wordHTML(w, i, j)).join('')
     const pb = e.target.closest('[data-play]'); if (pb) { buzz(); playVerse(+pb.dataset.play, set.audioHindi); return; }
     const nb = e.target.closest('[data-note]'); if (nb) { buzz(); openNote(verseInfo(+nb.dataset.note), rerender); return; }
     if (suppressClick) { suppressClick = false; return; }
+    const vn = e.target.closest('.vn'); if (vn && !stack.length) { const ve = vn.closest('.verse'); if (ve && ve.dataset.i) { buzz(); ve.classList.add('lp'); openVerseActions(+ve.dataset.i); return; } }
     const el = e.target.closest('.w'); if (!el) return;
     const now = Date.now();
     if (lastTap.el === el && now - lastTap.t < 320) {
@@ -676,7 +677,7 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('wa'
     if (vEl && vEl.dataset.i && !stack.length) lpT = setTimeout(() => {
       lpT = null; if (!G || G.mode) return;
       G.mode = 'lp'; suppressClick = true; clearTimeout(tapT); buzz(true); vEl.classList.add('lp'); openVerseActions(+vEl.dataset.i);
-    }, 480);
+    }, 400);
   }, { passive: true });
   let raf = 0;
   document.addEventListener('touchmove', e => {

@@ -178,7 +178,7 @@
   "clearHist": "Clear history",
   "notes": "Notes",
   "words": "Words",
-  "emptyNotes": "No notes or highlights yet.\nLong-press any verse to highlight it or add a note.",
+  "emptyNotes": "No notes or highlights yet.\nTap a verse number (or long-press the verse) to highlight it or add a note.",
   "emptyWords": "No learned words yet.\nMark the Word of the Day as learned on Home."
  },
  "set": {
