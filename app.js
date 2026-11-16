@@ -576,9 +576,12 @@ ${listItem('heart', t(fav ? 'verse.unfav' : 'verse.fav'), 'fav')}${listItem('wa'
     y += 40; x.font = `700 40px ${UI}`; x.fillStyle = '#fcd34d'; x.fillText(ref, M, y + 30);
     const fy = H - (tall ? 250 : 92);
     x.fillStyle = 'rgba(255,255,255,.12)'; x.fillRect(M, fy - 58, W - 2 * M, 2);
-    x.font = `500 28px ${UI}`; x.fillStyle = 'rgba(255,255,255,.7)'; x.fillText(t(gk ? 'card.footerNT' : 'card.footer'), M, fy);
-    const link = appLink();
-    if (link) { if (tall) { x.fillStyle = 'rgba(255,255,255,.55)'; x.fillText(link, M, fy + 48); } else { x.textAlign = 'right'; x.fillStyle = 'rgba(255,255,255,.55)'; x.fillText(link, W - M, fy); x.textAlign = 'left'; } }
+    const foot = t(gk ? 'card.footerNT' : 'card.footer'), link = appLink();
+    x.font = `500 28px ${UI}`;
+    const fits = !link || tall || x.measureText(foot).width + x.measureText(link).width + 40 <= W - 2 * M;
+    const fy1 = fits ? fy : fy - 14;
+    x.fillStyle = 'rgba(255,255,255,.7)'; x.fillText(foot, M, fy1);
+    if (link) { x.fillStyle = 'rgba(255,255,255,.55)'; if (tall || !fits) x.fillText(link, M, fy1 + (tall ? 48 : 40)); else { x.textAlign = 'right'; x.fillText(link, W - M, fy); x.textAlign = 'left'; } }
     return cv;
   }
   async function openCard(info) {
@@ -1389,7 +1392,15 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
   const chHandle = u => (String(u).match(/@[\w.-]+/) || [''])[0];
   const channelsHTML = () => channels().map(([u, l, s, cls]) => `<button class="chcard ${cls}" data-yt="${esc(u)}"><span class="yi">${ico('play')}</span><span class="m"><b>${esc(t(l))}</b><small>${esc(t(s))}</small><em>${esc(chHandle(u))}</em></span>${ico('chev-r')}</button>`).join('');
   document.addEventListener('click', e => { if (e.target.closest('[data-privacy]')) { e.preventDefault(); openPrivacy(); return; } const y = e.target.closest('[data-yt]'); if (y) { e.preventDefault(); buzz(); openExt(y.dataset.yt); } });
-  const openPrivacy = () => openExt(NATIVE ? (CFG.privacyUrl || 'https://dscj21.github.io/hebrew-hindi-bible/privacy.html') : 'privacy.html');
+  const openPrivacy = async () => {
+    try {
+      const r = await fetch('privacy.html'); if (!r.ok) throw 0;
+      const d = new DOMParser().parseFromString(await r.text(), 'text/html'), m = d.querySelector('main') || d.body;
+      m.querySelectorAll('script,style,a[href*="github"]').forEach(n => n.remove());
+      const h1 = m.querySelector('h1'), ttl = h1 ? h1.textContent : t('set.privacy'); if (h1) h1.remove();
+      sheet(`<div class="privacy">${m.innerHTML}</div>`, { title: esc(ttl) });
+    } catch { openExt(NATIVE ? (CFG.privacyUrl || 'https://dscj21.github.io/hebrew-hindi-bible/privacy.html') : 'privacy.html'); }
+  };
 
   function setWotdLang(l) {
     const cw = $('#v-home')._wotd; if (cw && (cw[0][0] === 'G') === (l === 'el')) return;
