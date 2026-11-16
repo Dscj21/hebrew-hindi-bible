@@ -1025,7 +1025,10 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
   async function hasVoice(code) {
     if (code in voiceOK) return voiceOK[code];
     const T = PLUG('TextToSpeech');
-    if (T) { try { const r = await T.isLanguageSupported({ lang: code }); return (voiceOK[code] = !!(r && r.supported)); } catch { return (voiceOK[code] = false); } }
+    if (T) {
+      for (const lang of code.startsWith('he') ? [code, 'iw-IL', 'he'] : [code]) { try { const r = await T.isLanguageSupported({ lang }); if (r && r.supported) return (voiceOK[code] = true); } catch (e) { console.warn('[audio] isLanguageSupported', lang, e && e.message); } }
+      return (voiceOK[code] = false);
+    }
     const vs = await loadVoices(); return (voiceOK[code] = vs.some(v => vMatch(v, code)));
   }
   // ---- best voice: prefer high-quality (network / neural / enhanced) voices when the user allows online voices ----
@@ -1049,21 +1052,42 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
   }
   // speak ONE utterance; onPos(charIndex) is called on word boundaries when the engine reports them
   // (Android TTS plugin: onRangeStart; Web Speech: onboundary). Resolves {bounds:boolean} when finished.
-  function say(text, code, rate, onPos, onStart) {
+  const audioLog = (where, code, e) => { const msg = String((e && (e.message || e.error || e.code)) || e || 'error').slice(0, 160); console.warn('[audio]', where, code, msg); try { store.set('audioErr', { t: Date.now(), where, code, msg }); } catch {} return msg; };
+  const failToast = e => toast(t('audio.failed') + ' · ' + String((e && (e.message || e.error)) || e || '').slice(0, 60));
+  // Robust speak: best voice → engine default voice for the language → alternate locale tags (he: iw-IL / he / iw).
+  // Retries once after a delay when the engine is still initialising. Throws only when every attempt failed.
+  async function say(text, code, rate, onPos, onStart) {
+    const T = PLUG('TextToSpeech');
+    const tags = code.startsWith('he') ? [code, 'iw-IL', 'he', 'iw'] : code.startsWith('hi') ? [code, 'hi'] : code.startsWith('el') ? [code, 'el'] : [code];
+    let last;
+    for (let a = 0; a < tags.length + 2; a++) {
+      const lang = tags[Math.max(0, a - 1)] , useVoice = a === 0;
+      if (a > 0 && a - 1 >= tags.length) break;
+      try { return await say1(text, lang, rate, onPos, a === 0 ? onStart : null, useVoice, code); }
+      catch (e) {
+        last = e; const msg = audioLog('speak#' + a + ' ' + lang, code, e);
+        if (a === 0) { const k = code + (set.netVoice !== false ? '+n' : ''); nBest[k] = -1; } // that voice failed: use engine default from now on
+        if (/not yet initialized|not available/i.test(msg)) { await sleep(900); if (a === 0) { try { return await say1(text, lang, rate, onPos, null, false, code); } catch (e2) { last = e2; audioLog('speak-retry', code, e2); } } }
+        if (!T && !('speechSynthesis' in window)) break;
+      }
+    }
+    throw last || new Error('tts-failed');
+  }
+  function say1(text, code, rate, onPos, onStart, useVoice, baseCode) {
     const T = PLUG('TextToSpeech'); let bounds = false;
     if (T) {
       let h = null;
       const add = onPos && T.addListener ? new Promise(r => r(T.addListener('onRangeStart', i => { bounds = true; onPos(i.start); }))).then(x => (h = x)).catch(() => {}) : Promise.resolve();
-      return add.then(() => { onStart && onStart(); return bestNativeVoice(code).then(vi => T.speak(Object.assign({ text, lang: code, rate: (rate || 1) * rateK(), pitch: 1, volume: 1, category: 'playback' }, vi >= 0 ? { voice: vi } : {}))); })
+      return add.then(() => { onStart && onStart(); return (useVoice ? bestNativeVoice(baseCode) : Promise.resolve(-1)).then(vi => T.speak(Object.assign({ text, lang: code, rate: (rate || 1) * rateK(), pitch: 1, volume: 1, category: 'playback' }, vi >= 0 ? { voice: vi } : {}))); })
         .then(() => ({ bounds }), e => { throw e; }).finally(() => { try { h && h.remove(); } catch {} });
     }
     return new Promise((res, rej) => {
       if (!('speechSynthesis' in window)) return rej(new Error('no-tts'));
       const u = new SpeechSynthesisUtterance(text); u.lang = code; u.rate = (rate || 1) * rateK();
-      const v = bestWebVoice(code); if (v) u.voice = v;
+      const v = useVoice ? bestWebVoice(baseCode) : null; if (v) u.voice = v;
       u.onstart = () => onStart && onStart();
       u.onboundary = e => { if (onPos && (!e.name || e.name === 'word')) { bounds = true; onPos(e.charIndex); } };
-      u.onend = () => res({ bounds }); u.onerror = e => (/interrupted|canceled/.test(e.error || '') ? res({ bounds }) : rej(e));
+      u.onend = () => res({ bounds }); u.onerror = e => (/interrupted|canceled/.test(e.error || '') ? res({ bounds }) : rej(new Error(e.error || 'speech-error')));
       speechSynthesis.speak(u);
     });
   }
@@ -1112,6 +1136,16 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
     }
     return hiOK ? { code: VOICE.hi, orig: false } : { missing: code };
   }
+  // original voice failed while speaking → treat as missing: ask once (install / Hindi pronunciation), then read the pronunciation
+  async function origFailed(pl, gk) {
+    const code = pl.code; voiceOK[code] = false;
+    const ch = store.get('voiceChoice', {})[code];
+    if (!ch) { const v = await voicePrompt(code); if (v !== 'pron') return false; }
+    else if (ch === 'never') { noVoice(code); return false; }
+    if (!(await hasVoice(VOICE.hi))) { noVoice(code); return false; }
+    toast(t('audio.fallback', { lang: t(gk ? 'audio.greek' : 'audio.hebrew') }));
+    pl.code = VOICE.hi; pl.orig = false; return true;
+  }
   function noVoice(code) {
     const name = t(code === VOICE.el ? 'audio.greek' : code === VOICE.hi ? 'audio.hindi' : 'audio.hebrew');
     sheet(`<div class="about"><p>${esc(t('audio.noVoiceBody', { lang: name }))}</p><p class="s">${esc(t(NATIVE ? 'audio.howAndroid' : 'audio.howWeb'))}</p></div>`, { title: esc(t('audio.noVoice', { lang: name })) });
@@ -1129,7 +1163,10 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
     const pl = await readPlan(gk); if (pl.cancel || gen !== speakGen) return; if (pl.missing) { noVoice(pl.missing); return; }
     btn && btn.classList.add('on');
     try { await say(pl.orig ? origText(orig, gk) : pronText(pron), pl.code, pl.orig ? 0.85 : RATE.pron); }
-    catch { if (gen === speakGen) toast(t('audio.failed')); }
+    catch (e) {
+      if (gen === speakGen && pl.orig && await origFailed(pl, gk) && gen === speakGen) { try { await say(pronText(pron), pl.code, RATE.pron); } catch (e2) { failToast(e2); } }
+      else if (gen === speakGen && !pl.orig) failToast(e);
+    }
     if (gen === speakGen) btn && btn.classList.remove('on');
   }
   // whole verse as ONE utterance (no gaps). Word highlight follows engine boundary events (char offsets → word index);
@@ -1142,7 +1179,7 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
       $$('.w.speaking').forEach(x => x.classList.remove('speaking')); el.classList.add('speaking');
       const r = el.getBoundingClientRect(); if (r.top < 70 || r.bottom > innerHeight - 160) { quietScroll = Date.now() + 800; window.scrollBy({ top: r.top - innerHeight / 3, behavior: 'smooth' }); }
     };
-    if (withOrig && pl && !pl.missing) {
+    for (let attempt = 0; withOrig && pl && !pl.missing && attempt < 2; attempt++) {
       const parts = ws.map(w => pl.orig ? origText(w[0], gk) : pronText(w[1])), offs = []; let text = '';
       parts.forEach((p, j) => { if (!p) return; if (text) text += ' '; offs.push([text.length, j]); text += p; });
       const at = c => { let j = offs.length ? offs[0][1] : 0; for (const [o, k] of offs) { if (o <= c) j = k; else break; } return j; };
@@ -1158,8 +1195,14 @@ ${x.n ? `<div class="nt">${esc(x.n.n)}</div>` : ''}<div class="t">${esc(x.hi)}</
         hlTimer = setInterval(() => { if (gotBound || gen !== speakGen) return clearInterval(hlTimer); const e = Date.now() - t0; if (e > total) return clearInterval(hlTimer); mark(at(e / msPerChar)); }, 120);
       };
       const safety = setTimeout(() => gen === speakGen && onStart(), 700); // engines that never fire onstart
-      try { await say(text, pl.code, rate, onPos, onStart); } catch (e) { clearInterval(hlTimer); if (gen === speakGen) { toast(t('audio.failed')); stopAudio(); } return false; }
-      clearTimeout(safety); clearInterval(hlTimer);
+      try { await say(text, pl.code, rate, onPos, onStart); }
+      catch (e) {
+        clearTimeout(safety); clearInterval(hlTimer); if (gen !== speakGen) return false;
+        if (pl.orig && attempt === 0) { if (await origFailed(pl, gk) && gen === speakGen) continue; } // retry this verse with the Hindi pronunciation
+        else failToast(e);
+        if (gen === speakGen) stopAudio(); return false;
+      }
+      clearTimeout(safety); clearInterval(hlTimer); break;
     }
     if (gen !== speakGen) return false;
     $$('.w.speaking').forEach(x => x.classList.remove('speaking'));
